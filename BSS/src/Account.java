@@ -25,7 +25,7 @@ public class Account {
     		Customer customer = users.get(i);
     		 	//check if the log in credentials match an associated user
     			if (this.account_ID == account_ID && this.pin.equals(pin)) {
-    				//if they do, get the account from bank
+    				//if they do, get the account data from bank
     	            Account temp  = new Account();
     	            temp = customer.getAccount(account_ID, in_pin, i);
     	            //set values of this account to values from bank(?)
