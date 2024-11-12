@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import enums.AccountType;
+
 public class Account {
 	//not sure about static
 	static private int count = 0;
@@ -8,7 +10,7 @@ public class Account {
 	private ArrayList<Customer> users;
 	private boolean frozen;
 	private double amount;
-	private Type AccountType;
+	private AccountType AccountType;
 	
 	Account() {
 		this.account_ID = count++;
@@ -16,7 +18,7 @@ public class Account {
 		this.users = new ArrayList<Customer>();
 		this.frozen = false;
 		this.amount = 0.0;
-		this.AccountType = Type.Undefined;
+		this.AccountType = AccountType.Undefined;
 	}
 	// Check credentials with account ID and pin
     public boolean checkCredentials(int account_ID, String in_pin) {
