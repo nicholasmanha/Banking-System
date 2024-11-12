@@ -12,5 +12,11 @@ public class Customer {
 		//stub code bc idk whats past here for now
 		Account A = new Account();
 		return A;
+	}
+
+	public void addAccount(Account acc) {
+		// TODO Auto-generated method stub
+		
 	} 
+	
 }
