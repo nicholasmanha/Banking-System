@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import enums.AccountType;
+
 public class Account {
 	//not sure about static
 	static private int count = 0;

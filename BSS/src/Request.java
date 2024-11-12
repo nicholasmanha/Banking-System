@@ -1,3 +1,5 @@
+import enums.RequestType;
+import enums.Status;
 
 public class Request {
 	private static int count = 0;
@@ -26,4 +28,18 @@ public class Request {
         this.status = status;
         this.id = ++count;
     }
+	 public String getText() {
+	        return text;
+	    }
+	    public Status getStatus() {
+	        return status;
+	    }
+
+	    public int getID(){
+	        return id;
+	    }
+
+	    public RequestType getType(){
+	        return type;
+	    }
 }
