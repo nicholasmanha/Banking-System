@@ -1,4 +1,4 @@
-package bankingsoftwaresystem;
+package bss;
 import java.util.Scanner;
 import java.io.FileWriter;
 import java.io.File;

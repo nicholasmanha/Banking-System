@@ -1,5 +1,5 @@
 package requests;
-import bankingsoftwaresystem.Teller;
+import bss.Teller;
 
 public class CreateAccountRequest {
 	private Teller teller;
