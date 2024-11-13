@@ -1,3 +1,4 @@
+package bankingsoftwaresystem;
 import java.util.ArrayList;
 
 public class Customer {
