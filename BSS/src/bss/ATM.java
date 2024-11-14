@@ -1,3 +1,4 @@
+package bss;
 public class ATM {
 	private Session session;
     private double balance;
