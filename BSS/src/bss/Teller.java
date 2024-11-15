@@ -1,6 +1,6 @@
 package bss;
 
-public class Teller {
+public class Teller extends User{
 
 	public Account createAccount(String pin) {
 		Account newAccount = new Account();
