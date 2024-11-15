@@ -1,17 +1,24 @@
 package bss;
+import java.util.Scanner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import requests.Request;
+import enums.*;
+
+
 
 
 
 public class Client {
 
 	public static void main(String[] args) {
-		try (Socket socket = new Socket("ip goes here", 1234)) {
+		try (Socket socket = new Socket("192.168.56.1", 1234)) {
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
@@ -20,6 +27,27 @@ public class Client {
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 	        
+			Scanner scanner = new Scanner(System.in);
+			
+			System.out.print("Enter username: ");
+	        String username = scanner.nextLine();
+	        
+	        System.out.print("Enter password: ");
+	        String password = scanner.nextLine();
+	        
+	        ArrayList<String> userAndPass = new ArrayList<String>();
+	        userAndPass.add(username);
+	        userAndPass.add(password);
+			
+			
+			List<Request> loginMessages = new ArrayList<>();
+			Request loginMessage = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
+			loginMessages.add(loginMessage);
+
+			// send the login request
+			System.out.println("Sending Login Request...");
+	        objectOutputStream.writeObject(loginMessages);
+			
 	        System.out.println("Closing socket");
 	        socket.close();
 	        

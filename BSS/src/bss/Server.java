@@ -8,8 +8,12 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
+
+import enums.*;
 import requests.Request;
+
 
 
 public class Server {
@@ -82,8 +86,10 @@ public class Server {
 				
 				try {
 					
-					Request message = (Request) objectInputStream.readObject();
-			        
+					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
+					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
+						
+					}
 			        System.out.println("Closing socket " + clientSocket.getRemoteSocketAddress());
 			        clientSocket.close();
 				} catch (ClassNotFoundException e) {
