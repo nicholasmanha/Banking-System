@@ -1,6 +1,7 @@
 package requests;
 
 import enums.RequestType;
+import enums.Requester;
 import enums.Status;
 import java.io.Serializable;
 
@@ -11,20 +12,24 @@ public class Request implements Serializable{
     private final String text;
     private final RequestType type;
     private final Status status;
+    private final Requester requester;
 
     public Request(){
+    	this.requester = Requester.UNDEFINED;
     	this.type = RequestType.UNDEFINED;
     	this.status = Status.UNDEFINED;
     	this.text = "Undefined";
     	this.id = ++count;
     }
-    public Request(RequestType type, Status status) {
+    public Request(Requester requester, RequestType type, Status status) {
+    	this.requester = requester;
     	this.text = "";
         this.type = type;
         this.status = status;
         this.id = ++count;
     }
-    public Request(String text, RequestType type, Status status) {
+    public Request(Requester requester, String text, RequestType type, Status status) {
+    	this.requester = requester;
         this.text = text;
         this.type = type;
         this.status = status;
