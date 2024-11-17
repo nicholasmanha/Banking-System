@@ -8,10 +8,10 @@ import java.awt.event.ActionListener;
 public class GUI {
 
     private JFrame frame;
-    private Client client; 
+    private String userRole; 
 
     public GUI(Client client) {
-        this.client = client;
+
         initializeLoginScreen();
     }
 
@@ -53,19 +53,40 @@ public class GUI {
         frame.setVisible(true);
     }
     
-    private void handleLogin(String accountId, String pin) {
-       
+    private void handleLogin(String accountId, String pin) 
+    {
+    	
+    	// notify the Client to send login request
+        System.out.println("Login attempted with ID: " + accountId + " and PIN: " + pin);
     }
     
- // display the teller view
+	public void setUserRole(String role) 
+	{
+	        
+	    	this.userRole = role;
+	        
+	    	if (role.equalsIgnoreCase("teller")) 
+	    	{
+	            showTellerView();
+	        } 
+	    	else if (role.equalsIgnoreCase("customer")) 
+	        {
+	            showCustomerView();
+	        } 
+	    	else 
+	    	{
+	            JOptionPane.showMessageDialog(frame, "invalid role");
+	        }
+	}
+    
+	// display the teller view
     private void showTellerView() {
-        
+    	
     }
     
- // display the customer view
+    // display the customer view
     private void showCustomerView() {
        
     }
-
 
 }
