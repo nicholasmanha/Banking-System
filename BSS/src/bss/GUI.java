@@ -80,13 +80,43 @@ public class GUI {
 	}
     
 	// display the teller view
-    private void showTellerView() {
-    	
+    private void showTellerView() 
+    {	
+    	frame.getContentPane().removeAll();
+        frame.setLayout(new GridLayout(4, 1));
+
+        JButton viewAccountsButton = new JButton("View Accounts");
+        JButton createAccountButton = new JButton("Create Account");
+        JButton readTransactionLogButton = new JButton("Read Transaction Log");
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> initializeLoginScreen());
+
+        frame.add(viewAccountsButton);
+        frame.add(createAccountButton);
+        frame.add(readTransactionLogButton);
+        frame.add(logoutButton);
+        frame.revalidate();
+        frame.repaint();
     }
     
     // display the customer view
-    private void showCustomerView() {
-       
+    private void showCustomerView() 
+    {
+    	frame.getContentPane().removeAll();
+        frame.setLayout(new GridLayout(4, 1));
+
+        JButton depositButton = new JButton("Deposit");
+        JButton withdrawButton = new JButton("Withdraw");
+        JButton viewBalanceButton = new JButton("View Balance");
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> initializeLoginScreen());
+
+        frame.add(depositButton);
+        frame.add(withdrawButton);
+        frame.add(viewBalanceButton);
+        frame.add(logoutButton);
+        frame.revalidate();
+        frame.repaint();
     }
 
 }
