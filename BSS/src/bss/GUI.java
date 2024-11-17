@@ -10,7 +10,7 @@ public class GUI {
     private JFrame frame;
     private String userRole; 
 
-    public GUI(Client client) {
+    public GUI() {
 
         initializeLoginScreen();
     }
@@ -117,6 +117,42 @@ public class GUI {
         frame.add(logoutButton);
         frame.revalidate();
         frame.repaint();
+    }
+    
+    // Placeholder: handle View Accounts action
+    private void handleViewAccounts() 
+    {
+        // logic for viewing accounts goes here
+    }
+
+    // Placeholder: handle Create Account action
+    private void handleCreateAccount() 
+    {
+        // logic for creating an account goes here
+    }
+
+    // Placeholder: handle Read Transaction Log action
+    private void handleReadTransactionLog() 
+    {
+        // Logic for reading transaction logs goes here
+    }
+
+    // Placeholder: handle Deposit action
+    private void handleDeposit() 
+    {
+        // logic for depositing money goes here
+    }
+
+    // Placeholder: handle Withdraw action
+    private void handleWithdraw() 
+    {
+        // logic for withdrawing money goes here
+    }
+
+    // Placeholder: handle View Balance action
+    private void handleViewBalance() 
+    {
+        // logic for viewing balance goes here
     }
 
 }
