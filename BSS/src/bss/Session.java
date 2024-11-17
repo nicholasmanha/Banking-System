@@ -1,40 +1,32 @@
 package bss;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class Session {
 	private Account account;
-	//private DateTime start_time;
-	//private DateTime end_time;
+	private LocalDateTime start_time;
+	private LocalDateTime end_time;
 	private ArrayList<Log> logs;
 	
 	public Session() {
 		this.account = new Account();
-		//this start_time = new DateTime();
-		//this end_time = new DateTime();
+		this.start_time = LocalDateTime.now();
+		this.end_time = LocalDateTime.now();
 		this.logs = new ArrayList<Log>();
 	}
-	// Validate credentials with account ID and pin
-    public boolean validate(int account_id, String in_pin) {
-    	//this will return a bool, AND set the attributes of this session's account to the account info from DB
-    	//so we can start a session using it
-    	if (this.account.checkCredentials(account_id, in_pin)) {
-    		//if checkCredentials is true, then this.account should hold the proper acc info
-    		return true;
-    	}
-    	return false;
-    }
+
     // Start a session with a given account
-    public boolean startSession(Account account) {
-        
-    	//if (validate(account.getAccountID(), account.getPin())) {
-    		//return true;
-    	//}
-        //return false;
+    public boolean startSession(Account in_account) {
+    	// note start time of the session
+    	this.start_time = LocalDateTime.now();
+    	//insert code for interacting with server
     	
-    	return true; //this passes true to processCommands(); (?)
+    	return true; 
     }
     // End the current session
     public void endSession() {
+    	//when we end the session, the time is recorded
+    	this.end_time = LocalDateTime.now();
         this.account = null;
     }
     // Get the current account in the session

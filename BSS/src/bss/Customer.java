@@ -9,8 +9,6 @@ public class Customer {
 	}
 
 	public Account getAccount(int in_id, String in_pin, int in_index) {
-		//findAccount()?
-		//stub code bc idk whats past here for now
 		Account A = new Account();
 		return A;
 	}

@@ -28,17 +28,15 @@ public class Account {
     		Customer customer = users.get(i);
     		 	//check if the log in credentials match an associated user
     			if (this.account_ID == account_ID && this.pin.equals(pin)) {
-    				//if they do, get the account data from bank
-    	            Account temp  = new Account();
-    	            temp = customer.getAccount(account_ID, in_pin, i);
-    	            //set values of this account to values from bank(?)
-    	            this.amount = temp.getAmount();
-    	            this.AccountType = temp.AccountType;
-    	            this.account_ID = temp.account_ID;
-    	            this.pin = temp.getPin();
-    	            this.users = temp.getUsers();
-    	            //i feel like this is wrong, might result in account_IDs incrementing by 2s
-    	        	return true;  // Return the matching customer
+    	      /*	//if they do, get the account data from bank     
+    	       *   this.amount = customer.getAccount(account_ID, in_pin, i).getAmount();
+    	            this.AccountType = customer.getAccount(account_ID, in_pin, i).getAccountType();
+    	            this.account_ID = customer.getAccount(account_ID, in_pin, i).getAccountID();
+    	            this.pin = customer.getAccount(account_ID, in_pin, i).getPin();
+    	            this.users = customer.getAccount(account_ID, in_pin, i).getUsers(); */
+    	        	
+    				//return true if given user credentials match those of users w/ access to account
+    				return true;  
     	        }
     	}
         //if this account's pin == pin then provided pin is valid for account
@@ -76,13 +74,15 @@ public class Account {
     	return this.amount;
     }
     // Withdraw an amount from the account
-    public boolean withdraw(double in_amt) {
+    public void withdraw(double in_amt) {
     	this.amount = this.amount - in_amt;
-    	return true;
     }
     // Deposit an amount into the account
-    public boolean deposit(double in_amt) {
+    public void deposit(double in_amt) {
         this.amount = this.amount + in_amt;
-    	return true;
+    }
+    //retrieve AccountType
+    public AccountType getAccountType() {
+    	return this.AccountType;
     }
 }
