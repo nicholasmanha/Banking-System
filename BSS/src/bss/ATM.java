@@ -1,4 +1,7 @@
 package bss;
+
+import java.util.ArrayList;
+
 public class ATM {
 	private Session session;
     private double balance;
@@ -7,58 +10,47 @@ public class ATM {
     	session = new Session();
     	this.balance = 0.0;
     }
-    
-    // Log in with account ID and pin, returning a session
-    public Session logIn(int account_id, String in_pin) {
-    	
-    	//pass arguments account_id and in_pin to session.validate()
-    	// this.session.validate(account_id, in_pin);
-    	
-    	//validate passes args to our sessions' account.checkCredentials() 
-    	
-    	// gets blurry here, i think it goes:
-    	//account.checkCredentials() passes args to Customer.getAccount() 
-    	//		plus it passes in that customer's index in the account's customer ArrayList
-    	//Customer.getAccount() calls
-    	
-    	//after all of that, this.session.validate() will return true if we can log in w/ those creds
-    	if (this.session.validate(account_id, in_pin)) {
-    		//if true then start session with that account
-    		//...is this circular?:
-    		this.session.startSession(this.session.getAccount());
-    	}
+    // log in with account, which is filed with the correct info from the Bank DB prior to logIn
+    public Session logIn(Account account) {   
+    	session.startSession(account);
     	return session;
     }
 
     // Log out of the current session
     public void logOut() {
-        // Stub: End the session
-        session = null;
+        session.endSession();
     }
 
     // Withdraw a specified amount from the account
     public void withdraw(double amount) {
-        // Stub: Replace with withdrawal logic
+       this.session.getAccount().withdraw(amount);
     }
 
     // Deposit a specified amount into the account
     public void deposit(double amount) {
-        // Stub: Replace with deposit logic
+    	this.session.getAccount().deposit(amount);
     }
 
     // Get the current balance of the account
     public double getBal() {
-        // Stub: Return the current balance
+    	this.balance = this.session.getAccount().getAmount();
         return balance;
     }
 
-    // Transfer an amount to another account by account ID
-    public void transfer(int toAccount_id, double amount) {
-        // Stub: Replace with transfer logic
+    // Transfer an amount to another account, pass in destination account similarly to how we passed
+    // in an account to use for the session
+    public void transfer(Account account, double txr_amount) {
+        //remove txr_amount from this session's account
+    	this.session.getAccount().withdraw(txr_amount);
+    	//add same amount to destination account
+    	account.deposit(txr_amount);
     }
 
     // Print a receipt for a given session
-    public void printReceipt(Session session) {
-        // Stub: Replace with receipt printing logic
+    public void printReceipt() {
+    	//get the array of logs belonging to the session
+        ArrayList<Log> logs = this.session.getLogs();
+        //print the last log, as this is the last operation done on the session, for a receipt (?)
+        System.out.println(logs.get(logs.size() - 1));
     }
 }

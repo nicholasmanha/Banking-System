@@ -14,14 +14,11 @@ import java.util.List;
 import enums.*;
 import requests.Request;
 
-
-
 public class Server {
 	
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
-
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
@@ -125,5 +122,4 @@ public class Server {
 		}
 	}
 	
-
 }
