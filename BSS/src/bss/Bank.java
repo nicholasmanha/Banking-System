@@ -39,6 +39,17 @@ public class Bank {
 		
 	    return null;
 	}
+	public Teller findTeller(int teller_id){
+		for (Teller teller : tellers) 
+		{
+	        if (teller.getId() == teller_id) 
+	        {
+	            return teller;
+	        }
+	    }
+		
+	    return null;
+	}
 
 	// save bank data to a file
 	public void saveData() {
