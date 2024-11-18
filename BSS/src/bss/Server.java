@@ -97,7 +97,9 @@ public class Server {
 							if(acc == null) {
 								// respond with user not found
 							}
+							userType = UserType.Teller;
 						}
+						userType = UserType.Customer;
 						if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
 							Session session = atm.logIn(acc);
 						}
