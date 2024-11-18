@@ -91,6 +91,7 @@ public class Server {
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
 						Request loginRequest = loginRequestList.get(0);
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
+						
 						Account acc = bank.findAccount(requestUserID);
 						if(acc == null) {
 							acc = bank.findTeller(requestUserID);
@@ -100,9 +101,12 @@ public class Server {
 							userType = UserType.Teller;
 						}
 						userType = UserType.Customer;
-						if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
-							Session session = atm.logIn(acc);
+						if(userType == UserType.Customer) {
+							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
+								Session session = atm.logIn(acc);
+							}
 						}
+						
 					}
 			        System.out.println("Closing socket " + clientSocket.getRemoteSocketAddress());
 			        clientSocket.close();
