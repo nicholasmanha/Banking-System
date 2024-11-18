@@ -70,6 +70,7 @@ public class Server {
 			this.clientSocket = socket;
 		}
 		public void run() {
+			UserType userType;
 			PrintWriter out = null;
 			BufferedReader in = null;
 			try {
@@ -86,10 +87,19 @@ public class Server {
 				try {
 					
 					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
+					
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
-						Account acc = bank.findAccount(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)));
+						Request loginRequest = loginRequestList.get(0);
+						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
+						Account acc = bank.findAccount(requestUserID);
+						if(acc == null) {
+							acc = bank.findTeller(requestUserID);
+							if(acc == null) {
+								// respond with user not found
+							}
+						}
 						if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
-							atm.logIn(0, null);
+							Session session = atm.logIn(acc);
 						}
 					}
 			        System.out.println("Closing socket " + clientSocket.getRemoteSocketAddress());
