@@ -8,18 +8,21 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
+
+import enums.*;
 import requests.Request;
 
 public class Server {
-
+	
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
-
+			Bank bank = new Bank();
 			// running infinite loop for getting
 			// client request
 			while (true) {
@@ -36,7 +39,7 @@ public class Server {
 
 				// create a new thread object
 				ClientHandler clientSock
-					= new ClientHandler(client);
+					= new ClientHandler(bank, client);
 
 				// This thread will handle the client
 				// separately
@@ -60,15 +63,17 @@ public class Server {
 	}
 	private static class ClientHandler implements Runnable {
 		private final Socket clientSocket;
-		public ClientHandler(Socket socket)
+		Bank bank;
+		public ClientHandler(Bank bank, Socket socket)
 		{
+			this.bank = bank;
 			this.clientSocket = socket;
 		}
 		public void run() {
 			PrintWriter out = null;
 			BufferedReader in = null;
 			try {
-					
+				ATM atm = new ATM();
 				// get the outputstream of client
 				OutputStream outputStream = clientSocket.getOutputStream();
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
@@ -80,8 +85,13 @@ public class Server {
 				
 				try {
 					
-					Request message = (Request) objectInputStream.readObject();
-			        
+					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
+					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
+						Account acc = bank.findAccount(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)));
+						if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
+							atm.logIn(0, null);
+						}
+					}
 			        System.out.println("Closing socket " + clientSocket.getRemoteSocketAddress());
 			        clientSocket.close();
 				} catch (ClassNotFoundException e) {
@@ -112,5 +122,4 @@ public class Server {
 		}
 	}
 	
-
 }

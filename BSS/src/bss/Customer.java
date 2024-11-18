@@ -1,8 +1,8 @@
 package bss;
 import java.util.ArrayList;
 
-public class Customer {
-	ArrayList<Account> accounts;
+public class Customer extends User{
+	protected ArrayList<Account> accounts;
 	
 	public Customer() {
 		this.accounts = new ArrayList<Account>();
@@ -14,8 +14,8 @@ public class Customer {
 	}
 
 	public void addAccount(Account acc) {
-		// TODO Auto-generated method stub
-		
+		accounts.add(acc);
+
 	} 
 	
 }

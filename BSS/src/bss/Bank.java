@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class Bank {
 	private ArrayList<Account> accounts;
 	private ArrayList<Customer> customers;
@@ -38,40 +39,7 @@ public class Bank {
 		
 	    return null;
 	}
-	
-	/*
-	 * I think findTeller() isnt necessary since Tellers "pop into existence"
-	
-	// find a customer by customer ID
-	public Customer findCustomer(int customerID) {
 
-		for (Customer customer : customers) 
-		{
-			// Assuming each customer has a unique ID and a getID() method
-            if (customer.getID() == customerID) 
-            {
-                return customer;
-            }
-        }
-		
-        return null;
-    }
-	
-	// Find a teller by teller ID
-	public Teller findTeller(int teller_id) {
-        
-		for (Teller teller : tellers) 
-		{
-			// assuming each teller has a unique ID and a getID() method
-            if (teller.getID() == tellerID) 
-            {
-                return teller;
-            }
-        }
-        return null;
-    }
-    */
-	
 	// save bank data to a file
 	public void saveData() {
 		
