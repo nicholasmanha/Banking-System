@@ -89,6 +89,10 @@ public class GUI {
         JButton createAccountButton = new JButton("Create Account");
         JButton readTransactionLogButton = new JButton("Read Transaction Log");
         JButton logoutButton = new JButton("Logout");
+        
+        viewAccountsButton.addActionListener(e -> handleViewAccounts());
+        createAccountButton.addActionListener(e -> handleCreateAccount());
+        readTransactionLogButton.addActionListener(e -> handleReadTransactionLog());
         logoutButton.addActionListener(e -> initializeLoginScreen());
 
         frame.add(viewAccountsButton);
@@ -109,6 +113,10 @@ public class GUI {
         JButton withdrawButton = new JButton("Withdraw");
         JButton viewBalanceButton = new JButton("View Balance");
         JButton logoutButton = new JButton("Logout");
+        
+        depositButton.addActionListener(e -> handleDeposit());
+        withdrawButton.addActionListener(e -> handleWithdraw());
+        viewBalanceButton.addActionListener(e -> handleViewBalance());
         logoutButton.addActionListener(e -> initializeLoginScreen());
 
         frame.add(depositButton);
@@ -122,7 +130,27 @@ public class GUI {
     // Placeholder: handle View Accounts action
     private void handleViewAccounts() 
     {
-        // logic for viewing accounts goes here
+    	frame.getContentPane().removeAll();
+        frame.setLayout(new BorderLayout());
+
+        JLabel headerLabel = new JLabel("Accounts:");
+        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JTextArea accountsArea = new JTextArea();
+        accountsArea.setEditable(false);
+        accountsArea.setText("Account 1: $0.00\nAccount 2: $100.00"); // Replace with real data later
+
+        JScrollPane scrollPane = new JScrollPane(accountsArea);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> showTellerView());
+
+        frame.add(headerLabel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(backButton, BorderLayout.SOUTH);
+
+        frame.revalidate();
+        frame.repaint();
     }
 
     // Placeholder: handle Create Account action
@@ -134,7 +162,27 @@ public class GUI {
     // Placeholder: handle Read Transaction Log action
     private void handleReadTransactionLog() 
     {
-        // Logic for reading transaction logs goes here
+    	frame.getContentPane().removeAll();
+        frame.setLayout(new BorderLayout());
+
+        JLabel headerLabel = new JLabel("Transaction Log:");
+        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JTextArea logArea = new JTextArea();
+        logArea.setEditable(false);
+        logArea.setText("Transaction 1: $50 deposit\nTransaction 2: $20 withdrawal"); // Replace with real data later
+
+        JScrollPane scrollPane = new JScrollPane(logArea);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> showTellerView());
+
+        frame.add(headerLabel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(backButton, BorderLayout.SOUTH);
+
+        frame.revalidate();
+        frame.repaint();
     }
 
     // Placeholder: handle Deposit action
@@ -152,7 +200,27 @@ public class GUI {
     // Placeholder: handle View Balance action
     private void handleViewBalance() 
     {
-        // logic for viewing balance goes here
+    	frame.getContentPane().removeAll();
+        frame.setLayout(new BorderLayout());
+
+        JLabel headerLabel = new JLabel("Accounts:");
+        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JTextArea accountsArea = new JTextArea();
+        accountsArea.setEditable(false);
+        accountsArea.setText("Account 1: $0.00\nAccount 2: $100.00"); // Replace with real data later
+
+        JScrollPane scrollPane = new JScrollPane(accountsArea);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> showTellerView());
+
+        frame.add(headerLabel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(backButton, BorderLayout.SOUTH);
+
+        frame.revalidate();
+        frame.repaint();
     }
 
 }
