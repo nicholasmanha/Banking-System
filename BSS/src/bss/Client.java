@@ -24,17 +24,9 @@ public class Client {
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 	        
-			Scanner scanner = new Scanner(System.in);
-			
-			System.out.print("Enter username: ");
-	        String username = scanner.nextLine();
+			BSSUserInterface bssUI = new BSSConsoleUI();
 	        
-	        System.out.print("Enter password: ");
-	        String password = scanner.nextLine();
-	        
-	        ArrayList<String> userAndPass = new ArrayList<String>();
-	        userAndPass.add(username);
-	        userAndPass.add(password);
+	        ArrayList<String> userAndPass = bssUI.login();
 			
 			
 			List<Request> loginMessages = new ArrayList<>();
@@ -44,6 +36,20 @@ public class Client {
 			// send the login request
 			System.out.println("Sending Login Request...");
 	        objectOutputStream.writeObject(loginMessages);
+	        
+	        try {
+				List<Request> loginResponses = (List<Request>) objectInputStream.readObject();
+				Status loginResponseStatus = loginResponses.get(0).getStatus();
+				if(loginResponseStatus == Status.SUCCESS) {
+					System.out.println("successfully logged in");
+				}
+				else {
+					System.out.println("wrong credentials or account not found");
+				}
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 	        System.out.println("Closing socket");
 	        socket.close();

@@ -2,5 +2,6 @@ package enums;
 
 public enum UserType {
 	Customer,
-	Teller
+	Teller,
+	Undefined
 }
