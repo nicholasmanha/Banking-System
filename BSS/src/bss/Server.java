@@ -89,14 +89,21 @@ public class Server {
 					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
 					
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
+						
 						Request loginRequest = loginRequestList.get(0);
+						
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
+						
 						userType = determineUserType(bank, requestUserID);
+						
 						if(userType == UserType.Customer) {
 							Account acc = bank.findAccount(requestUserID);
 							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
 								Session session = atm.logIn(acc);
 							}
+						}
+						else {
+							
 						}
 						
 					}
