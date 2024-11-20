@@ -2,7 +2,7 @@ package bss;
 
 public class User {
 	
-	private int id;
+	protected int id;
 //	private DateTime created;
 	private static int count = 0;
 	

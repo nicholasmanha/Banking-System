@@ -82,6 +82,9 @@ public class Server {
 				// get the inputstream of client
 				InputStream inputStream = clientSocket.getInputStream();
 				ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+				Teller firstTeller = new Teller("password");
+				bank.addTeller(firstTeller);
+				
 				
 				
 				try {
