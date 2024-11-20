@@ -19,12 +19,12 @@ public class Bank {
 	public void addAccount(Account account) {
 		accounts.add(account);
 	}
-	// add an customer to the bank
-	public void addAccount(Customer customer) {
+	// add a customer to the bank
+	public void addCustomer(Customer customer) {
 		customers.add(customer);
 	}
-	// add an teller to the bank
-	public void addAccount(Teller teller) {
+	// add a teller to the bank
+	public void addTeller(Teller teller) {
 		tellers.add(teller);
 	}
 	// find an account by account ID
