@@ -91,18 +91,9 @@ public class Server {
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
 						Request loginRequest = loginRequestList.get(0);
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
-						Teller teller;
-						Account acc; 
-						acc = bank.findAccount(requestUserID);
-						if(acc == null) {
-							teller = bank.findTeller(requestUserID);
-							if(teller == null) {
-								// respond with user not found
-							}
-							userType = UserType.Teller;
-						}
-						userType = UserType.Customer;
+						userType = determineUserType(bank, requestUserID);
 						if(userType == UserType.Customer) {
+							Account acc = bank.findAccount(requestUserID);
 							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
 								Session session = atm.logIn(acc);
 							}
@@ -137,6 +128,20 @@ public class Server {
 				}
 			}
 		}
+	}
+	private static UserType determineUserType(Bank bank, int userID) {
+		
+		Teller teller;
+		Account acc; 
+		acc = bank.findAccount(userID);
+		if(acc == null) {
+			teller = bank.findTeller(userID);
+			if(teller == null) {
+				// respond with user not found
+			}
+			return UserType.Teller;
+		}
+		return UserType.Customer;
 	}
 	
 }
