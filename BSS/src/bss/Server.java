@@ -89,7 +89,7 @@ public class Server {
 					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
 					
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
-						
+						System.out.println("got here");
 						Request loginRequest = loginRequestList.get(0);
 						
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
@@ -103,6 +103,7 @@ public class Server {
 							}
 						}
 						else {
+							Teller teller = bank.findTeller(requestUserID);
 							
 						}
 						

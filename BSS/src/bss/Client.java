@@ -24,17 +24,9 @@ public class Client {
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 	        
-			Scanner scanner = new Scanner(System.in);
-			
-			System.out.print("Enter username: ");
-	        String username = scanner.nextLine();
+			BSSUserInterface bssUI = new BSSConsoleUI();
 	        
-	        System.out.print("Enter password: ");
-	        String password = scanner.nextLine();
-	        
-	        ArrayList<String> userAndPass = new ArrayList<String>();
-	        userAndPass.add(username);
-	        userAndPass.add(password);
+	        ArrayList<String> userAndPass = bssUI.login();
 			
 			
 			List<Request> loginMessages = new ArrayList<>();

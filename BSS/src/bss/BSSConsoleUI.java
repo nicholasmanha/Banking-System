@@ -11,6 +11,7 @@ import java.util.*;
 public class BSSConsoleUI implements BSSUserInterface {
 	
 	private Scanner scan;
+	private Client client;
 	
 	public BSSConsoleUI() {
 		scan = new Scanner(System.in);
@@ -18,6 +19,7 @@ public class BSSConsoleUI implements BSSUserInterface {
 	
 	public void processCommands()
 	{
+		
 		 String[] commands = {"Deposit",
 	 			  "Withdraw",
 	 			  "Transfer",
@@ -25,9 +27,20 @@ public class BSSConsoleUI implements BSSUserInterface {
 	 			  };
 
 	}
-
+	
+	public ArrayList<String> login() {
+		ArrayList<String> userAndPass = new ArrayList<String>();
+		System.out.println("Enter username");
+		String username = scan.nextLine();
+		
+		System.out.println("Enter password");
+		String password = scan.nextLine();
+		userAndPass.add(username);
+		userAndPass.add(password);
+		return userAndPass;
+	}
 	private void doLogIn() {
-
+		
 	}
 	
 }
