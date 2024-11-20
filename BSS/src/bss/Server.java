@@ -85,7 +85,8 @@ public class Server {
 				Teller firstTeller = new Teller("password");
 				bank.addTeller(firstTeller);
 				
-				
+				Account testAccount = firstTeller.createAccount("123");
+				bank.addAccount(testAccount);
 				
 				try {
 					
@@ -102,6 +103,7 @@ public class Server {
 						if(userType == UserType.Customer) {
 							Account acc = bank.findAccount(requestUserID);
 							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
+								System.out.println("this is a customer");
 								Session session = atm.logIn(acc);
 							}
 						}
