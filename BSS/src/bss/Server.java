@@ -91,11 +91,12 @@ public class Server {
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
 						Request loginRequest = loginRequestList.get(0);
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
-						
-						Account acc = bank.findAccount(requestUserID);
+						Teller teller;
+						Account acc; 
+						acc = bank.findAccount(requestUserID);
 						if(acc == null) {
-							acc = bank.findTeller(requestUserID);
-							if(acc == null) {
+							teller = bank.findTeller(requestUserID);
+							if(teller == null) {
 								// respond with user not found
 							}
 							userType = UserType.Teller;
