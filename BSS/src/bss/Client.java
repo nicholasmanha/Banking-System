@@ -36,6 +36,20 @@ public class Client {
 			// send the login request
 			System.out.println("Sending Login Request...");
 	        objectOutputStream.writeObject(loginMessages);
+	        
+	        try {
+				List<Request> loginResponses = (List<Request>) objectInputStream.readObject();
+				Status loginResponseStatus = loginResponses.get(0).getStatus();
+				if(loginResponseStatus == Status.SUCCESS) {
+					System.out.println("successfully logged in");
+				}
+				else {
+					System.out.println("wrong credentials or account not found");
+				}
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 	        System.out.println("Closing socket");
 	        socket.close();

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -93,7 +94,7 @@ public class Server {
 					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
 					
 					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
-						System.out.println("got here");
+						
 						Request loginRequest = loginRequestList.get(0);
 						
 						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
@@ -103,13 +104,33 @@ public class Server {
 						if(userType == UserType.Customer) {
 							Account acc = bank.findAccount(requestUserID);
 							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
+							
+								List<Request> loginResponses = new ArrayList<>();
+								Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
+								loginResponses.add(loginResponse);
+								
+								objectOutputStream.writeObject(loginResponses);
 								System.out.println("this is a customer");
 								Session session = atm.logIn(acc);
 							}
+							else {
+								List<Request> loginResponses = new ArrayList<>();
+								Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+								loginResponses.add(loginResponse);
+								
+								objectOutputStream.writeObject(loginResponses);
+							}
 						}
-						else {
+						else if(userType == UserType.Teller) {
 							Teller teller = bank.findTeller(requestUserID);
 							
+						}
+						else {
+							List<Request> loginResponses = new ArrayList<>();
+							Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+							loginResponses.add(loginResponse);
+							
+							objectOutputStream.writeObject(loginResponses);
 						}
 						
 					}
@@ -150,7 +171,8 @@ public class Server {
 		if(acc == null) {
 			teller = bank.findTeller(userID);
 			if(teller == null) {
-				// respond with user not found
+				System.out.println("account undefined");
+				return UserType.Undefined;
 			}
 			return UserType.Teller;
 		}
