@@ -41,6 +41,7 @@ public class Client {
 				List<Request> loginResponses = (List<Request>) objectInputStream.readObject();
 				Status loginResponseStatus = loginResponses.get(0).getStatus();
 				if(loginResponseStatus == Status.SUCCESS) {
+					
 					System.out.println("successfully logged in");
 				}
 				else {
@@ -59,6 +60,12 @@ public class Client {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public Request createLoginRequest(String username, String password) {
+		ArrayList<String> userAndPass = new ArrayList<String>();
+		Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
+		return loginRequest;
 	}
 
 }
