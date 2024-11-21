@@ -8,13 +8,11 @@ public class User {
 	
 	public User() {
 		this.id = count++;
-		this.created = new DateTime();
-	}
-	
+//		this.created = new DateTime();
+  }
 	public int getId() {
 		return id;
 	}
-	
 	public void setID(int in_id) {
 		this.id = in_id;
 	}
@@ -22,15 +20,5 @@ public class User {
 	public DateTime getCreated() {
 		return created;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 }

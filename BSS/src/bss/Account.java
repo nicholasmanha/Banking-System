@@ -1,10 +1,11 @@
 package bss;
+
 import java.util.ArrayList;
 
 import enums.AccountType;
 
 public class Account {
-	//not sure about static
+	// not sure about static
 	static private int count = 0;
 	private int account_ID;
 	private String pin;
@@ -12,7 +13,7 @@ public class Account {
 	private boolean frozen;
 	private double amount;
 	private AccountType AccountType;
-	
+
 	Account() {
 		this.account_ID = count++;
 		this.pin = "";
@@ -110,5 +111,4 @@ public class Account {
     public void setAccountTypeSavings() {
     	this.AccountType = AccountType.Savings;
     }
-    
 }

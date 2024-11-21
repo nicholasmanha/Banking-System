@@ -14,17 +14,21 @@ public class Bank {
 		this.customers = new ArrayList<>();
 		this.tellers = new ArrayList<>();
 	}
+	// this is just for debugging purposes, will remove in production
+	public ArrayList<Account> getAccounts() {
+		return this.accounts;
+	}
 	// add an account to the bank
 	public void addAccount(Account account) {
 		this.accounts.add(account);
 	}
-	// add an customer to the bank
-	public void addAccount(Customer customer) {
-		this.customers.add(customer);
+	// add a customer to the bank
+	public void addCustomer(Customer customer) {
+		customers.add(customer);
 	}
-	// add an teller to the bank
-	public void addAccount(Teller teller) {
-		this.tellers.add(teller);
+	// add a teller to the bank
+	public void addTeller(Teller teller) {
+		tellers.add(teller);
 	}
 	// find an account by account ID
 	public Account findAccount(int account_id){
@@ -33,6 +37,17 @@ public class Bank {
 	        if (account.getAccountID() == account_id) 
 	        {
 	            return account;
+	        }
+	    }
+		
+	    return null;
+	}
+	public Teller findTeller(int teller_id){
+		for (Teller teller : tellers) 
+		{
+	        if (teller.getId() == teller_id) 
+	        {
+	            return teller;
 	        }
 	    }
 		
