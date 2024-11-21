@@ -128,7 +128,10 @@ public class Server {
 					doLogin(request);
 				}
 				if(type == RequestType.DEPOSIT) {
-					
+					if(loggedIn == true) {
+						session.getAccount().deposit(5.00);
+					}
+					System.out.println(session.getAccount().getAmount());
 				}
 			}
 		}
