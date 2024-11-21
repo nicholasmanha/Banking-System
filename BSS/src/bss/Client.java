@@ -28,7 +28,8 @@ public class Client {
 
 			// This thread will handle the client
 			// separately
-			new Thread(outHandler).start();
+			Thread outputThread = new Thread(outHandler);
+			outputThread.start();
 			
 			List<Request> reqs = new ArrayList<>();
 			reqs.add(createLoginRequest("1", "123"));
@@ -36,11 +37,12 @@ public class Client {
 			List<Object> objectList = new ArrayList<>(reqs);
 			outHandler.enqueueRequest(objectList);
 			
+			outputThread.join();
 			System.out.println("Closing socket");
 			
 			socket.close();
 
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 
