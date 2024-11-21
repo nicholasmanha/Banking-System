@@ -130,6 +130,7 @@ public class Server {
 				if(type == RequestType.DEPOSIT) {
 					if(loggedIn == true) {
 						session.getAccount().deposit(request.getAmount());
+						System.out.println("new balance: " + session.getAccount().getAmount());
 					}
 					
 				}

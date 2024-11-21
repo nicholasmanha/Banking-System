@@ -29,14 +29,14 @@ public class BSSConsoleUI implements Runnable{
 		System.out.print("Logging in");
 		while(!client.getLoggedIn()) {
 			try {
-                Thread.sleep(500);  // Pauses for 1 second
+                Thread.sleep(500);  
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();  // Restore interrupted status
+                Thread.currentThread().interrupt();  
                 System.out.println("Thread was interrupted.");
             }
             System.out.print(".");
 		}
-		
+		System.out.println();
 		String[] commands = { "Deposit", };
 
 		int choice;
@@ -51,6 +51,9 @@ public class BSSConsoleUI implements Runnable{
 				switch (choice) {
 				case 0:
 					doDeposit();
+					break;
+				case 1:
+					doLogout();
 					break;
 				default:
 					System.out.println("INVALID CHOICE - TRY AGAIN");
@@ -68,6 +71,9 @@ public class BSSConsoleUI implements Runnable{
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
+	}
+	private void doLogout() {
+		
 	}
 
 }

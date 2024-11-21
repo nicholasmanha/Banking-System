@@ -73,7 +73,6 @@ public class Client {
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
-				System.out.println("login successful");
 				loggedIn = true;
 
 			}
