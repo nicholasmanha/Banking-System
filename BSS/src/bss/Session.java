@@ -10,15 +10,15 @@ public class Session {
 	
 	public Session() {
 		this.account = new Account();
-		this.start_time = LocalDateTime.now();
-		this.end_time = LocalDateTime.now();
+		this.setStart_time(LocalDateTime.now());
+		this.setEnd_time(LocalDateTime.now());
 		this.logs = new ArrayList<Log>();
 	}
 
     // Start a session with a given account
     public boolean startSession(Account in_account) {
     	// note start time of the session
-    	this.start_time = LocalDateTime.now();
+    	this.setStart_time(LocalDateTime.now());
     	//insert code for interacting with server
     	
     	return true; 
@@ -26,7 +26,7 @@ public class Session {
     // End the current session
     public void endSession() {
     	//when we end the session, the time is recorded
-    	this.end_time = LocalDateTime.now();
+    	this.setEnd_time(LocalDateTime.now());
         this.account = null;
     }
     // Get the current account in the session
@@ -41,7 +41,20 @@ public class Session {
     private void addLog(Log log) {
         this.logs.add(log);
     }
-
-	
-	
+    // get the start time of session
+	public LocalDateTime getStart_time() {
+		return start_time;
+	}
+    // set start time of session
+	public void setStart_time(LocalDateTime start_time) {
+		this.start_time = start_time;
+	}
+	// get end time of session
+	public LocalDateTime getEnd_time() {
+		return end_time;
+	}
+	//get set end time of session
+	public void setEnd_time(LocalDateTime end_time) {
+		this.end_time = end_time;
+	}
 }

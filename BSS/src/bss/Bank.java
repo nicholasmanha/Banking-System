@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-
 public class Bank {
 	private ArrayList<Account> accounts;
 	private ArrayList<Customer> customers;
@@ -17,15 +16,15 @@ public class Bank {
 	}
 	// add an account to the bank
 	public void addAccount(Account account) {
-		accounts.add(account);
+		this.accounts.add(account);
 	}
 	// add an customer to the bank
 	public void addAccount(Customer customer) {
-		customers.add(customer);
+		this.customers.add(customer);
 	}
 	// add an teller to the bank
 	public void addAccount(Teller teller) {
-		tellers.add(teller);
+		this.tellers.add(teller);
 	}
 	// find an account by account ID
 	public Account findAccount(int account_id){
