@@ -71,5 +71,8 @@ public class Request implements Serializable{
     public RequestType getType(){
         return type;
     }
+    public double getAmount() {
+    	return amount;
+    }
 }
 
