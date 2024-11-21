@@ -27,22 +27,36 @@ public class BSSConsoleUI implements BSSUserInterface {
 		String password = scan.nextLine();
 		
 		client.createLoginRequest(username, password);
+		
+		String[] commands = {"Deposit",
+	 			  };
+
+		 int choice;
+		 
+		 do {
+			 for (int i = 0; i < commands.length; i++) {
+				 System.out.println("Select " + i + ": " + commands[i]);
+			 }
+			 try {
+				 choice = scan.nextInt();
+				 scan.nextLine();
+				 switch (choice) {
+				 	case 0: doDeposit(); break;
+				 	default:  System.out.println("INVALID CHOICE - TRY AGAIN");
+				 }
+			 } catch (InputMismatchException e) {
+				 System.out.println("INVALID CHOICE - TRY AGAIN");
+				 scan.nextLine();
+				 choice = -1;
+			 }	 
+		 } while (choice != commands.length-1);
 
 	}
 	
-	public ArrayList<String> login() {
-		ArrayList<String> userAndPass = new ArrayList<String>();
-		System.out.println("Enter username");
-		String username = scan.nextLine();
-		
-		System.out.println("Enter password");
-		String password = scan.nextLine();
-		userAndPass.add(username);
-		userAndPass.add(password);
-		return userAndPass;
-	}
-	private void doLogIn() {
-		
+	private void doDeposit() {
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createDepositRequest(amount);
 	}
 	
 }
