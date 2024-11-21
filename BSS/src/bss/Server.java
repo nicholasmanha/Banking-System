@@ -68,7 +68,12 @@ public class Server {
 		private final Socket clientSocket;
 		private static Bank bank;
 		private static UserType userType;
+		private static boolean loggedIn;
+		private static ATM atm;
+		private static Session session;
 		public ClientHandler(Bank bank, Socket socket) {
+			atm = new ATM();
+			this.loggedIn = false;
 			this.bank = bank;
 			this.clientSocket = socket;
 		}
@@ -146,8 +151,10 @@ public class Server {
 					loginResponses.add(loginResponse);
 					
 					outHandler.enqueueRequest(loginResponses);
+					loggedIn = true;
 					System.out.println("this is a customer");
-//					Session session = atm.logIn(acc);
+					
+					session = atm.logIn(acc);
 				}
 				else {
 					List<Request> loginResponses = new ArrayList<>();
