@@ -37,7 +37,7 @@ public class BSSConsoleUI implements Runnable{
             System.out.print(".");
 		}
 		System.out.println();
-		String[] commands = { "Deposit", };
+		String[] commands = { "Deposit", "Logout" };
 
 		int choice;
 

@@ -58,8 +58,8 @@ public class Client {
 
 				Thread.sleep(1000);
 			}
-			outputThread.join();
 			
+
 			System.out.println("Closing socket");
 
 			socket.close();
@@ -72,19 +72,28 @@ public class Client {
 
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
-			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
-				loggedIn = true;
-
+			if (request.getType() == RequestType.LOGIN) {
+				if(request.getStatus() == Status.SUCCESS) {
+					loggedIn = true;
+				}
+				else {
+					System.out.println("login failed");
+				}
 			}
-			else if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.FAILURE) {
-				System.out.println("login failed");
-
+			if(request.getType() == RequestType.LOGOUT) {
+				if(request.getStatus() == Status.SUCCESS) {
+					System.out.println("logging out");
+					alive = false;
+					loggedIn = false;
+				}
 			}
 		}
 	}
+
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}
+
 	public void createLoginRequest(String username, String password) {
 		ArrayList<String> userAndPass = new ArrayList<String>();
 		userAndPass.add(username);
@@ -95,15 +104,15 @@ public class Client {
 
 		outHandler.enqueueRequest(requests);
 	}
-	
+
 	public void createDepositRequest(double amount) {
 		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(depositRequest);
 		outHandler.enqueueRequest(requests);
-		
+
 	}
-	
+
 	public void createLogoutRequest() {
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
@@ -119,7 +128,6 @@ public class Client {
 			this.inputStream = in;
 			this.requestQueue = new ConcurrentLinkedQueue<>();
 		}
-
 
 		public void run() {
 			while (running) {
