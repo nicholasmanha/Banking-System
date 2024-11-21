@@ -16,9 +16,11 @@ import enums.*;
 
 public class Client {
 	private static OutHandler outHandler;
-	private static boolean isLoggedIn = true;
+	private static boolean alive = true;
+	private static boolean loggedIn;
 
 	public Client(OutHandler outHandler) {
+		loggedIn = false;
 		Client.outHandler = outHandler;
 	}
 
@@ -45,7 +47,7 @@ public class Client {
 
 			BSSConsoleUI UI = new BSSConsoleUI(client);
 			UI.processCommands();
-			while (isLoggedIn) {
+			while (alive) {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
 
@@ -71,6 +73,7 @@ public class Client {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
 				System.out.println("login successful");
+				loggedIn = true;
 
 			}
 			else if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.FAILURE) {
@@ -79,7 +82,10 @@ public class Client {
 			}
 		}
 	}
-
+	public boolean getLoggedIn() {
+		System.out.println(loggedIn);
+		return loggedIn;
+	}
 	public void createLoginRequest(String username, String password) {
 		ArrayList<String> userAndPass = new ArrayList<String>();
 		userAndPass.add(username);
