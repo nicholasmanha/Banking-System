@@ -23,6 +23,7 @@ public class Server {
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
+			
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
@@ -65,21 +66,27 @@ public class Server {
 	private static class ClientHandler implements Runnable {
 		private static OutHandler outHandler;
 		private final Socket clientSocket;
-		Bank bank;
-
+		private static Bank bank;
+		private static UserType userType;
 		public ClientHandler(Bank bank, Socket socket) {
 			this.bank = bank;
 			this.clientSocket = socket;
 		}
 
 		public void run() {
-			UserType userType;
+			Teller firstTeller = new Teller("password");
+			bank.addTeller(firstTeller);
+			
+			Account testAccount = firstTeller.createAccount("123");
+			bank.addAccount(testAccount);
 			// for debugging purposes
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
 			}
 
 			try {
+				
+				
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
 				ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -111,18 +118,57 @@ public class Server {
 		}
 		private static void processRequest(List<Request> req) {
 			for (Request request : req) {
-				if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
-					System.out.println("login request recieved");
-					String username = request.getTexts().get(0);
-					String password = request.getTexts().get(1);
-					System.out.println(username + ", " + password);
-					List<Request> responses = new ArrayList<Request>();
-					responses.add(new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS));
-					outHandler.enqueueRequest(responses);
+				RequestType type = request.getType();
+				if(type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
+					doLogin(request);
+				}
+				if(type == RequestType.DEPOSIT) {
+					
 				}
 			}
 		}
-
+		
+		private static void doLogin(Request request) {
+			System.out.println("login request recieved");
+			String username = request.getTexts().get(0);
+			String password = request.getTexts().get(1);
+			System.out.println(username + ", " + password);
+			int usernameInt = Integer.parseInt(username);
+			
+			userType = determineUserType(bank, usernameInt);
+			
+			if(userType == UserType.Customer) {
+				Account acc = bank.findAccount(usernameInt);
+				if(acc.checkCredentials(usernameInt, password)) {
+				
+					List<Request> loginResponses = new ArrayList<>();
+					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
+					loginResponses.add(loginResponse);
+					
+					outHandler.enqueueRequest(loginResponses);
+					System.out.println("this is a customer");
+//					Session session = atm.logIn(acc);
+				}
+				else {
+					List<Request> loginResponses = new ArrayList<>();
+					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+					loginResponses.add(loginResponse);
+					
+					outHandler.enqueueRequest(loginResponses);
+				}
+			}
+			else if(userType == UserType.Teller) {
+				Teller teller = bank.findTeller(usernameInt);
+				
+			}
+			else {
+				List<Request> loginResponses = new ArrayList<>();
+				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+				loginResponses.add(loginResponse);
+				
+				outHandler.enqueueRequest(loginResponses);
+			}
+		}
 		
 
 		private static UserType determineUserType(Bank bank, int userID) {
