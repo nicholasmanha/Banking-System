@@ -1,4 +1,5 @@
 package bss;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,13 +11,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import enums.*;
 import requests.Request;
 
 public class Server {
-	
+
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
@@ -34,148 +35,120 @@ public class Server {
 
 				// Displaying that new client is connected
 				// to server
-				System.out.println("New client connected"
-								+ client.getInetAddress()
-										.getHostAddress());
+				System.out.println("New client connected" + client.getInetAddress().getHostAddress());
 
 				// create a new thread object
-				ClientHandler clientSock
-					= new ClientHandler(bank, client);
+				ClientHandler clientSock = new ClientHandler(bank, client);
 
 				// This thread will handle the client
 				// separately
 				new Thread(clientSock).start();
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			if (server != null) {
 				try {
 					server.close();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 
 	}
+
 	private static class ClientHandler implements Runnable {
 		private final Socket clientSocket;
 		Bank bank;
-		public ClientHandler(Bank bank, Socket socket)
-		{
+
+		public ClientHandler(Bank bank, Socket socket) {
 			this.bank = bank;
 			this.clientSocket = socket;
 		}
+
 		public void run() {
 			UserType userType;
-			PrintWriter out = null;
-			BufferedReader in = null;
 			// for debugging purposes
-			for(Account account : bank.getAccounts()) {
+			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
 			}
+
 			try {
-				ATM atm = new ATM();
-				// get the outputstream of client
-				OutputStream outputStream = clientSocket.getOutputStream();
-				ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+				ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
 
-				// get the inputstream of client
-				InputStream inputStream = clientSocket.getInputStream();
-				ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-				Teller firstTeller = new Teller("password");
-				bank.addTeller(firstTeller);
-				
-				Account testAccount = firstTeller.createAccount("123");
-				bank.addAccount(testAccount);
-				
-				try {
-					
-					List<Request> loginRequestList = (List<Request>) objectInputStream.readObject();
-					
-					if(loginRequestList.get(0).getType()==RequestType.LOGIN && loginRequestList.get(0).getStatus()==Status.REQUEST) {
-						
-						Request loginRequest = loginRequestList.get(0);
-						
-						int requestUserID = Integer.parseInt(loginRequest.getTexts().get(0));
-						
-						userType = determineUserType(bank, requestUserID);
-						
-						if(userType == UserType.Customer) {
-							Account acc = bank.findAccount(requestUserID);
-							if(acc.checkCredentials(Integer.parseInt(loginRequestList.get(0).getTexts().get(0)), loginRequestList.get(0).getTexts().get(1))) {
-							
-								List<Request> loginResponses = new ArrayList<>();
-								Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
-								loginResponses.add(loginResponse);
-								
-								objectOutputStream.writeObject(loginResponses);
-								System.out.println("this is a customer");
-								Session session = atm.logIn(acc);
-							}
-							else {
-								List<Request> loginResponses = new ArrayList<>();
-								Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
-								loginResponses.add(loginResponse);
-								
-								objectOutputStream.writeObject(loginResponses);
-							}
-						}
-						else if(userType == UserType.Teller) {
-							Teller teller = bank.findTeller(requestUserID);
-							System.out.println("this is a teller");
-							
-						}
-						else {
-							List<Request> loginResponses = new ArrayList<>();
-							Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
-							loginResponses.add(loginResponse);
-							
-							objectOutputStream.writeObject(loginResponses);
-						}
-						
-					}
-			        System.out.println("Closing socket " + clientSocket.getRemoteSocketAddress());
-			        clientSocket.close();
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+	            InputHandler inputHandler = new InputHandler(inputStream);
+	            Thread inputThread = new Thread(inputHandler);
+	            inputThread.start();
+	            
+	            while (true) {
+	                Object message = inputHandler.getNextMessage();
+	                if (message != null) {
+	                	System.out.println("got here");
+	                    System.out.println("Received: " + message);
+	                }
+	                
+	                Thread.sleep(1000);
+	            }
 
-				
-			}
-			catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
-			}
-			finally {
-				try {
-					if (out != null) {
-						out.close();
-					}
-					if (in != null) {
-						in.close();
-						clientSocket.close();
-					}
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			
 		}
 	}
+
+	private static class InputHandler implements Runnable {
+		private final ObjectInputStream inputStream;
+		private final ConcurrentLinkedQueue<List<Object>> requestQueue;
+		private boolean running = true;
+
+		public InputHandler(ObjectInputStream in) {
+			this.inputStream = in;
+			this.requestQueue = new ConcurrentLinkedQueue<>();
+		}
+
+		public void enqueueRequest(List<Object> requests) {
+			requestQueue.add(requests);
+		}
+
+		public void run() {
+			while (running) {
+				try {
+					List<Object> requests = (List<Object>) inputStream.readObject();
+					if( requests != null) {
+						requestQueue.add(requests);
+					}
+				} catch (IOException | ClassNotFoundException e) {
+					e.printStackTrace();
+					running = false;
+				}
+
+				System.out.println("request was null");
+				try {
+
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+		public void stop() {
+	        running = false;
+	    }
+		public Object getNextMessage() {
+	        return requestQueue.poll();
+	    }
+	}
+
 	private static UserType determineUserType(Bank bank, int userID) {
-		
+
 		Teller teller;
-		Account acc; 
+		Account acc;
 		acc = bank.findAccount(userID);
-		if(acc == null) {
+		if (acc == null) {
 			teller = bank.findTeller(userID);
-			if(teller == null) {
+			if (teller == null) {
 				System.out.println("account undefined");
 				return UserType.Undefined;
 			}
@@ -183,5 +156,6 @@ public class Server {
 		}
 		return UserType.Customer;
 	}
-	
+
+}
 }

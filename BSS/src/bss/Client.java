@@ -15,17 +15,18 @@ import enums.*;
 
 public class Client {
 	public static void main(String[] args) {
-		try (Socket socket = new Socket("192.168.56.1", 1234)) {
+		try (Socket socket = new Socket("localhost", 1234)) {
+			
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-
+			
 			// input, to recieve FROM the server
-			InputStream inputStream = socket.getInputStream();
-			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+//			InputStream inputStream = socket.getInputStream();
+//			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 			// create a new thread object
 			OutHandler outHandler = new OutHandler(objectOutputStream);
-
+			
 			// This thread will handle the client
 			// separately
 			Thread outputThread = new Thread(outHandler);
@@ -35,6 +36,7 @@ public class Client {
 			reqs.add(createLoginRequest("1", "123"));
 			
 			List<Object> objectList = new ArrayList<>(reqs);
+			System.out.println("enqueueing request");
 			outHandler.enqueueRequest(objectList);
 			
 			outputThread.join();
