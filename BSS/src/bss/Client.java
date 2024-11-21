@@ -73,6 +73,10 @@ public class Client {
 				System.out.println("login successful");
 
 			}
+			else if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.FAILURE) {
+				System.out.println("login failed");
+
+			}
 		}
 	}
 
