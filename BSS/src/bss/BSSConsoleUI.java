@@ -7,7 +7,7 @@ import java.util.*;
  * display the menu of command choices
  */
 
-public class BSSConsoleUI implements BSSUserInterface {
+public class BSSConsoleUI implements Runnable{
 
 	private Scanner scan;
 	private Client client;
@@ -17,7 +17,7 @@ public class BSSConsoleUI implements BSSUserInterface {
 		this.client = client;
 	}
 
-	public void processCommands() {
+	public void run() {
 		System.out.println("Enter username");
 		String username = scan.nextLine();
 

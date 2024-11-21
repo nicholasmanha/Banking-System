@@ -46,7 +46,8 @@ public class Client {
 			Client client = new Client(outHandler);
 
 			BSSConsoleUI UI = new BSSConsoleUI(client);
-			UI.processCommands();
+			Thread consoleThread = new Thread(UI);
+			consoleThread.start();
 			while (alive) {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
