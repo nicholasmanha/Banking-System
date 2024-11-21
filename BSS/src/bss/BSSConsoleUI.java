@@ -26,17 +26,16 @@ public class BSSConsoleUI implements Runnable{
 
 		client.createLoginRequest(username, password);
 		
-//		System.out.print("Logging in");
-//		System.out.println(client.getLoggedIn());
-//		while(!client.getLoggedIn()) {
-//			try {
-//                Thread.sleep(500);  // Pauses for 1 second
-//            } catch (InterruptedException e) {
-//                Thread.currentThread().interrupt();  // Restore interrupted status
-//                System.out.println("Thread was interrupted.");
-//            }
-//            System.out.print(".");
-//		}
+		System.out.print("Logging in");
+		while(!client.getLoggedIn()) {
+			try {
+                Thread.sleep(500);  // Pauses for 1 second
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();  // Restore interrupted status
+                System.out.println("Thread was interrupted.");
+            }
+            System.out.print(".");
+		}
 		
 		String[] commands = { "Deposit", };
 

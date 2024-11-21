@@ -84,7 +84,6 @@ public class Client {
 		}
 	}
 	public boolean getLoggedIn() {
-		System.out.println(loggedIn);
 		return loggedIn;
 	}
 	public void createLoginRequest(String username, String password) {
