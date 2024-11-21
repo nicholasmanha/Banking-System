@@ -16,9 +16,11 @@ import enums.*;
 
 public class Client {
 	private static OutHandler outHandler;
-	private static boolean isLoggedIn = true;
+	private static boolean alive = true;
+	private static boolean loggedIn;
 
 	public Client(OutHandler outHandler) {
+		loggedIn = false;
 		Client.outHandler = outHandler;
 	}
 
@@ -44,8 +46,9 @@ public class Client {
 			Client client = new Client(outHandler);
 
 			BSSConsoleUI UI = new BSSConsoleUI(client);
-			UI.processCommands();
-			while (isLoggedIn) {
+			Thread consoleThread = new Thread(UI);
+			consoleThread.start();
+			while (alive) {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
 
@@ -55,8 +58,8 @@ public class Client {
 
 				Thread.sleep(1000);
 			}
-			outputThread.join();
 			
+
 			System.out.println("Closing socket");
 
 			socket.close();
@@ -69,15 +72,26 @@ public class Client {
 
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
-			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
-				System.out.println("login successful");
-
+			if (request.getType() == RequestType.LOGIN) {
+				if(request.getStatus() == Status.SUCCESS) {
+					loggedIn = true;
+				}
+				else {
+					System.out.println("login failed");
+				}
 			}
-			else if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.FAILURE) {
-				System.out.println("login failed");
-
+			if(request.getType() == RequestType.LOGOUT) {
+				if(request.getStatus() == Status.SUCCESS) {
+					System.out.println("logging out");
+					alive = false;
+					loggedIn = false;
+				}
 			}
 		}
+	}
+
+	public boolean getLoggedIn() {
+		return loggedIn;
 	}
 
 	public void createLoginRequest(String username, String password) {
@@ -91,6 +105,20 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 	}
 
+	public void createDepositRequest(double amount) {
+		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(depositRequest);
+		outHandler.enqueueRequest(requests);
+
+	}
+
+	public void createLogoutRequest() {
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
+		outHandler.enqueueRequest(requests);
+	}
+
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -100,7 +128,6 @@ public class Client {
 			this.inputStream = in;
 			this.requestQueue = new ConcurrentLinkedQueue<>();
 		}
-
 
 		public void run() {
 			while (running) {

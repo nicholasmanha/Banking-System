@@ -68,7 +68,12 @@ public class Server {
 		private final Socket clientSocket;
 		private static Bank bank;
 		private static UserType userType;
+		private static boolean loggedIn;
+		private static ATM atm;
+		private static Session session;
 		public ClientHandler(Bank bank, Socket socket) {
+			atm = new ATM();
+			this.loggedIn = false;
 			this.bank = bank;
 			this.clientSocket = socket;
 		}
@@ -122,7 +127,14 @@ public class Server {
 				if(type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
 					doLogin(request);
 				}
+				if(type == RequestType.LOGOUT && request.getStatus() == Status.REQUEST) {
+					doLogout(request);
+				}
 				if(type == RequestType.DEPOSIT) {
+					if(loggedIn == true) {
+						session.getAccount().deposit(request.getAmount());
+						System.out.println("new balance: " + session.getAccount().getAmount());
+					}
 					
 				}
 			}
@@ -146,8 +158,10 @@ public class Server {
 					loginResponses.add(loginResponse);
 					
 					outHandler.enqueueRequest(loginResponses);
+					loggedIn = true;
 					System.out.println("this is a customer");
-//					Session session = atm.logIn(acc);
+					
+					session = atm.logIn(acc);
 				}
 				else {
 					List<Request> loginResponses = new ArrayList<>();
@@ -170,7 +184,17 @@ public class Server {
 			}
 		}
 		
-
+		private static void doLogout(Request request) {
+			if(loggedIn) {
+				atm.logOut();
+				List<Request> logoutResponses = new ArrayList<>();
+				Request logoutResponse = new Request(RequestType.LOGOUT, Status.SUCCESS);
+				logoutResponses.add(logoutResponse);
+				
+				outHandler.enqueueRequest(logoutResponses);
+			}
+		}
+		
 		private static UserType determineUserType(Bank bank, int userID) {
 
 			Teller teller;
