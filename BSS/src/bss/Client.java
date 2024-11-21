@@ -90,6 +90,14 @@ public class Client {
 
 		outHandler.enqueueRequest(requests);
 	}
+	
+	public void createDepositRequest(double amount) {
+		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(depositRequest);
+		outHandler.enqueueRequest(requests);
+		
+	}
 
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
