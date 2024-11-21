@@ -40,7 +40,6 @@ public class Client {
 			reqs.add(createLoginRequest("1", "123"));
 			
 			List<Object> objectList = new ArrayList<>(reqs);
-			System.out.println("enqueueing request");
 			outHandler.enqueueRequest(objectList);
 			
 			outputThread.join();
@@ -86,7 +85,6 @@ public class Client {
 					running = false;
 				}
 
-				System.out.println("request was null");
 				try {
 
 					Thread.sleep(1000);
@@ -123,15 +121,12 @@ public class Client {
 				List<Object> requests = requestQueue.poll();
 				if (requests != null) {
 					try {
-						System.out.println("sending requests");
 						outputStream.writeObject(requests);
 						outputStream.flush();
 					} catch (IOException e) {
-						System.out.println("request wasn't null but something went wrong");
 						running = false;
 					}
 				}
-				System.out.println("request was null");
 				try {
 					
 					Thread.sleep(1000);

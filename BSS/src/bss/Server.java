@@ -58,7 +58,15 @@ public class Server {
 		}
 
 	}
-
+	
+	private static void processRequest(List<Request> req) {
+		for(Request request : req) {
+			if(request.getType() == RequestType.LOGIN) {
+				System.out.println("login request recieved");
+			}
+		}
+	}
+	
 	private static class ClientHandler implements Runnable {
 		private final Socket clientSocket;
 		Bank bank;
@@ -69,18 +77,18 @@ public class Server {
 		}
 
 		public void run() {
-			UserType userType;
-			// for debugging purposes
-			for (Account account : bank.getAccounts()) {
-				System.out.println(account.getAccountID());
-			}
+//			UserType userType;
+//			// for debugging purposes
+//			for (Account account : bank.getAccounts()) {
+//				System.out.println(account.getAccountID());
+//			}
 
 			try {
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				
-				ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
+				ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
 
-	            InputHandler inputHandler = new InputHandler(inputStream);
+	            InputHandler inputHandler = new InputHandler(objectInputStream);
 	            Thread inputThread = new Thread(inputHandler);
 	            inputThread.start();
 	            
@@ -89,10 +97,11 @@ public class Server {
 				outputThread.start();
 	            
 	            while (true) {
-	                Object message = inputHandler.getNextMessage();
-	                if (message != null) {
-	                	System.out.println("got here");
-	                    System.out.println("Received: " + message);
+	                List<Request> req = inputHandler.getNextRequest();
+	                if (req != null) {
+	                	
+	                    System.out.println("Received: " + req);
+	                    processRequest(req);
 	                }
 	                
 	                Thread.sleep(1000);
@@ -123,15 +132,14 @@ public class Server {
 					List<Object> requests = requestQueue.poll();
 					if (requests != null) {
 						try {
-							System.out.println("sending requests");
+
 							outputStream.writeObject(requests);
 							outputStream.flush();
 						} catch (IOException e) {
-							System.out.println("request wasn't null but something went wrong");
 							running = false;
 						}
 					}
-					System.out.println("request was null");
+
 					try {
 						
 						Thread.sleep(1000);
@@ -145,7 +153,7 @@ public class Server {
 		
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
-		private final ConcurrentLinkedQueue<List<Object>> requestQueue;
+		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
 		private boolean running = true;
 
 		public InputHandler(ObjectInputStream in) {
@@ -153,14 +161,12 @@ public class Server {
 			this.requestQueue = new ConcurrentLinkedQueue<>();
 		}
 
-		public void enqueueRequest(List<Object> requests) {
-			requestQueue.add(requests);
-		}
+
 
 		public void run() {
 			while (running) {
 				try {
-					List<Object> requests = (List<Object>) inputStream.readObject();
+					List<Request> requests = (List<Request>) inputStream.readObject();
 					if( requests != null) {
 						requestQueue.add(requests);
 					}
@@ -169,7 +175,6 @@ public class Server {
 					running = false;
 				}
 
-				System.out.println("request was null");
 				try {
 
 					Thread.sleep(1000);
@@ -182,7 +187,7 @@ public class Server {
 		public void stop() {
 	        running = false;
 	    }
-		public Object getNextMessage() {
+		public List<Request> getNextRequest() {
 	        return requestQueue.poll();
 	    }
 	}
