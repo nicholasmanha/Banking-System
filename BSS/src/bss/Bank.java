@@ -15,6 +15,10 @@ public class Bank {
 		this.customers = new ArrayList<>();
 		this.tellers = new ArrayList<>();
 	}
+	// this is just for debugging purposes, will remove in production
+	public ArrayList<Account> getAccounts() {
+		return this.accounts;
+	}
 	// add an account to the bank
 	public void addAccount(Account account) {
 		accounts.add(account);

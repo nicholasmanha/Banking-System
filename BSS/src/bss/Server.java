@@ -74,6 +74,10 @@ public class Server {
 			UserType userType;
 			PrintWriter out = null;
 			BufferedReader in = null;
+			// for debugging purposes
+			for(Account account : bank.getAccounts()) {
+				System.out.println(account.getAccountID());
+			}
 			try {
 				ATM atm = new ATM();
 				// get the outputstream of client
@@ -123,6 +127,7 @@ public class Server {
 						}
 						else if(userType == UserType.Teller) {
 							Teller teller = bank.findTeller(requestUserID);
+							System.out.println("this is a teller");
 							
 						}
 						else {
