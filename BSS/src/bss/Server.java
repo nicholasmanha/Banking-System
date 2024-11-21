@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+
 import enums.*;
 import requests.Request;
 
@@ -75,11 +76,17 @@ public class Server {
 			}
 
 			try {
+				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+				
 				ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
 
 	            InputHandler inputHandler = new InputHandler(inputStream);
 	            Thread inputThread = new Thread(inputHandler);
 	            inputThread.start();
+	            
+	            OutHandler outHandler = new OutHandler(objectOutputStream);
+	            Thread outputThread = new Thread(outHandler);
+				outputThread.start();
 	            
 	            while (true) {
 	                Object message = inputHandler.getNextMessage();
@@ -97,6 +104,45 @@ public class Server {
 		}
 	}
 
+		private static class OutHandler implements Runnable {
+			private final ObjectOutputStream outputStream;
+			private final ConcurrentLinkedQueue<List<Object>> requestQueue;
+			private boolean running = true;
+
+			public OutHandler(ObjectOutputStream out) {
+				this.outputStream = out;
+				this.requestQueue = new ConcurrentLinkedQueue<>();
+			}
+
+			public void enqueueRequest(List<Object> requests) {
+				requestQueue.add(requests);
+			}
+
+			public void run() {
+				while (running) {
+					List<Object> requests = requestQueue.poll();
+					if (requests != null) {
+						try {
+							System.out.println("sending requests");
+							outputStream.writeObject(requests);
+							outputStream.flush();
+						} catch (IOException e) {
+							System.out.println("request wasn't null but something went wrong");
+							running = false;
+						}
+					}
+					System.out.println("request was null");
+					try {
+						
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
+		}
+		
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
 		private final ConcurrentLinkedQueue<List<Object>> requestQueue;
