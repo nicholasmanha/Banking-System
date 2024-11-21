@@ -127,6 +127,9 @@ public class Server {
 				if(type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
 					doLogin(request);
 				}
+				if(type == RequestType.LOGOUT && request.getStatus() == Status.REQUEST) {
+					doLogout(request);
+				}
 				if(type == RequestType.DEPOSIT) {
 					if(loggedIn == true) {
 						session.getAccount().deposit(request.getAmount());
@@ -181,7 +184,17 @@ public class Server {
 			}
 		}
 		
-
+		private static void doLogout(Request request) {
+			if(loggedIn) {
+				atm.logOut();
+				List<Request> logoutResponses = new ArrayList<>();
+				Request logoutResponse = new Request(RequestType.LOGOUT, Status.SUCCESS);
+				logoutResponses.add(logoutResponse);
+				
+				outHandler.enqueueRequest(logoutResponses);
+			}
+		}
+		
 		private static UserType determineUserType(Bank bank, int userID) {
 
 			Teller teller;

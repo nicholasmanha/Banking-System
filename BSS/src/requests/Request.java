@@ -56,6 +56,14 @@ public class Request implements Serializable{
         this.status = status;
         this.id = ++count;
     }
+    public Request(RequestType type, Status status) {
+    	this.amount = -1;
+    	this.requester = Requester.UNDEFINED;
+        this.texts = null;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+    }
 
     public ArrayList<String> getTexts() {
         return texts;

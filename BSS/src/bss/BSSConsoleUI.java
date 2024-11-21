@@ -73,7 +73,8 @@ public class BSSConsoleUI implements Runnable{
 		client.createDepositRequest(amount);
 	}
 	private void doLogout() {
-		
+		System.out.println("cya");
+		client.createLogoutRequest();
 	}
 
 }

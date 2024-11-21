@@ -103,6 +103,12 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 		
 	}
+	
+	public void createLogoutRequest() {
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
+		outHandler.enqueueRequest(requests);
+	}
 
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
