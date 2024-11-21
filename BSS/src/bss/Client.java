@@ -3,7 +3,6 @@ package bss;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -17,43 +16,64 @@ import enums.*;
 
 public class Client {
 	private static OutHandler outHandler;
-	
+	private static boolean isLoggedIn = true;
+
 	public Client(OutHandler outHandler) {
 		Client.outHandler = outHandler;
 	}
+
 	public static void main(String[] args) {
 		try (Socket socket = new Socket("localhost", 1234)) {
-			
+
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-			
+
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
-            InputHandler inputHandler = new InputHandler(objectInputStream);
-            Thread inputThread = new Thread(inputHandler);
-            inputThread.start();
-            
-            OutHandler outHandler = new OutHandler(objectOutputStream);
+			InputHandler inputHandler = new InputHandler(objectInputStream);
+			Thread inputThread = new Thread(inputHandler);
+			inputThread.start();
+
+			OutHandler outHandler = new OutHandler(objectOutputStream);
 
 			Thread outputThread = new Thread(outHandler);
 			outputThread.start();
-			
+
 			Client client = new Client(outHandler);
-			
+
 			BSSConsoleUI UI = new BSSConsoleUI(client);
 			UI.processCommands();
-			
+			while (isLoggedIn) {
+				List<Request> req = inputHandler.getNextRequest();
+				if (req != null) {
+
+					System.out.println("Received: " + req);
+					processResponse(req);
+				}
+
+				Thread.sleep(1000);
+			}
 			outputThread.join();
-			System.out.println("Closing socket");
 			
+			System.out.println("Closing socket");
+
 			socket.close();
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void processResponse(List<Request> req) {
+		for (Request request : req) {
+			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
+				System.out.println("login successful");
+
+			}
+		}
 	}
 
 	public void createLoginRequest(String username, String password) {
@@ -63,15 +83,13 @@ public class Client {
 		Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(loginRequest);
-		
 
-		
 		outHandler.enqueueRequest(requests);
 	}
 
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
-		private final ConcurrentLinkedQueue<List<Object>> requestQueue;
+		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
 		private boolean running = true;
 
 		public InputHandler(ObjectInputStream in) {
@@ -79,15 +97,12 @@ public class Client {
 			this.requestQueue = new ConcurrentLinkedQueue<>();
 		}
 
-		public void enqueueRequest(List<Object> requests) {
-			requestQueue.add(requests);
-		}
 
 		public void run() {
 			while (running) {
 				try {
-					List<Object> requests = (List<Object>) inputStream.readObject();
-					if( requests != null) {
+					List<Request> requests = (List<Request>) inputStream.readObject();
+					if (requests != null) {
 						requestQueue.add(requests);
 					}
 				} catch (IOException | ClassNotFoundException e) {
@@ -104,14 +119,16 @@ public class Client {
 
 			}
 		}
+
 		public void stop() {
-	        running = false;
-	    }
-		public Object getNextMessage() {
-	        return requestQueue.poll();
-	    }
+			running = false;
+		}
+
+		public List<Request> getNextRequest() {
+			return requestQueue.poll();
+		}
 	}
-	
+
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -138,7 +155,7 @@ public class Client {
 					}
 				}
 				try {
-					
+
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
