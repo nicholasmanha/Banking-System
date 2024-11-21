@@ -1,5 +1,8 @@
 package bss;
+
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -11,54 +14,155 @@ import java.util.List;
 import requests.Request;
 import enums.*;
 
-
-
 public class Client {
+	private static OutHandler outHandler;
+	private static boolean isLoggedIn = true;
+
+	public Client(OutHandler outHandler) {
+		Client.outHandler = outHandler;
+	}
+
 	public static void main(String[] args) {
-		try (Socket socket = new Socket("192.168.56.1", 1234)) {
+		try (Socket socket = new Socket("localhost", 1234)) {
+
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-			
-			// input, to recieve FROM the server
+
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-	        
-			BSSUserInterface bssUI = new BSSConsoleUI();
-	        
-	        ArrayList<String> userAndPass = bssUI.login();
-			
-			
-			List<Request> loginMessages = new ArrayList<>();
-			Request loginMessage = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
-			loginMessages.add(loginMessage);
 
-			// send the login request
-			System.out.println("Sending Login Request...");
-	        objectOutputStream.writeObject(loginMessages);
-	        
-	        try {
-				List<Request> loginResponses = (List<Request>) objectInputStream.readObject();
-				Status loginResponseStatus = loginResponses.get(0).getStatus();
-				if(loginResponseStatus == Status.SUCCESS) {
-					System.out.println("successfully logged in");
+			InputHandler inputHandler = new InputHandler(objectInputStream);
+			Thread inputThread = new Thread(inputHandler);
+			inputThread.start();
+
+			OutHandler outHandler = new OutHandler(objectOutputStream);
+
+			Thread outputThread = new Thread(outHandler);
+			outputThread.start();
+
+			Client client = new Client(outHandler);
+
+			BSSConsoleUI UI = new BSSConsoleUI(client);
+			UI.processCommands();
+			while (isLoggedIn) {
+				List<Request> req = inputHandler.getNextRequest();
+				if (req != null) {
+
+					System.out.println("Received: " + req);
+					processResponse(req);
 				}
-				else {
-					System.out.println("wrong credentials or account not found");
-				}
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+				Thread.sleep(1000);
 			}
+			outputThread.join();
 			
-	        System.out.println("Closing socket");
-	        socket.close();
-	        
-		}
-		catch (IOException e) {
+			System.out.println("Closing socket");
+
+			socket.close();
+
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void processResponse(List<Request> req) {
+		for (Request request : req) {
+			if (request.getType() == RequestType.LOGIN && request.getStatus() == Status.SUCCESS) {
+				System.out.println("login successful");
+
+			}
+		}
+	}
+
+	public void createLoginRequest(String username, String password) {
+		ArrayList<String> userAndPass = new ArrayList<String>();
+		userAndPass.add(username);
+		userAndPass.add(password);
+		Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(loginRequest);
+
+		outHandler.enqueueRequest(requests);
+	}
+
+	private static class InputHandler implements Runnable {
+		private final ObjectInputStream inputStream;
+		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
+		private boolean running = true;
+
+		public InputHandler(ObjectInputStream in) {
+			this.inputStream = in;
+			this.requestQueue = new ConcurrentLinkedQueue<>();
+		}
+
+
+		public void run() {
+			while (running) {
+				try {
+					List<Request> requests = (List<Request>) inputStream.readObject();
+					if (requests != null) {
+						requestQueue.add(requests);
+					}
+				} catch (IOException | ClassNotFoundException e) {
+					e.printStackTrace();
+					running = false;
+				}
+
+				try {
+
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+
+		public void stop() {
+			running = false;
+		}
+
+		public List<Request> getNextRequest() {
+			return requestQueue.poll();
+		}
+	}
+
+	private static class OutHandler implements Runnable {
+		private final ObjectOutputStream outputStream;
+		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
+		private boolean running = true;
+
+		public OutHandler(ObjectOutputStream out) {
+			this.outputStream = out;
+			this.requestQueue = new ConcurrentLinkedQueue<>();
+		}
+
+		public void enqueueRequest(List<Request> requests) {
+			requestQueue.add(requests);
+		}
+
+		public void run() {
+			while (running) {
+				List<Request> requests = requestQueue.poll();
+				if (requests != null) {
+					try {
+						outputStream.writeObject(requests);
+						outputStream.flush();
+					} catch (IOException e) {
+						running = false;
+					}
+				}
+				try {
+
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
 	}
 
 }

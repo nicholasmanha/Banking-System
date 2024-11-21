@@ -13,18 +13,20 @@ public class BSSConsoleUI implements BSSUserInterface {
 	private Scanner scan;
 	private Client client;
 	
-	public BSSConsoleUI() {
+	public BSSConsoleUI(Client client) {
 		scan = new Scanner(System.in);
+		this.client = client;
 	}
 	
 	public void processCommands()
 	{
+		System.out.println("Enter username");
+		String username = scan.nextLine();
+
+		System.out.println("Enter password");
+		String password = scan.nextLine();
 		
-		 String[] commands = {"Deposit",
-	 			  "Withdraw",
-	 			  "Transfer",
-	 			  "Logout"
-	 			  };
+		client.createLoginRequest(username, password);
 
 	}
 	
