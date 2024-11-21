@@ -3,7 +3,7 @@ package bss;
 public class User {
 	
 	protected int id;
-	private DateTime created;
+//	private DateTime created;
 	static int count = 0;
 	
 	public User() {
@@ -17,8 +17,8 @@ public class User {
 		this.id = in_id;
 	}
 	
-	public DateTime getCreated() {
-		return created;
-	}
+//	public DateTime getCreated() {
+//		return created;
+//	}
 
 }
