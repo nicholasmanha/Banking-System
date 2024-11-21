@@ -16,6 +16,11 @@ import requests.Request;
 import enums.*;
 
 public class Client {
+	private static OutHandler outHandler;
+	
+	public Client(OutHandler outHandler) {
+		Client.outHandler = outHandler;
+	}
 	public static void main(String[] args) {
 		try (Socket socket = new Socket("localhost", 1234)) {
 			
@@ -30,17 +35,15 @@ public class Client {
             Thread inputThread = new Thread(inputHandler);
             inputThread.start();
             
-            
-			OutHandler outHandler = new OutHandler(objectOutputStream);
+            OutHandler outHandler = new OutHandler(objectOutputStream);
 
 			Thread outputThread = new Thread(outHandler);
 			outputThread.start();
 			
-			List<Request> reqs = new ArrayList<>();
-			reqs.add(createLoginRequest("1", "123"));
+			Client client = new Client(outHandler);
 			
-			List<Object> objectList = new ArrayList<>(reqs);
-			outHandler.enqueueRequest(objectList);
+			BSSConsoleUI UI = new BSSConsoleUI(client);
+			UI.processCommands();
 			
 			outputThread.join();
 			System.out.println("Closing socket");
@@ -53,10 +56,17 @@ public class Client {
 
 	}
 
-	public static Request createLoginRequest(String username, String password) {
+	public void createLoginRequest(String username, String password) {
 		ArrayList<String> userAndPass = new ArrayList<String>();
+		userAndPass.add(username);
+		userAndPass.add(password);
 		Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
-		return loginRequest;
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(loginRequest);
+		
+
+		
+		outHandler.enqueueRequest(requests);
 	}
 
 	private static class InputHandler implements Runnable {
@@ -104,7 +114,7 @@ public class Client {
 	
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
-		private final ConcurrentLinkedQueue<List<Object>> requestQueue;
+		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
 		private boolean running = true;
 
 		public OutHandler(ObjectOutputStream out) {
@@ -112,13 +122,13 @@ public class Client {
 			this.requestQueue = new ConcurrentLinkedQueue<>();
 		}
 
-		public void enqueueRequest(List<Object> requests) {
+		public void enqueueRequest(List<Request> requests) {
 			requestQueue.add(requests);
 		}
 
 		public void run() {
 			while (running) {
-				List<Object> requests = requestQueue.poll();
+				List<Request> requests = requestQueue.poll();
 				if (requests != null) {
 					try {
 						outputStream.writeObject(requests);

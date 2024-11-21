@@ -22,15 +22,11 @@ public class BSSConsoleUI implements BSSUserInterface {
 	{
 		System.out.println("Enter username");
 		String username = scan.nextLine();
-		
+
 		System.out.println("Enter password");
 		String password = scan.nextLine();
-		//client.sendRequest(client.createLoginRequest(username, password));
-		String[] commands = {"Deposit",
-	 			  "Withdraw",
-	 			  "Transfer",
-	 			  "Logout"
-	 			  };
+		
+		client.createLoginRequest(username, password);
 
 	}
 	

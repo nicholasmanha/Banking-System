@@ -63,6 +63,9 @@ public class Server {
 		for(Request request : req) {
 			if(request.getType() == RequestType.LOGIN) {
 				System.out.println("login request recieved");
+				String username = request.getTexts().get(0);
+				String password = request.getTexts().get(1);
+				System.out.println(username + ", " + password);
 			}
 		}
 	}
@@ -77,11 +80,11 @@ public class Server {
 		}
 
 		public void run() {
-//			UserType userType;
-//			// for debugging purposes
-//			for (Account account : bank.getAccounts()) {
-//				System.out.println(account.getAccountID());
-//			}
+			UserType userType;
+			// for debugging purposes
+			for (Account account : bank.getAccounts()) {
+				System.out.println(account.getAccountID());
+			}
 
 			try {
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
