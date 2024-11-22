@@ -141,9 +141,9 @@ public class Server {
 					if(loggedIn == true) {
 						if(session.getAccount().getAmount() < request.getAmount()) {
 							List<Request> insufficientFundsResponses = new ArrayList<>();
-							List<String> errorMessage = new ArrayList<String>();
+							ArrayList<String> errorMessage = new ArrayList<String>();
 							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(RequestType.WITHDRAW, Status.FAILURE);
+							Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 							insufficientFundsResponses.add(insufficientFundsResponse);
 							
 							outHandler.enqueueRequest(insufficientFundsResponses);
