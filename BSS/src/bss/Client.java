@@ -87,6 +87,14 @@ public class Client {
 					loggedIn = false;
 				}
 			}
+			if(request.getType() == RequestType.WITHDRAW) {
+				if(request.getStatus() == Status.SUCCESS) {
+					System.out.println("withdraw successful");
+				}
+				else {
+					System.out.println(request.getTexts().get(0));
+				}
+			}
 		}
 	}
 

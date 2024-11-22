@@ -89,6 +89,7 @@ public class BSSConsoleUI implements Runnable{
 	private void doLogout() {
 		System.out.println("cya");
 		client.createLogoutRequest();
+		
 	}
 
 }
