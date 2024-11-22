@@ -32,24 +32,27 @@ public class Client {
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-
+			// input, receive FROM the server
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
+			// input handler setup
 			InputHandler inputHandler = new InputHandler(objectInputStream);
 			Thread inputThread = new Thread(inputHandler);
 			inputThread.start();
 
+			// output handler setup
 			OutHandler outHandler = new OutHandler(objectOutputStream);
-
 			Thread outputThread = new Thread(outHandler);
 			outputThread.start();
-
 			Client client = new Client(outHandler);
-
+			
+			// start GUI on thread
 			BSSConsoleUI UI = new BSSConsoleUI(client);
 			Thread consoleThread = new Thread(UI);
 			consoleThread.start();
+			
+			// process responses every 200ms
 			while (alive) {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
@@ -70,6 +73,10 @@ public class Client {
 
 	}
 
+	/*
+	 * RESPONSE PROCESSING
+	 */
+	
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN) {
@@ -115,6 +122,10 @@ public class Client {
 		}
 	}
 
+	/*
+	 * METHODS FOR GUI
+	 */
+	
 	public boolean getIsProcessing() {
 		return isProcessing;
 	}
@@ -174,6 +185,10 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 	}
 
+	/*
+	 * INPUT HANDLER
+	 */
+	
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -215,6 +230,10 @@ public class Client {
 		}
 	}
 
+	/*
+	 * OUTPUT HANDLER
+	 */
+	
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
