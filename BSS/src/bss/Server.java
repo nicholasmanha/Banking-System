@@ -81,6 +81,9 @@ public class Server {
 
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
+			
+			Account testAccount2 = firstTeller.createAccount("321");
+			bank.addAccount(testAccount2);
 			// for debugging purposes
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
@@ -193,13 +196,26 @@ public class Server {
 						else {
 							session.getAccount().withdraw(request.getAmount());
 							Account account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
-							account.deposit(request.getAmount());
-							List<Request> transferResponses = new ArrayList<>();
-							Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
-							transferResponses.add(transferResponse);
+							if(account == null) {
+								List<Request> accountNotFoundResponses = new ArrayList<>();
+								ArrayList<String> errorMessage = new ArrayList<String>();
+								errorMessage.add("Account Not Found");
+								Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+										Status.FAILURE);
+								accountNotFoundResponses.add(accountNotFoundResponse);
 
-							outHandler.enqueueRequest(transferResponses);
-							System.out.println("new balance: " + session.getAccount().getAmount());
+								outHandler.enqueueRequest(accountNotFoundResponses);
+							}
+							else {
+								account.deposit(request.getAmount());
+								List<Request> transferResponses = new ArrayList<>();
+								Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+								transferResponses.add(transferResponse);
+
+								outHandler.enqueueRequest(transferResponses);
+								System.out.println("new balance: " + session.getAccount().getAmount());
+							}
+							
 						}
 					}
 				}
