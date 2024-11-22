@@ -145,75 +145,13 @@ public class Server {
 					doLogout(request);
 				}
 				if (type == RequestType.DEPOSIT) {
-					
-
+					doDeposit(request);
 				}
-
 				if (type == RequestType.WITHDRAW) {
-					if (loggedIn == true) {
-						// if they have insufficient funds
-						if (session.getAccount().getAmount() < request.getAmount()) {
-							List<Request> insufficientFundsResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
-									Status.FAILURE);
-							insufficientFundsResponses.add(insufficientFundsResponse);
-
-							outHandler.enqueueRequest(insufficientFundsResponses);
-						} else {
-							// Account has sufficient funds, withdraw and send success
-
-							session.getAccount().withdraw(request.getAmount());
-							List<Request> withdrawResponses = new ArrayList<>();
-							Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
-							withdrawResponses.add(withdrawResponse);
-
-							outHandler.enqueueRequest(withdrawResponses);
-							System.out.println("new balance: " + session.getAccount().getAmount());
-						}
-
-					}
-
+					doWithdraw(request);
 				}
 				if (type == RequestType.TRANSFER) {
-					if (loggedIn == true) {
-						// Account has insufficient funds, send failure
-						if (session.getAccount().getAmount() < request.getAmount()) {
-							List<Request> insufficientFundsResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
-									Status.FAILURE);
-							insufficientFundsResponses.add(insufficientFundsResponse);
-
-							outHandler.enqueueRequest(insufficientFundsResponses);
-						} else {
-							// to_account wasn't found, send failure
-							session.getAccount().withdraw(request.getAmount());
-							Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
-							if (to_account == null) {
-								List<Request> accountNotFoundResponses = new ArrayList<>();
-								ArrayList<String> errorMessage = new ArrayList<String>();
-								errorMessage.add("Account Not Found");
-								Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
-										Status.FAILURE);
-								accountNotFoundResponses.add(accountNotFoundResponse);
-
-								outHandler.enqueueRequest(accountNotFoundResponses);
-							} else {
-								// Account has sufficient funds, transfer and send success
-								to_account.deposit(request.getAmount());
-								List<Request> transferResponses = new ArrayList<>();
-								Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
-								transferResponses.add(transferResponse);
-
-								outHandler.enqueueRequest(transferResponses);
-								System.out.println("new balance: " + session.getAccount().getAmount());
-							}
-
-						}
-					}
+					doTransfer(request);
 				}
 			}
 		}
@@ -298,6 +236,73 @@ public class Server {
 					outHandler.enqueueRequest(accountOccupiedResponses);
 				}
 
+			}
+		}
+		
+		private static void doWithdraw(Request request) {
+			if (loggedIn == true) {
+				// if they have insufficient funds
+				if (session.getAccount().getAmount() < request.getAmount()) {
+					List<Request> insufficientFundsResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Insufficient Funds");
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
+							Status.FAILURE);
+					insufficientFundsResponses.add(insufficientFundsResponse);
+
+					outHandler.enqueueRequest(insufficientFundsResponses);
+				} else {
+					// Account has sufficient funds, withdraw and send success
+
+					session.getAccount().withdraw(request.getAmount());
+					List<Request> withdrawResponses = new ArrayList<>();
+					Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
+					withdrawResponses.add(withdrawResponse);
+
+					outHandler.enqueueRequest(withdrawResponses);
+					System.out.println("new balance: " + session.getAccount().getAmount());
+				}
+
+			}
+		}
+		
+		private static void doTransfer(Request request) {
+			if (loggedIn == true) {
+				// Account has insufficient funds, send failure
+				if (session.getAccount().getAmount() < request.getAmount()) {
+					List<Request> insufficientFundsResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Insufficient Funds");
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
+							Status.FAILURE);
+					insufficientFundsResponses.add(insufficientFundsResponse);
+
+					outHandler.enqueueRequest(insufficientFundsResponses);
+				} else {
+					// to_account wasn't found, send failure
+					session.getAccount().withdraw(request.getAmount());
+					Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
+					if (to_account == null) {
+						List<Request> accountNotFoundResponses = new ArrayList<>();
+						ArrayList<String> errorMessage = new ArrayList<String>();
+						errorMessage.add("Account Not Found");
+						Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+								Status.FAILURE);
+						accountNotFoundResponses.add(accountNotFoundResponse);
+
+						outHandler.enqueueRequest(accountNotFoundResponses);
+					} else {
+						// Account has sufficient funds, transfer and send success
+						to_account.deposit(request.getAmount());
+						List<Request> transferResponses = new ArrayList<>();
+						Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+						transferResponses.add(transferResponse);
+
+						outHandler.enqueueRequest(transferResponses);
+						System.out.println("new balance: " + session.getAccount().getAmount());
+					}
+
+				}
 			}
 		}
 		
