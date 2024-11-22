@@ -1,7 +1,10 @@
-package bss;
+package network;
 
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import bss.BSSConsoleUI;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -12,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import enums.*;
-import requests.Request;
 
 public class Client {
 	private static OutputHandler outputHandler;
@@ -32,6 +34,7 @@ public class Client {
 			// output, to send TO the server
 			OutputStream outputStream = socket.getOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+			
 			// input, receive FROM the server
 			InputStream inputStream = socket.getInputStream();
 			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);

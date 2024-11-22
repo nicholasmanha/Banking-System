@@ -1,11 +1,9 @@
-package bss;
+package network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import requests.Request;
 
 public class InputHandler implements Runnable {
 	private final ObjectInputStream inputStream;

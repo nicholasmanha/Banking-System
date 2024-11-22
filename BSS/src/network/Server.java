@@ -1,4 +1,4 @@
-package bss;
+package network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,8 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import bss.ATM;
+import bss.Account;
+import bss.Bank;
+import bss.Session;
+import bss.Teller;
 import enums.*;
-import requests.Request;
 
 public class Server {
 
