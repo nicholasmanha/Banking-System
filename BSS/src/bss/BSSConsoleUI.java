@@ -98,7 +98,11 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doTransfer() {
-
+		System.out.println("Enter Account id you wish to send money to");
+		int id = scan.nextInt();
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createTransferRequest(amount);
 	}
 
 	private void doLogout() {
