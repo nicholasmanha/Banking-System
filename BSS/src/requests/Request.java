@@ -40,6 +40,14 @@ public class Request implements Serializable{
         this.status = status;
         this.id = ++count;
     }
+    public Request(ArrayList<String> texts, double amt, RequestType type, Status status) {
+    	this.amount = amt;
+    	this.requester = Requester.UNDEFINED;
+    	this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+    }
     public Request(Requester requester, ArrayList<String> texts, RequestType type, Status status) {
     	this.amount = -1;
     	this.requester = requester;

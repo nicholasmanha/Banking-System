@@ -102,7 +102,7 @@ public class BSSConsoleUI implements Runnable {
 		int id = scan.nextInt();
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
-		client.createTransferRequest(amount);
+		client.createTransferRequest(id, amount);
 	}
 
 	private void doLogout() {
