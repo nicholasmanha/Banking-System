@@ -2,7 +2,6 @@ package bss;
 
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -11,19 +10,20 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import requests.Request;
+
 import enums.*;
+import requests.Request;
 
 public class Client {
-	private static OutHandler outHandler;
+	private static OutputHandler outputHandler;
 	private static boolean alive = true;
 	private static boolean loggedIn;
 	private static boolean isProcessing;
 	private static String responseMessage;
 
-	public Client(OutHandler outHandler) {
+	public Client(OutputHandler outputHandler) {
 		loggedIn = false;
-		Client.outHandler = outHandler;
+		Client.outputHandler = outputHandler;
 	}
 
 	public static void main(String[] args) {
@@ -42,10 +42,10 @@ public class Client {
 			inputThread.start();
 
 			// output handler setup
-			OutHandler outHandler = new OutHandler(objectOutputStream);
-			Thread outputThread = new Thread(outHandler);
+			OutputHandler outputHandler = new OutputHandler(objectOutputStream);
+			Thread outputThread = new Thread(outputHandler);
 			outputThread.start();
-			Client client = new Client(outHandler);
+			Client client = new Client(outputHandler);
 
 			// start GUI on thread
 			BSSConsoleUI UI = new BSSConsoleUI(client);
@@ -144,7 +144,7 @@ public class Client {
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(loginRequest);
 
-		outHandler.enqueueRequest(requests);
+		outputHandler.enqueueRequest(requests);
 	}
 
 	public void createDepositRequest(double amount) {
@@ -152,7 +152,7 @@ public class Client {
 		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(depositRequest);
-		outHandler.enqueueRequest(requests);
+		outputHandler.enqueueRequest(requests);
 
 	}
 
@@ -161,7 +161,7 @@ public class Client {
 		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(withdrawRequest);
-		outHandler.enqueueRequest(requests);
+		outputHandler.enqueueRequest(requests);
 
 	}
 
@@ -173,100 +173,15 @@ public class Client {
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(transferRequest);
 
-		outHandler.enqueueRequest(requests);
+		outputHandler.enqueueRequest(requests);
 
 	}
 
 	public void createLogoutRequest() {
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
-		outHandler.enqueueRequest(requests);
+		outputHandler.enqueueRequest(requests);
 	}
 
-	/*
-	 * INPUT HANDLER
-	 */
-	private static class InputHandler implements Runnable {
-		private final ObjectInputStream inputStream;
-		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
-		private boolean running = true;
-
-		public InputHandler(ObjectInputStream in) {
-			this.inputStream = in;
-			this.requestQueue = new ConcurrentLinkedQueue<>();
-		}
-
-		public void run() {
-			// put responses in queue for processing (which is done in the main method)
-			while (running) {
-				try {
-					List<Request> requests = (List<Request>) inputStream.readObject();
-					if (requests != null) {
-						requestQueue.add(requests);
-					}
-				} catch (IOException | ClassNotFoundException e) {
-					e.printStackTrace();
-					running = false;
-				}
-
-				try {
-
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-		}
-
-		public void stop() {
-			running = false;
-		}
-
-		public List<Request> getNextRequest() {
-			return requestQueue.poll();
-		}
-	}
-
-	/*
-	 * OUTPUT HANDLER
-	 */
-	private static class OutHandler implements Runnable {
-		private final ObjectOutputStream outputStream;
-		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
-		private boolean running = true;
-
-		public OutHandler(ObjectOutputStream out) {
-			this.outputStream = out;
-			this.requestQueue = new ConcurrentLinkedQueue<>();
-		}
-
-		public void enqueueRequest(List<Request> requests) {
-			requestQueue.add(requests);
-		}
-
-		public void run() {
-
-			// send requests to server every 200ms
-			while (running) {
-				List<Request> requests = requestQueue.poll();
-				if (requests != null) {
-					try {
-						outputStream.writeObject(requests);
-						outputStream.flush();
-					} catch (IOException e) {
-						running = false;
-					}
-				}
-				try {
-
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-		}
-	}
-
+	
 }
