@@ -140,9 +140,9 @@ public class Client {
 		
 		ArrayList<String> ID = new ArrayList<String>();
 		ID.add(toAccountID + "");
-		Request loginRequest = new Request(ID, RequestType.TRANSFER, Status.REQUEST);
+		Request transferRequest = new Request(ID, RequestType.TRANSFER, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
-		requests.add(loginRequest);
+		requests.add(transferRequest);
 
 		outHandler.enqueueRequest(requests);
 

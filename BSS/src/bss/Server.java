@@ -178,7 +178,31 @@ public class Server {
 					}
 
 				}
+				if(type == RequestType.TRANSFER) {
+					if(loggedIn == true) {
+						if (session.getAccount().getAmount() < request.getAmount()) {
+							List<Request> insufficientFundsResponses = new ArrayList<>();
+							ArrayList<String> errorMessage = new ArrayList<String>();
+							errorMessage.add("Insufficient Funds");
+							Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
+									Status.FAILURE);
+							insufficientFundsResponses.add(insufficientFundsResponse);
 
+							outHandler.enqueueRequest(insufficientFundsResponses);
+						}
+						else {
+							session.getAccount().withdraw(request.getAmount());
+							Account account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
+							account.deposit(request.getAmount());
+							List<Request> transferResponses = new ArrayList<>();
+							Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+							transferResponses.add(transferResponse);
+
+							outHandler.enqueueRequest(transferResponses);
+							System.out.println("new balance: " + session.getAccount().getAmount());
+						}
+					}
+				}
 			}
 		}
 
