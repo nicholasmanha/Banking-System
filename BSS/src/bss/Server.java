@@ -60,7 +60,7 @@ public class Server {
 	}
 
 	private static class ClientHandler implements Runnable {
-		private static OutHandler outHandler;
+		private static OutputHandler outputHandler;
 		private final Socket clientSocket;
 		private static Bank bank;
 		private static UserType userType;
@@ -106,8 +106,8 @@ public class Server {
 				Thread inputThread = new Thread(inputHandler);
 				inputThread.start();
 
-				OutHandler outHandler = new OutHandler(objectOutputStream);
-				ClientHandler.outHandler = outHandler;
+				OutputHandler outHandler = new OutputHandler(objectOutputStream);
+				ClientHandler.outputHandler = outHandler;
 				Thread outputThread = new Thread(outHandler);
 				outputThread.start();
 
@@ -175,7 +175,7 @@ public class Server {
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
 
-					outHandler.enqueueRequest(loginResponses);
+					outputHandler.enqueueRequest(loginResponses);
 					loggedIn = true;
 					
 					// initialized global session variable
@@ -186,7 +186,7 @@ public class Server {
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
 
-					outHandler.enqueueRequest(loginResponses);
+					outputHandler.enqueueRequest(loginResponses);
 				}
 			} else if (userType == UserType.Teller) {
 				Teller teller = bank.findTeller(username);
@@ -198,7 +198,7 @@ public class Server {
 				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
 
-				outHandler.enqueueRequest(loginResponses);
+				outputHandler.enqueueRequest(loginResponses);
 			}
 		}
 
@@ -218,7 +218,7 @@ public class Server {
 					depositResponses.add(depositResponse);
 
 					// enqueue the response so it can be delivered
-					outHandler.enqueueRequest(depositResponses);
+					outputHandler.enqueueRequest(depositResponses);
 
 					// debug
 					System.out.println("new balance: " + session.getAccount().getAmount());
@@ -231,7 +231,7 @@ public class Server {
 							Status.FAILURE);
 					accountOccupiedResponses.add(accountOccupiedResponse);
 
-					outHandler.enqueueRequest(accountOccupiedResponses);
+					outputHandler.enqueueRequest(accountOccupiedResponses);
 				}
 
 			}
@@ -248,7 +248,7 @@ public class Server {
 							Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
-					outHandler.enqueueRequest(insufficientFundsResponses);
+					outputHandler.enqueueRequest(insufficientFundsResponses);
 				} else {
 					// Account has sufficient funds, withdraw and send success
 
@@ -257,7 +257,7 @@ public class Server {
 					Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
 					withdrawResponses.add(withdrawResponse);
 
-					outHandler.enqueueRequest(withdrawResponses);
+					outputHandler.enqueueRequest(withdrawResponses);
 					System.out.println("new balance: " + session.getAccount().getAmount());
 				}
 
@@ -275,7 +275,7 @@ public class Server {
 							Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
-					outHandler.enqueueRequest(insufficientFundsResponses);
+					outputHandler.enqueueRequest(insufficientFundsResponses);
 				} else {
 					// to_account wasn't found, send failure
 					session.getAccount().withdraw(request.getAmount());
@@ -288,7 +288,7 @@ public class Server {
 								Status.FAILURE);
 						accountNotFoundResponses.add(accountNotFoundResponse);
 
-						outHandler.enqueueRequest(accountNotFoundResponses);
+						outputHandler.enqueueRequest(accountNotFoundResponses);
 					} else {
 						// Account has sufficient funds, transfer and send success
 						to_account.deposit(request.getAmount());
@@ -296,7 +296,7 @@ public class Server {
 						Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
 						transferResponses.add(transferResponse);
 
-						outHandler.enqueueRequest(transferResponses);
+						outputHandler.enqueueRequest(transferResponses);
 						System.out.println("new balance: " + session.getAccount().getAmount());
 					}
 
@@ -311,7 +311,7 @@ public class Server {
 				Request logoutResponse = new Request(RequestType.LOGOUT, Status.SUCCESS);
 				logoutResponses.add(logoutResponse);
 
-				outHandler.enqueueRequest(logoutResponses);
+				outputHandler.enqueueRequest(logoutResponses);
 			}
 		}
 

@@ -47,7 +47,7 @@ public class Parser {
                 	// get account info
                     Account account = parseAccount(reader);
                     // add account to previously made customer
-                    currentCustomer.accounts.add(account);
+                    currentCustomer.getAccounts.add(account);
                     
                 }
             }

@@ -2,7 +2,6 @@ package bss;
 
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -11,8 +10,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import requests.Request;
+
 import enums.*;
+import requests.Request;
 
 public class Client {
 	private static OutHandler outHandler;
