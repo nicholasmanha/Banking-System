@@ -137,9 +137,13 @@ public class Client {
 	}
 	
 	public void createTransferRequest(int toAccountID, double amount) {
-		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
+		
+		ArrayList<String> ID = new ArrayList<String>();
+		ID.add(toAccountID + "");
+		Request loginRequest = new Request(ID, RequestType.TRANSFER, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
-		requests.add(withdrawRequest);
+		requests.add(loginRequest);
+
 		outHandler.enqueueRequest(requests);
 
 	}
