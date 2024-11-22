@@ -37,7 +37,7 @@ public class BSSConsoleUI implements Runnable{
             System.out.print(".");
 		}
 		System.out.println();
-		String[] commands = { "Deposit", "Logout" };
+		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
 
 		int choice;
 
@@ -53,6 +53,12 @@ public class BSSConsoleUI implements Runnable{
 					doDeposit();
 					break;
 				case 1:
+					doWithdraw();
+					break;
+				case 2:
+					doTransfer();
+					break;
+				case 3:
 					doLogout();
 					break;
 				default:
@@ -72,9 +78,18 @@ public class BSSConsoleUI implements Runnable{
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
 	}
+	private void doWithdraw() {
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createWithdrawRequest(amount);
+	}
+	private void doTransfer() {
+		
+	}
 	private void doLogout() {
 		System.out.println("cya");
 		client.createLogoutRequest();
+		
 	}
 
 }

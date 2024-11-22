@@ -87,6 +87,14 @@ public class Client {
 					loggedIn = false;
 				}
 			}
+			if(request.getType() == RequestType.WITHDRAW) {
+				if(request.getStatus() == Status.SUCCESS) {
+					System.out.println("withdraw successful");
+				}
+				else {
+					System.out.println(request.getTexts().get(0));
+				}
+			}
 		}
 	}
 
@@ -109,6 +117,14 @@ public class Client {
 		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(depositRequest);
+		outHandler.enqueueRequest(requests);
+
+	}
+	
+	public void createWithdrawRequest(double amount) {
+		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(withdrawRequest);
 		outHandler.enqueueRequest(requests);
 
 	}
