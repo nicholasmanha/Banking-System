@@ -89,13 +89,16 @@ public class Client {
 			if (request.getType() == RequestType.DEPOSIT) {
 				if (request.getStatus() == Status.SUCCESS) {
 					isProcessing = false;
+					responseMessage = "Deposit Successful";
 				}
 			}
 			if (request.getType() == RequestType.WITHDRAW) {
 				if (request.getStatus() == Status.SUCCESS) {
-					System.out.println("withdraw successful");
+					isProcessing = false;
+					responseMessage = "Withdraw Successful";
 				} else {
-					System.out.println(request.getTexts().get(0));
+					isProcessing = false;
+					responseMessage = request.getTexts().get(0);
 				}
 			}
 			if(request.getType() == RequestType.TRANSFER) {
