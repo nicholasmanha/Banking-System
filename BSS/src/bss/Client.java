@@ -19,6 +19,7 @@ public class Client {
 	private static boolean alive = true;
 	private static boolean loggedIn;
 	private static boolean isProcessing;
+
 	public Client(OutHandler outHandler) {
 		loggedIn = false;
 		Client.outHandler = outHandler;
@@ -55,9 +56,8 @@ public class Client {
 					processResponse(req);
 				}
 
-				Thread.sleep(1000);
+				Thread.sleep(200);
 			}
-			
 
 			System.out.println("Closing socket");
 
@@ -72,30 +72,28 @@ public class Client {
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN) {
-				if(request.getStatus() == Status.SUCCESS) {
+				if (request.getStatus() == Status.SUCCESS) {
 					loggedIn = true;
-				}
-				else {
+				} else {
 					System.out.println("login failed");
 				}
 			}
-			if(request.getType() == RequestType.LOGOUT) {
-				if(request.getStatus() == Status.SUCCESS) {
+			if (request.getType() == RequestType.LOGOUT) {
+				if (request.getStatus() == Status.SUCCESS) {
 					System.out.println("logging out");
 					alive = false;
 					loggedIn = false;
 				}
 			}
-			if(request.getType() == RequestType.DEPOSIT) {
-				if(request.getStatus() == Status.SUCCESS) {
+			if (request.getType() == RequestType.DEPOSIT) {
+				if (request.getStatus() == Status.SUCCESS) {
 					isProcessing = false;
 				}
 			}
-			if(request.getType() == RequestType.WITHDRAW) {
-				if(request.getStatus() == Status.SUCCESS) {
+			if (request.getType() == RequestType.WITHDRAW) {
+				if (request.getStatus() == Status.SUCCESS) {
 					System.out.println("withdraw successful");
-				}
-				else {
+				} else {
 					System.out.println(request.getTexts().get(0));
 				}
 			}
@@ -105,6 +103,7 @@ public class Client {
 	public boolean getIsProcessing() {
 		return isProcessing;
 	}
+
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}
@@ -128,7 +127,7 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 
 	}
-	
+
 	public void createWithdrawRequest(double amount) {
 		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
@@ -167,7 +166,7 @@ public class Client {
 
 				try {
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
