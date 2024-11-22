@@ -7,7 +7,7 @@ import java.util.*;
  * display the menu of command choices
  */
 
-public class BSSConsoleUI implements Runnable{
+public class BSSConsoleUI implements Runnable {
 
 	private Scanner scan;
 	private Client client;
@@ -25,16 +25,16 @@ public class BSSConsoleUI implements Runnable{
 		String password = scan.nextLine();
 
 		client.createLoginRequest(username, password);
-		
+
 		System.out.print("Logging in");
-		while(!client.getLoggedIn()) {
+		while (!client.getLoggedIn()) {
 			try {
-                Thread.sleep(500);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();  
-                System.out.println("Thread was interrupted.");
-            }
-            System.out.print(".");
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
 		}
 		System.out.println();
 		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
@@ -74,22 +74,37 @@ public class BSSConsoleUI implements Runnable{
 	}
 
 	private void doDeposit() {
+
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
+		System.out.print("Depositing");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println("Deposit Successful.");
 	}
+
 	private void doWithdraw() {
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createWithdrawRequest(amount);
 	}
+
 	private void doTransfer() {
-		
+
 	}
+
 	private void doLogout() {
 		System.out.println("cya");
 		client.createLogoutRequest();
-		
+
 	}
 
 }

@@ -17,13 +17,11 @@ import enums.*;
 import requests.Request;
 
 public class Server {
-	
 
-	
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
-			
+
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
@@ -61,8 +59,6 @@ public class Server {
 
 	}
 
-	
-
 	private static class ClientHandler implements Runnable {
 		private static OutHandler outHandler;
 		private final Socket clientSocket;
@@ -71,6 +67,7 @@ public class Server {
 		private static boolean loggedIn;
 		private static ATM atm;
 		private static Session session;
+
 		public ClientHandler(Bank bank, Socket socket) {
 			atm = new ATM();
 			this.loggedIn = false;
@@ -81,7 +78,7 @@ public class Server {
 		public void run() {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
-			
+
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 			// for debugging purposes
@@ -90,8 +87,7 @@ public class Server {
 			}
 
 			try {
-				
-				
+
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
 				ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -109,11 +105,10 @@ public class Server {
 					List<Request> req = inputHandler.getNextRequest();
 					if (req != null) {
 
-						System.out.println("Received: " + req);
 						processRequest(req);
 					}
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				}
 
 			} catch (IOException | InterruptedException e) {
@@ -121,106 +116,109 @@ public class Server {
 
 			}
 		}
+
 		private static void processRequest(List<Request> req) {
 			for (Request request : req) {
 				RequestType type = request.getType();
-				if(type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
+				if (type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
 					doLogin(request);
 				}
-				if(type == RequestType.LOGOUT && request.getStatus() == Status.REQUEST) {
+				if (type == RequestType.LOGOUT && request.getStatus() == Status.REQUEST) {
 					doLogout(request);
 				}
-				if(type == RequestType.DEPOSIT) {
-					if(loggedIn == true) {
+				if (type == RequestType.DEPOSIT) {
+					if (loggedIn == true) {
 						session.getAccount().deposit(request.getAmount());
+						List<Request> depositResponses = new ArrayList<>();
+						Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
+						depositResponses.add(depositResponse);
+
+						outHandler.enqueueRequest(depositResponses);
 						System.out.println("new balance: " + session.getAccount().getAmount());
 					}
-					
+
 				}
-				if(type == RequestType.WITHDRAW) {
-					if(loggedIn == true) {
-						if(session.getAccount().getAmount() < request.getAmount()) {
+				if (type == RequestType.WITHDRAW) {
+					if (loggedIn == true) {
+						if (session.getAccount().getAmount() < request.getAmount()) {
 							List<Request> insufficientFundsResponses = new ArrayList<>();
 							ArrayList<String> errorMessage = new ArrayList<String>();
 							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
+							Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
+									Status.FAILURE);
 							insufficientFundsResponses.add(insufficientFundsResponse);
-							
+
 							outHandler.enqueueRequest(insufficientFundsResponses);
-						}
-						else {
-							
+						} else {
+
 							session.getAccount().withdraw(request.getAmount());
 							List<Request> withdrawResponses = new ArrayList<>();
 							Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
 							withdrawResponses.add(withdrawResponse);
-							
+
 							outHandler.enqueueRequest(withdrawResponses);
 							System.out.println("new balance: " + session.getAccount().getAmount());
 						}
-						
+
 					}
-					
+
 				}
-				
+
 			}
 		}
-		
+
 		private static void doLogin(Request request) {
 			System.out.println("login request recieved");
 			String username = request.getTexts().get(0);
 			String password = request.getTexts().get(1);
 			System.out.println(username + ", " + password);
 			int usernameInt = Integer.parseInt(username);
-			
+
 			userType = determineUserType(bank, usernameInt);
-			
-			if(userType == UserType.Customer) {
+
+			if (userType == UserType.Customer) {
 				Account acc = bank.findAccount(usernameInt);
-				if(acc.checkCredentials(usernameInt, password)) {
-				
+				if (acc.checkCredentials(usernameInt, password)) {
+
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
-					
+
 					outHandler.enqueueRequest(loginResponses);
 					loggedIn = true;
 					System.out.println("this is a customer");
-					
+
 					session = atm.logIn(acc);
-				}
-				else {
+				} else {
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
-					
+
 					outHandler.enqueueRequest(loginResponses);
 				}
-			}
-			else if(userType == UserType.Teller) {
+			} else if (userType == UserType.Teller) {
 				Teller teller = bank.findTeller(usernameInt);
-				
-			}
-			else {
+
+			} else {
 				List<Request> loginResponses = new ArrayList<>();
 				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
-				
+
 				outHandler.enqueueRequest(loginResponses);
 			}
 		}
-		
+
 		private static void doLogout(Request request) {
-			if(loggedIn) {
+			if (loggedIn) {
 				atm.logOut();
 				List<Request> logoutResponses = new ArrayList<>();
 				Request logoutResponse = new Request(RequestType.LOGOUT, Status.SUCCESS);
 				logoutResponses.add(logoutResponse);
-				
+
 				outHandler.enqueueRequest(logoutResponses);
 			}
 		}
-		
+
 		private static UserType determineUserType(Bank bank, int userID) {
 
 			Teller teller;
@@ -238,6 +236,7 @@ public class Server {
 		}
 
 	}
+
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -257,7 +256,7 @@ public class Server {
 				List<Request> requests = requestQueue.poll();
 				if (requests != null) {
 					try {
-						
+
 						outputStream.writeObject(requests);
 						outputStream.flush();
 						System.out.println("sent message");
@@ -301,7 +300,7 @@ public class Server {
 
 				try {
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

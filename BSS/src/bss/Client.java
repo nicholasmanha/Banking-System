@@ -18,6 +18,7 @@ public class Client {
 	private static OutHandler outHandler;
 	private static boolean alive = true;
 	private static boolean loggedIn;
+	private static boolean isProcessing;
 
 	public Client(OutHandler outHandler) {
 		loggedIn = false;
@@ -52,13 +53,11 @@ public class Client {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
 
-					System.out.println("Received: " + req);
 					processResponse(req);
 				}
 
-				Thread.sleep(1000);
+				Thread.sleep(200);
 			}
-			
 
 			System.out.println("Closing socket");
 
@@ -73,29 +72,36 @@ public class Client {
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN) {
-				if(request.getStatus() == Status.SUCCESS) {
+				if (request.getStatus() == Status.SUCCESS) {
 					loggedIn = true;
-				}
-				else {
+				} else {
 					System.out.println("login failed");
 				}
 			}
-			if(request.getType() == RequestType.LOGOUT) {
-				if(request.getStatus() == Status.SUCCESS) {
+			if (request.getType() == RequestType.LOGOUT) {
+				if (request.getStatus() == Status.SUCCESS) {
 					System.out.println("logging out");
 					alive = false;
 					loggedIn = false;
 				}
 			}
-			if(request.getType() == RequestType.WITHDRAW) {
-				if(request.getStatus() == Status.SUCCESS) {
-					System.out.println("withdraw successful");
+			if (request.getType() == RequestType.DEPOSIT) {
+				if (request.getStatus() == Status.SUCCESS) {
+					isProcessing = false;
 				}
-				else {
+			}
+			if (request.getType() == RequestType.WITHDRAW) {
+				if (request.getStatus() == Status.SUCCESS) {
+					System.out.println("withdraw successful");
+				} else {
 					System.out.println(request.getTexts().get(0));
 				}
 			}
 		}
+	}
+
+	public boolean getIsProcessing() {
+		return isProcessing;
 	}
 
 	public boolean getLoggedIn() {
@@ -114,13 +120,14 @@ public class Client {
 	}
 
 	public void createDepositRequest(double amount) {
+		isProcessing = true;
 		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(depositRequest);
 		outHandler.enqueueRequest(requests);
 
 	}
-	
+
 	public void createWithdrawRequest(double amount) {
 		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
@@ -159,7 +166,7 @@ public class Client {
 
 				try {
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
