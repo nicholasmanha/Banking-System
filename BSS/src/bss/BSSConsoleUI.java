@@ -98,7 +98,23 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doTransfer() {
-
+		System.out.println("Enter Account id you wish to send money to");
+		int id = scan.nextInt();
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createTransferRequest(id, amount);
+		
+		System.out.print("Transfering");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
 	}
 
 	private void doLogout() {

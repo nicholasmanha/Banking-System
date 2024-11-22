@@ -19,6 +19,7 @@ public class Client {
 	private static boolean alive = true;
 	private static boolean loggedIn;
 	private static boolean isProcessing;
+	private static String responseMessage;
 
 	public Client(OutHandler outHandler) {
 		loggedIn = false;
@@ -97,11 +98,26 @@ public class Client {
 					System.out.println(request.getTexts().get(0));
 				}
 			}
+			if(request.getType() == RequestType.TRANSFER) {
+				if(request.getStatus() == Status.SUCCESS) {
+					isProcessing = false;
+					responseMessage = "Transfer Successful";
+				}
+				else
+				{
+					isProcessing = false;
+					responseMessage = request.getTexts().get(0);
+				}
+			}
 		}
 	}
 
 	public boolean getIsProcessing() {
 		return isProcessing;
+	}
+	
+	public String getResponseMessage() {
+		return responseMessage;
 	}
 
 	public boolean getLoggedIn() {
@@ -129,9 +145,22 @@ public class Client {
 	}
 
 	public void createWithdrawRequest(double amount) {
+		isProcessing = true;
 		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(withdrawRequest);
+		outHandler.enqueueRequest(requests);
+
+	}
+	
+	public void createTransferRequest(int toAccountID, double amount) {
+		isProcessing = true;
+		ArrayList<String> ID = new ArrayList<String>();
+		ID.add(toAccountID + "");
+		Request transferRequest = new Request(ID, amount, RequestType.TRANSFER, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(transferRequest);
+
 		outHandler.enqueueRequest(requests);
 
 	}

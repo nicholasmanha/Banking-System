@@ -81,6 +81,9 @@ public class Server {
 
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
+			
+			Account testAccount2 = firstTeller.createAccount("321");
+			bank.addAccount(testAccount2);
 			// for debugging purposes
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
@@ -178,7 +181,44 @@ public class Server {
 					}
 
 				}
+				if(type == RequestType.TRANSFER) {
+					if(loggedIn == true) {
+						if (session.getAccount().getAmount() < request.getAmount()) {
+							List<Request> insufficientFundsResponses = new ArrayList<>();
+							ArrayList<String> errorMessage = new ArrayList<String>();
+							errorMessage.add("Insufficient Funds");
+							Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
+									Status.FAILURE);
+							insufficientFundsResponses.add(insufficientFundsResponse);
 
+							outHandler.enqueueRequest(insufficientFundsResponses);
+						}
+						else {
+							session.getAccount().withdraw(request.getAmount());
+							Account account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
+							if(account == null) {
+								List<Request> accountNotFoundResponses = new ArrayList<>();
+								ArrayList<String> errorMessage = new ArrayList<String>();
+								errorMessage.add("Account Not Found");
+								Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+										Status.FAILURE);
+								accountNotFoundResponses.add(accountNotFoundResponse);
+
+								outHandler.enqueueRequest(accountNotFoundResponses);
+							}
+							else {
+								account.deposit(request.getAmount());
+								List<Request> transferResponses = new ArrayList<>();
+								Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+								transferResponses.add(transferResponse);
+
+								outHandler.enqueueRequest(transferResponses);
+								System.out.println("new balance: " + session.getAccount().getAmount());
+							}
+							
+						}
+					}
+				}
 			}
 		}
 
