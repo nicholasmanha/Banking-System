@@ -128,13 +128,28 @@ public class Server {
 				}
 				if (type == RequestType.DEPOSIT) {
 					if (loggedIn == true) {
-						session.getAccount().deposit(request.getAmount());
-						List<Request> depositResponses = new ArrayList<>();
-						Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
-						depositResponses.add(depositResponse);
+						if(session.getAccount().getOccupied() == false) {
+							session.getAccount().setFrozen(true);
+							session.getAccount().deposit(request.getAmount());
+							session.getAccount().setFrozen(false);
+							List<Request> depositResponses = new ArrayList<>();
+							Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
+							depositResponses.add(depositResponse);
 
-						outHandler.enqueueRequest(depositResponses);
-						System.out.println("new balance: " + session.getAccount().getAmount());
+							outHandler.enqueueRequest(depositResponses);
+							System.out.println("new balance: " + session.getAccount().getAmount());
+						}
+						else {
+							List<Request> accountOccupiedResponses = new ArrayList<>();
+							ArrayList<String> errorMessage = new ArrayList<String>();
+							errorMessage.add("Account Occupied");
+							Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT,
+									Status.FAILURE);
+							accountOccupiedResponses.add(accountOccupiedResponse);
+
+							outHandler.enqueueRequest(accountOccupiedResponses);
+						}
+						
 					}
 
 				}

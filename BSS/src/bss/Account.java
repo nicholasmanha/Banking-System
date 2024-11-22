@@ -44,6 +44,11 @@ public class Account {
     public int getAccountID() {
         return account_ID;
     }
+    
+    public boolean getOccupied() {
+    	return this.frozen;
+    }
+    
   //pass in account id read in from .txt file
     public void matchUpAccountID(int in_id) {
     	//do nothing if count == id, 
