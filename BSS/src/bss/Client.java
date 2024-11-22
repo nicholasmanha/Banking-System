@@ -52,7 +52,6 @@ public class Client {
 				List<Request> req = inputHandler.getNextRequest();
 				if (req != null) {
 
-					System.out.println("Received: " + req);
 					processResponse(req);
 				}
 
@@ -87,6 +86,11 @@ public class Client {
 					loggedIn = false;
 				}
 			}
+			if(request.getType() == RequestType.DEPOSIT) {
+				if(request.getStatus() == Status.SUCCESS) {
+					isProcessing = false;
+				}
+			}
 			if(request.getType() == RequestType.WITHDRAW) {
 				if(request.getStatus() == Status.SUCCESS) {
 					System.out.println("withdraw successful");
@@ -98,6 +102,9 @@ public class Client {
 		}
 	}
 
+	public boolean getIsProcessing() {
+		return isProcessing;
+	}
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}

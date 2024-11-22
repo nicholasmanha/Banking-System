@@ -109,7 +109,6 @@ public class Server {
 					List<Request> req = inputHandler.getNextRequest();
 					if (req != null) {
 
-						System.out.println("Received: " + req);
 						processRequest(req);
 					}
 
@@ -133,6 +132,11 @@ public class Server {
 				if(type == RequestType.DEPOSIT) {
 					if(loggedIn == true) {
 						session.getAccount().deposit(request.getAmount());
+						List<Request> depositResponses = new ArrayList<>();
+						Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
+						depositResponses.add(depositResponse);
+						
+						outHandler.enqueueRequest(depositResponses);
 						System.out.println("new balance: " + session.getAccount().getAmount());
 					}
 					

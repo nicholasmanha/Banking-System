@@ -78,7 +78,8 @@ public class BSSConsoleUI implements Runnable{
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
-		while(client.isProcessing()) {
+		System.out.print("Depositing");
+		while(client.getIsProcessing()) {
 			try {
                 Thread.sleep(500);  
             } catch (InterruptedException e) {
@@ -87,6 +88,7 @@ public class BSSConsoleUI implements Runnable{
             }
             System.out.print(".");
 		}
+		System.out.println("Deposit Successful.");
 	}
 	private void doWithdraw() {
 		System.out.println("Enter amount");
