@@ -194,7 +194,6 @@ public class Server {
 			} 
 			// user isn't a teller or a customer, send failure response
 			else {
-				
 				List<Request> loginResponses = new ArrayList<>();
 				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
@@ -205,7 +204,6 @@ public class Server {
 
 		private static void doDeposit(Request request){
 			if (loggedIn == true) {
-
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
 				if (session.getAccount().getOccupied() == false) {
