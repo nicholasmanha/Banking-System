@@ -18,7 +18,7 @@ public class Client {
 	private static OutHandler outHandler;
 	private static boolean alive = true;
 	private static boolean loggedIn;
-
+	private static boolean isProcessing;
 	public Client(OutHandler outHandler) {
 		loggedIn = false;
 		Client.outHandler = outHandler;
@@ -114,6 +114,7 @@ public class Client {
 	}
 
 	public void createDepositRequest(double amount) {
+		isProcessing = true;
 		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
 		List<Request> requests = new ArrayList<Request>();
 		requests.add(depositRequest);

@@ -74,9 +74,19 @@ public class BSSConsoleUI implements Runnable{
 	}
 
 	private void doDeposit() {
+		
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
+		while(client.isProcessing()) {
+			try {
+                Thread.sleep(500);  
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();  
+                System.out.println("Thread was interrupted.");
+            }
+            System.out.print(".");
+		}
 	}
 	private void doWithdraw() {
 		System.out.println("Enter amount");
