@@ -1,4 +1,4 @@
-package requests;
+package network;
 
 import enums.RequestType;
 import enums.Requester;

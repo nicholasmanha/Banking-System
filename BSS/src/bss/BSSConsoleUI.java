@@ -2,6 +2,8 @@ package bss;
 
 import java.util.*;
 
+import network.Client;
+
 /**
  * This class is an implementation of DVDUserInterface that uses the console to
  * display the menu of command choices

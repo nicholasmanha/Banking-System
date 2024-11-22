@@ -14,7 +14,7 @@ public class Account {
 	private double amount;
 	private AccountType AccountType;
 
-	Account() {
+	public Account() {
 		this.account_ID = count++;
 		this.pin = "";
 		this.users = new ArrayList<Customer>();
