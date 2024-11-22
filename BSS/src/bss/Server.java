@@ -137,6 +137,32 @@ public class Server {
 					}
 					
 				}
+				if(type == RequestType.WITHDRAW) {
+					if(loggedIn == true) {
+						if(session.getAccount().getAmount() < request.getAmount()) {
+							List<Request> insufficientFundsResponses = new ArrayList<>();
+							List<String> errorMessage = new ArrayList<String>();
+							errorMessage.add("Insufficient Funds");
+							Request insufficientFundsResponse = new Request(RequestType.WITHDRAW, Status.FAILURE);
+							insufficientFundsResponses.add(insufficientFundsResponse);
+							
+							outHandler.enqueueRequest(insufficientFundsResponses);
+						}
+						else {
+							
+							session.getAccount().withdraw(request.getAmount());
+							List<Request> withdrawResponses = new ArrayList<>();
+							Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
+							withdrawResponses.add(withdrawResponse);
+							
+							outHandler.enqueueRequest(withdrawResponses);
+							System.out.println("new balance: " + session.getAccount().getAmount());
+						}
+						
+					}
+					
+				}
+				
 			}
 		}
 		
