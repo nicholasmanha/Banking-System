@@ -333,49 +333,6 @@ public class Server {
 		}
 
 	}
-	
-	/*
-	 * OUTPUT HANDLER
-	 */
-	private static class OutHandler implements Runnable {
-		private final ObjectOutputStream outputStream;
-		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
-		private boolean running = true;
-
-		public OutHandler(ObjectOutputStream out) {
-			this.outputStream = out;
-			this.requestQueue = new ConcurrentLinkedQueue<>();
-		}
-
-		public void enqueueRequest(List<Request> requests) {
-			requestQueue.add(requests);
-		}
-
-		public void run() {
-			// send responses to client every 200ms
-			while (running) {
-				List<Request> requests = requestQueue.poll();
-				if (requests != null) {
-					try {
-
-						outputStream.writeObject(requests);
-						outputStream.flush();
-						System.out.println("sent message");
-					} catch (IOException e) {
-						running = false;
-					}
-				}
-
-				try {
-
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-		}
-	}
 
 	/*
 	 * INPUT HANDLER
