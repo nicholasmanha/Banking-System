@@ -162,10 +162,9 @@ public class Server {
 			int username = Integer.parseInt(username_string);
 			String password = request.getTexts().get(1);
 			System.out.println(username + ", " + password);
-			
 
 			userType = determineUserType(bank, username);
-			
+
 			if (userType == UserType.Customer) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
@@ -177,7 +176,7 @@ public class Server {
 
 					outputHandler.enqueueRequest(loginResponses);
 					loggedIn = true;
-					
+
 					// initialized global session variable
 					session = atm.logIn(acc);
 				} else {
@@ -191,7 +190,7 @@ public class Server {
 			} else if (userType == UserType.Teller) {
 				Teller teller = bank.findTeller(username);
 
-			} 
+			}
 			// user isn't a teller or a customer, send failure response
 			else {
 				List<Request> loginResponses = new ArrayList<>();
@@ -202,7 +201,7 @@ public class Server {
 			}
 		}
 
-		private static void doDeposit(Request request){
+		private static void doDeposit(Request request) {
 			if (loggedIn == true) {
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
@@ -227,8 +226,7 @@ public class Server {
 					List<Request> accountOccupiedResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
 					errorMessage.add("Account Occupied");
-					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT,
-							Status.FAILURE);
+					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 					accountOccupiedResponses.add(accountOccupiedResponse);
 
 					outputHandler.enqueueRequest(accountOccupiedResponses);
@@ -236,7 +234,7 @@ public class Server {
 
 			}
 		}
-		
+
 		private static void doWithdraw(Request request) {
 			if (loggedIn == true) {
 				// if they have insufficient funds
@@ -244,8 +242,7 @@ public class Server {
 					List<Request> insufficientFundsResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
 					errorMessage.add("Insufficient Funds");
-					Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
-							Status.FAILURE);
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
 					outputHandler.enqueueRequest(insufficientFundsResponses);
@@ -263,7 +260,7 @@ public class Server {
 
 			}
 		}
-		
+
 		private static void doTransfer(Request request) {
 			if (loggedIn == true) {
 				// Account has insufficient funds, send failure
@@ -271,8 +268,7 @@ public class Server {
 					List<Request> insufficientFundsResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
 					errorMessage.add("Insufficient Funds");
-					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
-							Status.FAILURE);
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
 					outputHandler.enqueueRequest(insufficientFundsResponses);
@@ -303,7 +299,7 @@ public class Server {
 				}
 			}
 		}
-		
+
 		private static void doLogout(Request request) {
 			if (loggedIn) {
 				atm.logOut();
@@ -332,50 +328,5 @@ public class Server {
 			return UserType.Customer;
 		}
 
-	}
-
-	/*
-	 * INPUT HANDLER
-	 */
-	private static class InputHandler implements Runnable {
-		private final ObjectInputStream inputStream;
-		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
-		private boolean running = true;
-
-		public InputHandler(ObjectInputStream in) {
-			this.inputStream = in;
-			this.requestQueue = new ConcurrentLinkedQueue<>();
-		}
-
-		public void run() {
-			// put requests in queue for processing (which is done in the ClientHandler.run())
-			while (running) {
-				try {
-					List<Request> requests = (List<Request>) inputStream.readObject();
-					if (requests != null) {
-						requestQueue.add(requests);
-					}
-				} catch (IOException | ClassNotFoundException e) {
-					e.printStackTrace();
-					running = false;
-				}
-
-				try {
-
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-		}
-
-		public void stop() {
-			running = false;
-		}
-
-		public List<Request> getNextRequest() {
-			return requestQueue.poll();
-		}
 	}
 }
