@@ -76,23 +76,30 @@ public class Server {
 		}
 
 		public void run() {
+
+			/*
+			 * creating accounts for debugging purposes
+			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
-			
+
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
-			// for debugging purposes
+
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
 			}
 
+			/*
+			 * Establish input and output streams and inputHandler and outputHandler,
+			 * initialize threads for them and process requests in a regular interval
+			 */
 			try {
 
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-
 				ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
 
 				InputHandler inputHandler = new InputHandler(objectInputStream);
@@ -104,6 +111,7 @@ public class Server {
 				Thread outputThread = new Thread(outHandler);
 				outputThread.start();
 
+				// process requests every 200ms
 				while (true) {
 					List<Request> req = inputHandler.getNextRequest();
 					if (req != null) {
@@ -120,9 +128,16 @@ public class Server {
 			}
 		}
 
+		/*
+		 * conditional statements for processing incoming requests
+		 */
 		private static void processRequest(List<Request> req) {
+
+			// for every request in the list of requests that was received
 			for (Request request : req) {
 				RequestType type = request.getType();
+				Status status = request.getStatus();
+
 				if (type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
 					doLogin(request);
 				}
@@ -131,18 +146,27 @@ public class Server {
 				}
 				if (type == RequestType.DEPOSIT) {
 					if (loggedIn == true) {
-						if(session.getAccount().getOccupied() == false) {
+
+						// getOccupied is for checking if the account is currently processing something
+						// so two people can't interact with an account at once
+						if (session.getAccount().getOccupied() == false) {
+							// set the frozen flag to true on account whilst interacting with it
 							session.getAccount().setFrozen(true);
 							session.getAccount().deposit(request.getAmount());
 							session.getAccount().setFrozen(false);
+
+							// make the deposit response
 							List<Request> depositResponses = new ArrayList<>();
 							Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
 							depositResponses.add(depositResponse);
 
+							// enqueue the response so it can be delivered
 							outHandler.enqueueRequest(depositResponses);
+
+							// debug
 							System.out.println("new balance: " + session.getAccount().getAmount());
-						}
-						else {
+						} else {
+							// send deposit failure response if the account is occupied
 							List<Request> accountOccupiedResponses = new ArrayList<>();
 							ArrayList<String> errorMessage = new ArrayList<String>();
 							errorMessage.add("Account Occupied");
@@ -152,12 +176,14 @@ public class Server {
 
 							outHandler.enqueueRequest(accountOccupiedResponses);
 						}
-						
+
 					}
 
 				}
+
 				if (type == RequestType.WITHDRAW) {
 					if (loggedIn == true) {
+						// if they have insufficient funds
 						if (session.getAccount().getAmount() < request.getAmount()) {
 							List<Request> insufficientFundsResponses = new ArrayList<>();
 							ArrayList<String> errorMessage = new ArrayList<String>();
@@ -181,8 +207,8 @@ public class Server {
 					}
 
 				}
-				if(type == RequestType.TRANSFER) {
-					if(loggedIn == true) {
+				if (type == RequestType.TRANSFER) {
+					if (loggedIn == true) {
 						if (session.getAccount().getAmount() < request.getAmount()) {
 							List<Request> insufficientFundsResponses = new ArrayList<>();
 							ArrayList<String> errorMessage = new ArrayList<String>();
@@ -192,11 +218,10 @@ public class Server {
 							insufficientFundsResponses.add(insufficientFundsResponse);
 
 							outHandler.enqueueRequest(insufficientFundsResponses);
-						}
-						else {
+						} else {
 							session.getAccount().withdraw(request.getAmount());
 							Account account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
-							if(account == null) {
+							if (account == null) {
 								List<Request> accountNotFoundResponses = new ArrayList<>();
 								ArrayList<String> errorMessage = new ArrayList<String>();
 								errorMessage.add("Account Not Found");
@@ -205,8 +230,7 @@ public class Server {
 								accountNotFoundResponses.add(accountNotFoundResponse);
 
 								outHandler.enqueueRequest(accountNotFoundResponses);
-							}
-							else {
+							} else {
 								account.deposit(request.getAmount());
 								List<Request> transferResponses = new ArrayList<>();
 								Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
@@ -215,7 +239,7 @@ public class Server {
 								outHandler.enqueueRequest(transferResponses);
 								System.out.println("new balance: " + session.getAccount().getAmount());
 							}
-							
+
 						}
 					}
 				}
