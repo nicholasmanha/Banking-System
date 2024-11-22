@@ -129,7 +129,7 @@ public class Server {
 		}
 
 		/*
-		 * conditional statements for processing incoming requests
+		 * Conditionals for processing incoming requests
 		 */
 		private static void processRequest(List<Request> req) {
 
@@ -145,130 +145,43 @@ public class Server {
 					doLogout(request);
 				}
 				if (type == RequestType.DEPOSIT) {
-					if (loggedIn == true) {
-
-						// getOccupied is for checking if the account is currently processing something
-						// so two people can't interact with an account at once
-						if (session.getAccount().getOccupied() == false) {
-							// set the frozen flag to true on account whilst interacting with it
-							session.getAccount().setFrozen(true);
-							session.getAccount().deposit(request.getAmount());
-							session.getAccount().setFrozen(false);
-
-							// make the deposit response
-							List<Request> depositResponses = new ArrayList<>();
-							Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
-							depositResponses.add(depositResponse);
-
-							// enqueue the response so it can be delivered
-							outHandler.enqueueRequest(depositResponses);
-
-							// debug
-							System.out.println("new balance: " + session.getAccount().getAmount());
-						} else {
-							// send deposit failure response if the account is occupied
-							List<Request> accountOccupiedResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Account Occupied");
-							Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT,
-									Status.FAILURE);
-							accountOccupiedResponses.add(accountOccupiedResponse);
-
-							outHandler.enqueueRequest(accountOccupiedResponses);
-						}
-
-					}
-
+					doDeposit(request);
 				}
-
 				if (type == RequestType.WITHDRAW) {
-					if (loggedIn == true) {
-						// if they have insufficient funds
-						if (session.getAccount().getAmount() < request.getAmount()) {
-							List<Request> insufficientFundsResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
-									Status.FAILURE);
-							insufficientFundsResponses.add(insufficientFundsResponse);
-
-							outHandler.enqueueRequest(insufficientFundsResponses);
-						} else {
-
-							session.getAccount().withdraw(request.getAmount());
-							List<Request> withdrawResponses = new ArrayList<>();
-							Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
-							withdrawResponses.add(withdrawResponse);
-
-							outHandler.enqueueRequest(withdrawResponses);
-							System.out.println("new balance: " + session.getAccount().getAmount());
-						}
-
-					}
-
+					doWithdraw(request);
 				}
 				if (type == RequestType.TRANSFER) {
-					if (loggedIn == true) {
-						if (session.getAccount().getAmount() < request.getAmount()) {
-							List<Request> insufficientFundsResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Insufficient Funds");
-							Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
-									Status.FAILURE);
-							insufficientFundsResponses.add(insufficientFundsResponse);
-
-							outHandler.enqueueRequest(insufficientFundsResponses);
-						} else {
-							session.getAccount().withdraw(request.getAmount());
-							Account account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
-							if (account == null) {
-								List<Request> accountNotFoundResponses = new ArrayList<>();
-								ArrayList<String> errorMessage = new ArrayList<String>();
-								errorMessage.add("Account Not Found");
-								Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
-										Status.FAILURE);
-								accountNotFoundResponses.add(accountNotFoundResponse);
-
-								outHandler.enqueueRequest(accountNotFoundResponses);
-							} else {
-								account.deposit(request.getAmount());
-								List<Request> transferResponses = new ArrayList<>();
-								Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
-								transferResponses.add(transferResponse);
-
-								outHandler.enqueueRequest(transferResponses);
-								System.out.println("new balance: " + session.getAccount().getAmount());
-							}
-
-						}
-					}
+					doTransfer(request);
 				}
 			}
 		}
 
 		private static void doLogin(Request request) {
 			System.out.println("login request recieved");
-			String username = request.getTexts().get(0);
+			String username_string = request.getTexts().get(0);
+			int username = Integer.parseInt(username_string);
 			String password = request.getTexts().get(1);
 			System.out.println(username + ", " + password);
-			int usernameInt = Integer.parseInt(username);
+			
 
-			userType = determineUserType(bank, usernameInt);
-
+			userType = determineUserType(bank, username);
+			
 			if (userType == UserType.Customer) {
-				Account acc = bank.findAccount(usernameInt);
-				if (acc.checkCredentials(usernameInt, password)) {
+				Account acc = bank.findAccount(username);
+				if (acc.checkCredentials(username, password)) {
 
+					// send login success
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
 
 					outHandler.enqueueRequest(loginResponses);
 					loggedIn = true;
-					System.out.println("this is a customer");
-
+					
+					// initialized global session variable
 					session = atm.logIn(acc);
 				} else {
+					// user credentials were incorrect, send failure reponse
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
@@ -276,9 +189,11 @@ public class Server {
 					outHandler.enqueueRequest(loginResponses);
 				}
 			} else if (userType == UserType.Teller) {
-				Teller teller = bank.findTeller(usernameInt);
+				Teller teller = bank.findTeller(username);
 
-			} else {
+			} 
+			// user isn't a teller or a customer, send failure response
+			else {
 				List<Request> loginResponses = new ArrayList<>();
 				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
@@ -287,6 +202,108 @@ public class Server {
 			}
 		}
 
+		private static void doDeposit(Request request){
+			if (loggedIn == true) {
+				// getOccupied is for checking if the account is currently processing something
+				// so two people can't interact with an account at once
+				if (session.getAccount().getOccupied() == false) {
+					// set the frozen flag to true on account whilst interacting with it
+					session.getAccount().setFrozen(true);
+					session.getAccount().deposit(request.getAmount());
+					session.getAccount().setFrozen(false);
+
+					// make the deposit response
+					List<Request> depositResponses = new ArrayList<>();
+					Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
+					depositResponses.add(depositResponse);
+
+					// enqueue the response so it can be delivered
+					outHandler.enqueueRequest(depositResponses);
+
+					// debug
+					System.out.println("new balance: " + session.getAccount().getAmount());
+				} else {
+					// send deposit failure response if the account is occupied
+					List<Request> accountOccupiedResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Account Occupied");
+					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT,
+							Status.FAILURE);
+					accountOccupiedResponses.add(accountOccupiedResponse);
+
+					outHandler.enqueueRequest(accountOccupiedResponses);
+				}
+
+			}
+		}
+		
+		private static void doWithdraw(Request request) {
+			if (loggedIn == true) {
+				// if they have insufficient funds
+				if (session.getAccount().getAmount() < request.getAmount()) {
+					List<Request> insufficientFundsResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Insufficient Funds");
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
+							Status.FAILURE);
+					insufficientFundsResponses.add(insufficientFundsResponse);
+
+					outHandler.enqueueRequest(insufficientFundsResponses);
+				} else {
+					// Account has sufficient funds, withdraw and send success
+
+					session.getAccount().withdraw(request.getAmount());
+					List<Request> withdrawResponses = new ArrayList<>();
+					Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
+					withdrawResponses.add(withdrawResponse);
+
+					outHandler.enqueueRequest(withdrawResponses);
+					System.out.println("new balance: " + session.getAccount().getAmount());
+				}
+
+			}
+		}
+		
+		private static void doTransfer(Request request) {
+			if (loggedIn == true) {
+				// Account has insufficient funds, send failure
+				if (session.getAccount().getAmount() < request.getAmount()) {
+					List<Request> insufficientFundsResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Insufficient Funds");
+					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
+							Status.FAILURE);
+					insufficientFundsResponses.add(insufficientFundsResponse);
+
+					outHandler.enqueueRequest(insufficientFundsResponses);
+				} else {
+					// to_account wasn't found, send failure
+					session.getAccount().withdraw(request.getAmount());
+					Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
+					if (to_account == null) {
+						List<Request> accountNotFoundResponses = new ArrayList<>();
+						ArrayList<String> errorMessage = new ArrayList<String>();
+						errorMessage.add("Account Not Found");
+						Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+								Status.FAILURE);
+						accountNotFoundResponses.add(accountNotFoundResponse);
+
+						outHandler.enqueueRequest(accountNotFoundResponses);
+					} else {
+						// Account has sufficient funds, transfer and send success
+						to_account.deposit(request.getAmount());
+						List<Request> transferResponses = new ArrayList<>();
+						Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+						transferResponses.add(transferResponse);
+
+						outHandler.enqueueRequest(transferResponses);
+						System.out.println("new balance: " + session.getAccount().getAmount());
+					}
+
+				}
+			}
+		}
+		
 		private static void doLogout(Request request) {
 			if (loggedIn) {
 				atm.logOut();
@@ -298,6 +315,7 @@ public class Server {
 			}
 		}
 
+		// based on the given username, determine if it is for an account or a teller
 		private static UserType determineUserType(Bank bank, int userID) {
 
 			Teller teller;
@@ -315,7 +333,10 @@ public class Server {
 		}
 
 	}
-
+	
+	/*
+	 * OUTPUT HANDLER
+	 */
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -331,6 +352,7 @@ public class Server {
 		}
 
 		public void run() {
+			// send responses to client every 200ms
 			while (running) {
 				List<Request> requests = requestQueue.poll();
 				if (requests != null) {
@@ -346,7 +368,7 @@ public class Server {
 
 				try {
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -355,6 +377,9 @@ public class Server {
 		}
 	}
 
+	/*
+	 * INPUT HANDLER
+	 */
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -366,6 +391,7 @@ public class Server {
 		}
 
 		public void run() {
+			// put requests in queue for processing (which is done in the ClientHandler.run())
 			while (running) {
 				try {
 					List<Request> requests = (List<Request>) inputStream.readObject();

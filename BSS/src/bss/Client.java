@@ -46,12 +46,12 @@ public class Client {
 			Thread outputThread = new Thread(outHandler);
 			outputThread.start();
 			Client client = new Client(outHandler);
-			
+
 			// start GUI on thread
 			BSSConsoleUI UI = new BSSConsoleUI(client);
 			Thread consoleThread = new Thread(UI);
 			consoleThread.start();
-			
+
 			// process responses every 200ms
 			while (alive) {
 				List<Request> req = inputHandler.getNextRequest();
@@ -76,7 +76,7 @@ public class Client {
 	/*
 	 * RESPONSE PROCESSING
 	 */
-	
+
 	private static void processResponse(List<Request> req) {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN) {
@@ -108,13 +108,11 @@ public class Client {
 					responseMessage = request.getTexts().get(0);
 				}
 			}
-			if(request.getType() == RequestType.TRANSFER) {
-				if(request.getStatus() == Status.SUCCESS) {
+			if (request.getType() == RequestType.TRANSFER) {
+				if (request.getStatus() == Status.SUCCESS) {
 					isProcessing = false;
 					responseMessage = "Transfer Successful";
-				}
-				else
-				{
+				} else {
 					isProcessing = false;
 					responseMessage = request.getTexts().get(0);
 				}
@@ -125,11 +123,11 @@ public class Client {
 	/*
 	 * METHODS FOR GUI
 	 */
-	
+
 	public boolean getIsProcessing() {
 		return isProcessing;
 	}
-	
+
 	public String getResponseMessage() {
 		return responseMessage;
 	}
@@ -166,7 +164,7 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 
 	}
-	
+
 	public void createTransferRequest(int toAccountID, double amount) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<String>();
@@ -188,7 +186,6 @@ public class Client {
 	/*
 	 * INPUT HANDLER
 	 */
-	
 	private static class InputHandler implements Runnable {
 		private final ObjectInputStream inputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -200,6 +197,7 @@ public class Client {
 		}
 
 		public void run() {
+			// put responses in queue for processing (which is done in the main method)
 			while (running) {
 				try {
 					List<Request> requests = (List<Request>) inputStream.readObject();
@@ -233,7 +231,6 @@ public class Client {
 	/*
 	 * OUTPUT HANDLER
 	 */
-	
 	private static class OutHandler implements Runnable {
 		private final ObjectOutputStream outputStream;
 		private final ConcurrentLinkedQueue<List<Request>> requestQueue;
@@ -249,6 +246,8 @@ public class Client {
 		}
 
 		public void run() {
+
+			// send requests to server every 200ms
 			while (running) {
 				List<Request> requests = requestQueue.poll();
 				if (requests != null) {
@@ -261,7 +260,7 @@ public class Client {
 				}
 				try {
 
-					Thread.sleep(1000);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
