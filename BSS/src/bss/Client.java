@@ -112,6 +112,14 @@ public class Client {
 		outHandler.enqueueRequest(requests);
 
 	}
+	
+	public void createWithdrawRequest(double amount) {
+		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
+		List<Request> requests = new ArrayList<Request>();
+		requests.add(withdrawRequest);
+		outHandler.enqueueRequest(requests);
+
+	}
 
 	public void createLogoutRequest() {
 		List<Request> requests = new ArrayList<Request>();
