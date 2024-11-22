@@ -1,8 +1,10 @@
-package bss;
+package lang;
 import java.io.*;
 import java.util.*;
 import java.util.ArrayList;
 
+import bss.Account;
+import bss.Customer;
 import enums.AccountType;
 /* Text Format for our Bank's Customer/Account Info
  Customer:
@@ -47,7 +49,7 @@ public class Parser {
                 	// get account info
                     Account account = parseAccount(reader);
                     // add account to previously made customer
-                    currentCustomer.getAccounts.add(account);
+                    currentCustomer.addAccount(account);
                     
                 }
             }
