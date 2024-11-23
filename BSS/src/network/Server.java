@@ -92,7 +92,8 @@ public class Server {
 
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
-
+			
+			
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
 			}
@@ -161,7 +162,7 @@ public class Server {
 		}
 
 		private static void doLogin(Request request) {
-			System.out.println("login request recieved");
+			System.out.println("Login Request Received");
 			String username_string = request.getTexts().get(0);
 			int username = Integer.parseInt(username_string);
 			String password = request.getTexts().get(1);
