@@ -1,0 +1,5 @@
+# Ignore all log files with "test_log" in the name
+test_log*.txt
+test_log.txt
+
+/bin/
