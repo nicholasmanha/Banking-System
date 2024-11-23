@@ -14,7 +14,7 @@ public class Account {
 	private double amount;
 	private AccountType AccountType;
 
-	Account() {
+	public Account() {
 		this.account_ID = count++;
 		this.pin = "";
 		this.users = new ArrayList<Customer>();
@@ -44,6 +44,11 @@ public class Account {
     public int getAccountID() {
         return account_ID;
     }
+    
+    public boolean getOccupied() {
+    	return this.frozen;
+    }
+    
   //pass in account id read in from .txt file
     public void matchUpAccountID(int in_id) {
     	//do nothing if count == id, 
@@ -60,7 +65,6 @@ public class Account {
     	this.account_ID = count;
     	return;
     }
-    public 
     // Get list of users associated with this account
     public ArrayList<Customer> getUsers() {
     	return users;

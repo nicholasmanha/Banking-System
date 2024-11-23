@@ -2,47 +2,138 @@ package bss;
 
 import java.util.*;
 
+import network.Client;
+
 /**
- *  This class is an implementation of DVDUserInterface
- *  that uses the console to display the menu of command choices
+ * This class is an implementation of DVDUserInterface that uses the console to
+ * display the menu of command choices
  */
 
+public class BSSConsoleUI implements Runnable {
 
-public class BSSConsoleUI implements BSSUserInterface {
-	
 	private Scanner scan;
 	private Client client;
-	
+
 	public BSSConsoleUI(Client client) {
 		scan = new Scanner(System.in);
 		this.client = client;
 	}
-	
-	public void processCommands()
-	{
+
+	public void run() {
 		System.out.println("Enter username");
 		String username = scan.nextLine();
 
 		System.out.println("Enter password");
 		String password = scan.nextLine();
-		
+
 		client.createLoginRequest(username, password);
 
+		System.out.print("Logging in");
+		while (!client.getLoggedIn()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println();
+		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
+
+		int choice;
+
+		do {
+			for (int i = 0; i < commands.length; i++) {
+				System.out.println("Select " + i + ": " + commands[i]);
+			}
+			try {
+				choice = scan.nextInt();
+				scan.nextLine();
+				switch (choice) {
+				case 0:
+					doDeposit();
+					break;
+				case 1:
+					doWithdraw();
+					break;
+				case 2:
+					doTransfer();
+					break;
+				case 3:
+					doLogout();
+					break;
+				default:
+					System.out.println("INVALID CHOICE - TRY AGAIN");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("INVALID CHOICE - TRY AGAIN");
+				scan.nextLine();
+				choice = -1;
+			}
+		} while (choice != commands.length - 1);
+
 	}
-	
-	public ArrayList<String> login() {
-		ArrayList<String> userAndPass = new ArrayList<String>();
-		System.out.println("Enter username");
-		String username = scan.nextLine();
+
+	private void doDeposit() {
+
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createDepositRequest(amount);
+		System.out.print("Depositing");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
+	}
+
+	private void doWithdraw() {
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createWithdrawRequest(amount);
+		System.out.print("Withdrawing");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
+	}
+
+	private void doTransfer() {
+		System.out.println("Enter Account id you wish to send money to");
+		int id = scan.nextInt();
+		System.out.println("Enter amount");
+		Double amount = scan.nextDouble();
+		client.createTransferRequest(id, amount);
 		
-		System.out.println("Enter password");
-		String password = scan.nextLine();
-		userAndPass.add(username);
-		userAndPass.add(password);
-		return userAndPass;
+		System.out.print("Transfering");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
 	}
-	private void doLogIn() {
-		
+
+	private void doLogout() {
+		System.out.println("cya");
+		client.createLogoutRequest();
+
 	}
-	
+
 }
