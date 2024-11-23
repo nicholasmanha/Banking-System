@@ -4,6 +4,25 @@ import java.util.ArrayList;
 
 import bss.Account;
 import bss.Customer;
+import enums.AccountType;
+/* Text Format for our Bank's Customer/Account Info
+ Customer:
+ 	Accounts:
+ 		Account_ID: 0
+ 		Pin: "1234"
+ 		Users: [Customer_ID: 1, Customer_ID: 2]
+ 		Frozen: false
+ 		Amount: 1500.75
+ 		AccountType: Savings
+ 		
+ 	Accounts:
+ 		Account_ID: 1
+ 		Pin: "5678"
+ 		Users: [Customer_ID: 3, Customer_ID: 4]
+ 		Frozen: false
+ 		Amount: 100.35
+ 		AccountType: Checking
+ */
 
 public class Parser {
     // Method to read file, populate Customer objects, Populate Account objects

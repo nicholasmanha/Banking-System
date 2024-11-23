@@ -9,5 +9,6 @@ public enum RequestType {
 	ADDACCOUNT,
 	FREEZE,
 	CREATEACCOUNT,
+	TRANSFER,
 	UNDEFINED
 }

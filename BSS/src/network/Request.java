@@ -1,4 +1,4 @@
-package requests;
+package network;
 
 import enums.RequestType;
 import enums.Requester;
@@ -14,8 +14,10 @@ public class Request implements Serializable{
     private final RequestType type;
     private final Status status;
     private final Requester requester;
+    private final double amount;
 
     public Request(){
+    	this.amount = -1;
     	this.requester = Requester.UNDEFINED;
     	this.type = RequestType.UNDEFINED;
     	this.status = Status.UNDEFINED;
@@ -23,6 +25,7 @@ public class Request implements Serializable{
     	this.id = ++count;
     }
     public Request(Requester requester, RequestType type, Status status) {
+    	this.amount = -1;
     	this.requester = requester;
     	this.texts = null;
         this.type = type;
@@ -30,6 +33,15 @@ public class Request implements Serializable{
         this.id = ++count;
     }
     public Request(ArrayList<String> texts, RequestType type, Status status) {
+    	this.amount = -1;
+    	this.requester = Requester.UNDEFINED;
+    	this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+    }
+    public Request(ArrayList<String> texts, double amt, RequestType type, Status status) {
+    	this.amount = amt;
     	this.requester = Requester.UNDEFINED;
     	this.texts = texts;
         this.type = type;
@@ -37,8 +49,25 @@ public class Request implements Serializable{
         this.id = ++count;
     }
     public Request(Requester requester, ArrayList<String> texts, RequestType type, Status status) {
+    	this.amount = -1;
     	this.requester = requester;
         this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+    }
+    public Request(double amt, RequestType type, Status status) {
+    	this.amount = amt;
+    	this.requester = Requester.UNDEFINED;
+        this.texts = null;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+    }
+    public Request(RequestType type, Status status) {
+    	this.amount = -1;
+    	this.requester = Requester.UNDEFINED;
+        this.texts = null;
         this.type = type;
         this.status = status;
         this.id = ++count;
@@ -57,6 +86,9 @@ public class Request implements Serializable{
 
     public RequestType getType(){
         return type;
+    }
+    public double getAmount() {
+    	return amount;
     }
 }
 
