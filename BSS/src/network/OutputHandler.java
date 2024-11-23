@@ -30,7 +30,7 @@ public class OutputHandler implements Runnable {
 					outputStream.flush();
 					System.out.println("sent message");
 				} catch (IOException e) {
-					running = false;
+					this.stop();
 				}
 			}
 
@@ -42,5 +42,9 @@ public class OutputHandler implements Runnable {
 			}
 
 		}
+	}
+	
+	public void stop() {
+		running = false;
 	}
 }

@@ -32,7 +32,7 @@ public class InputHandler implements Runnable {
 	            running = false; // Stop the thread
 	        } catch (ClassNotFoundException e) {
 	            e.printStackTrace();
-	            running = false;
+	            this.stop();
 	        }
 
 	        try {
