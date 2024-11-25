@@ -51,4 +51,8 @@ public class InputHandler implements Runnable {
 	public List<Request> getNextRequest() {
 		return requestQueue.poll();
 	}
+	
+	public ObjectInputStream getInputStream() {
+	    return inputStream;
+	}
 }

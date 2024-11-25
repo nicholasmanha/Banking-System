@@ -175,19 +175,39 @@ public class Client {
         outputHandler.enqueueRequest(requests);
     }
 
-    public void createLogoutRequest() {
-        List<Request> requests = new ArrayList<>();
-        requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
-        outputHandler.enqueueRequest(requests);
 
-        //  shutdown
-        try {
-            System.out.println("Stopping handlers...");
-            inputHandler.stop();
-            outputHandler.stop();
-            alive = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
+
+    public void createLogoutRequest() {
+    	List<Request> requests = new ArrayList<>();
+    	requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
+    	outputHandler.enqueueRequest(requests);
+
+	    // Shutdown
+	    try {
+	        System.out.println("Stopping Handlers...");
+	        inputHandler.stop();
+	        outputHandler.stop();
+	        alive = false;
+	
+	        // Wait for threads to finish
+	        Thread inputThread = new Thread(inputHandler);
+	        Thread outputThread = new Thread(outputHandler);
+	        inputThread.join();
+	        outputThread.join();
+	
+	        // Close the socket and streams
+	        if (inputHandler.getInputStream() != null) {
+	            inputHandler.getInputStream().close();
+	        }
+	        if (outputHandler.getOutputStream() != null) {
+	            outputHandler.getOutputStream().close();
+	        }
+	    } catch (IOException | InterruptedException e) {
+	        e.printStackTrace();
+	    }
+}
+
+
+
 }

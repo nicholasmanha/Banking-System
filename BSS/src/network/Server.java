@@ -225,12 +225,12 @@ public class Server {
 					outputHandler.enqueueRequest(depositResponses);
 
 					// debug
-					System.out.println("new balance: " + session.getAccount().getAmount());
+					System.out.println("New Balance: " + session.getAccount().getAmount());
 				} else {
 					// send deposit failure response if the account is occupied
 					List<Request> accountOccupiedResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied");
+					errorMessage.add("Account Occupied\n");
 					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 					accountOccupiedResponses.add(accountOccupiedResponse);
 
@@ -260,7 +260,7 @@ public class Server {
 					withdrawResponses.add(withdrawResponse);
 
 					outputHandler.enqueueRequest(withdrawResponses);
-					System.out.println("new balance: " + session.getAccount().getAmount());
+					System.out.println("New Balance: " + session.getAccount().getAmount());
 				}
 
 			}
@@ -272,7 +272,7 @@ public class Server {
 				if (session.getAccount().getAmount() < request.getAmount()) {
 					List<Request> insufficientFundsResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Insufficient Funds");
+					errorMessage.add("Insufficient Funds\n");
 					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
@@ -284,7 +284,7 @@ public class Server {
 					if (to_account == null) {
 						List<Request> accountNotFoundResponses = new ArrayList<>();
 						ArrayList<String> errorMessage = new ArrayList<String>();
-						errorMessage.add("Account Not Found");
+						errorMessage.add("Account Not Found\n");
 						Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
 								Status.FAILURE);
 						accountNotFoundResponses.add(accountNotFoundResponse);
@@ -298,7 +298,7 @@ public class Server {
 						transferResponses.add(transferResponse);
 
 						outputHandler.enqueueRequest(transferResponses);
-						System.out.println("new balance: " + session.getAccount().getAmount());
+						System.out.println("New Balance: " + session.getAccount().getAmount());
 					}
 
 				}
@@ -325,7 +325,7 @@ public class Server {
 			if (acc == null) {
 				teller = bank.findTeller(userID);
 				if (teller == null) {
-					System.out.println("account undefined");
+					System.out.println("Account Undefined\n");
 					return UserType.Undefined;
 				}
 				return UserType.Teller;

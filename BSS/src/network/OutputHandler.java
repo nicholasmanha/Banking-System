@@ -28,7 +28,7 @@ public class OutputHandler implements Runnable {
 
 					outputStream.writeObject(requests);
 					outputStream.flush();
-					System.out.println("sent message");
+					System.out.println("\nSent Message");
 				} catch (IOException e) {
 					this.stop();
 				}
@@ -47,4 +47,9 @@ public class OutputHandler implements Runnable {
 	public void stop() {
 		running = false;
 	}
+
+	public ObjectOutputStream getOutputStream() {
+	    return outputStream;
+	}
+
 }
