@@ -1,6 +1,5 @@
 package lang;
 import java.io.*;
-import java.util.*;
 import java.util.ArrayList;
 
 import bss.Account;
@@ -26,11 +25,10 @@ import enums.AccountType;
  */
 
 public class Parser {
-
-    // Method to read file and populate Customer objects
-    public static ArrayList<Customer> readFromFile(String filePath) throws IOException {
+    // Method to read file, populate Customer objects, Populate Account objects
+    public static ArrayList<Customer> readFromFile(String filePath, ArrayList<Account> accounts) throws IOException {
         ArrayList<Customer> customers = new ArrayList<>();
-        FileReader fileReader = new FileReader(filePath);
+        FileReader fileReader = new FileReader(filePath); 
         BufferedReader reader = new BufferedReader(fileReader);
         String line;
         Customer currentCustomer = null;
@@ -50,7 +48,8 @@ public class Parser {
                     Account account = parseAccount(reader);
                     // add account to previously made customer
                     currentCustomer.addAccount(account);
-                    
+                    // add account to Bank's passed in accounts ArrayList
+                    accounts.add(account);
                 }
             }
         }
@@ -79,17 +78,30 @@ public class Parser {
             } 
             // Customers ArrayList
             else if (line.startsWith("Users:")) {
+            	System.out.println(line);
                 String usersStr = line.split(":")[1].trim();
+                System.out.println(usersStr);
                 // remove the brackets [] that denote the arrayList of Customers w/ access to this account
                 usersStr = usersStr.substring(1, usersStr.length() - 1); 
-                // split by comma to properly read each customer's ID
-                String[] userIDs = usersStr.split(",");
-                for (String userID : userIDs) {
-                    int customerID = Integer.parseInt(userID.split(":")[1].trim());
-                    //account for removed Customers when assigning account ID's using static
+                System.out.println(usersStr);
+                // split by , to properly read each customer's ID if there are multiple customer ID's
+                if (usersStr.contains(",")) {
+                    String[] userIDs = usersStr.split(",");
+                    for (String userID : userIDs) {
+                    	System.out.println(userID);
+                        int customerID = Integer.parseInt(userID.split("!")[1].trim());
+                        System.out.println(customerID);
+                        //this constructor accounts for removed Customers when assigning account ID's using static
+                        Customer customerToAdd = new Customer(customerID);
+                        account.getUsers().add(customerToAdd);
+                    }
+                }
+                else {
+                	int customerID = Integer.parseInt(usersStr.split("!")[1].trim());
                     Customer customerToAdd = new Customer(customerID);
                     account.getUsers().add(customerToAdd);
                 }
+               
             }
             // Frozen
             else if (line.startsWith("Frozen:")) {
@@ -113,6 +125,38 @@ public class Parser {
             }
         }
         return account;
+    }
+    
+ // Method to write Customers and Accounts to file
+    public static void writeToFile(ArrayList<Customer> customers, String filePath) throws IOException {
+        FileWriter fileWriter = new FileWriter(filePath);
+        BufferedWriter writer = new BufferedWriter(fileWriter);
+        //for each customer
+        for (Customer customer : customers) {
+            writer.write("Customer:\n");
+            // look at each of their accounts and write to .txt file
+            for (Account account : customer.getAccounts()) {
+            	writer.write("\tAccounts:\n");
+                writer.write("\t\tAccount_ID: " + account.getAccountID() + "\n");
+                writer.write("\t\tPin: \"" + account.getPin() + "\"\n");
+                // denote start Account's ArrayList<Customer> users
+                writer.write("\t\tUsers: [");
+                // look at each customer that has access to this account, write to .txt
+                for (int i = 0; i < account.getUsers().size(); i++) {
+                    writer.write("Customer_ID: " + account.getUsers().get(i).getId());
+                    if (i < account.getUsers().size() - 1) {
+                        writer.write(", ");
+                    }
+                }
+                //finish writting ArrayList
+                writer.write("]\n");
+                writer.write("\t\tFrozen: " + account.getFrozen() + "\n");
+                writer.write("\t\tAmount: " + account.getAmount() + "\n");
+                writer.write("\t\tAccountType: " + account.getAccountType() + "\n\n");
+            }
+        }
+        //close resources
+        writer.close();
     }
 
 }

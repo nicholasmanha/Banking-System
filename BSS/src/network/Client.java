@@ -122,12 +122,14 @@ public class Client {
         }
     }
 
+
     /*
      * METHODS FOR GUI
      */
     public boolean getIsProcessing() {
         return isProcessing;
     }
+
 
     public String getResponseMessage() {
         return responseMessage;

@@ -28,9 +28,16 @@ public class Customer extends User{
     	setID(count);
     	return;
     }
-	
-	public Account getAccount(int in_id, String in_pin, int in_index) {
-		Account A = new Account();
+    //not sure if we need index
+	public Account getAccount(int in_id, String in_pin) { //,int in_index) {
+		Account A =  new Account();
+		for (int i = 0; i < accounts.size(); i++ ) {
+			if (accounts.get(i).getAccountID() == in_id && accounts.get(i).getPin().equals(in_pin)) {
+				A = accounts.get(i);
+				break;
+			}
+			else { A = null; }
+		}
 		return A;
 	}
 
@@ -38,5 +45,13 @@ public class Customer extends User{
 		accounts.add(acc);
 
 	} 
+	
+	public int getAccountsSize() {
+		return this.accounts.size();
+	}
+	
+	public ArrayList<Account> getAccounts() {
+		return accounts;
+	}
 	
 }

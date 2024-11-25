@@ -14,10 +14,14 @@ public class Bank {
 		this.customers = new ArrayList<>();
 		this.tellers = new ArrayList<>();
 	}
-	// this is just for debugging purposes, will remove in production
+	// !!! these is just for debugging purposes, will remove in production
 	public ArrayList<Account> getAccounts() {
 		return this.accounts;
 	}
+	public ArrayList<Customer> getCustomers() {
+		return this.customers;
+	}
+	
 	// add an account to the bank
 	public void addAccount(Account account) {
 		this.accounts.add(account);
@@ -50,7 +54,6 @@ public class Bank {
 	            return teller;
 	        }
 	    }
-		
 	    return null;
 	}
 

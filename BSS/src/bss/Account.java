@@ -23,32 +23,33 @@ public class Account {
 		this.AccountType = AccountType.Undefined;
 	}
 	
-	// Check credentials with account ID and pin
-    public boolean checkCredentials(int account_ID, String in_pin) {
-    	//for each user in this account
-    	for (int i = 0; i < users.size(); i++) {
-    		Customer customer = users.get(i);
-    		 	//check if the log in credentials match an associated user
-    			if (this.account_ID == account_ID && this.pin.equals(pin)) {
-    				//return true if given user credentials match those of users w/ access to account
-    				return true;  
-    	        }
-    	}
-        //if this account's pin == pin then provided pin is valid for account
-    	if (this.pin.equals(in_pin)) {
-        	return true;
-        }
+	// Check the credentials the customer gives to verify access to this account
+    public boolean checkCredentials(int in_account_ID, String in_pin) {
+    	//do the credentials match this account? ok check if the user is authorized
+    	if (this.account_ID == in_account_ID && this.pin.equals(in_pin)) { 
+    		//for each user in users
+    		for (Customer customer : users) {
+
+    			Account a = new Account();
+    			//see if an account with these credentials is in their accounts ArrayList 
+    			a = customer.getAccount(in_account_ID, in_pin);
+    			//if so, credentials check out
+    			if (a != null) {
+    				return true;
+    			}
+    		}
+    	} 
+    	//otherwise:
         return false;
     }
     // Get the account ID
     public int getAccountID() {
         return account_ID;
     }
-    
+    // Get frozen status
     public boolean getOccupied() {
     	return this.frozen;
     }
-    
   //pass in account id read in from .txt file
     public void matchUpAccountID(int in_id) {
     	//do nothing if count == id, 
@@ -67,19 +68,23 @@ public class Account {
     }
     // Get list of users associated with this account
     public ArrayList<Customer> getUsers() {
-    	return users;
+    	return this.users;
     }
     // Add a user to this account
     public void addUser(Customer in_user) {
     	users.add(in_user);
     }
+    // Get the current pin
+    public String getPin() {
+    	return this.pin;
+    }
     // Set a new pin for the account
     public void setPin(String in_pin) {
         this.pin = in_pin;
     }
-    // Get the current pin
-    public String getPin() {
-    	return this.pin;
+    // get frozen status of account
+    public boolean getFrozen() {
+    	return this.frozen;
     }
     // Freeze or unfreeze the account
     public void setFrozen(boolean in_freeze) {
