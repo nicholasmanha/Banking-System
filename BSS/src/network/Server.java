@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import bss.ATM;
 import bss.Account;
 import bss.Bank;
+import bss.Customer;
 import bss.Session;
 import bss.Teller;
 import enums.*;
@@ -87,9 +88,15 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
+			Customer customer = new Customer();
+			
+			
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
+			customer.addAccount(testAccount);
+			testAccount.addUser(customer);
+			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
 
@@ -184,7 +191,7 @@ public class Server {
 					// initialized global session variable
 					session = atm.logIn(acc);
 				} else {
-					// user credentials were incorrect, send failure reponse
+					// user credentials were incorrect, send failure response
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);

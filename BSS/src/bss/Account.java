@@ -26,9 +26,10 @@ public class Account {
 	// Check the credentials the customer gives to verify access to this account
     public boolean checkCredentials(int in_account_ID, String in_pin) {
     	//do the credentials match this account? ok check if the user is authorized
-    	if (this.account_ID == in_account_ID && this.pin == in_pin) { 
+    	if (this.account_ID == in_account_ID && this.pin.equals(in_pin)) { 
     		//for each user in users
     		for (Customer customer : users) {
+
     			Account a = new Account();
     			//see if an account with these credentials is in their accounts ArrayList 
     			a = customer.getAccount(in_account_ID, in_pin);

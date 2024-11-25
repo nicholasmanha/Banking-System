@@ -84,6 +84,7 @@ public class Client {
 		for (Request request : req) {
 			if (request.getType() == RequestType.LOGIN) {
 				if (request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Login Successful";
 					loggedIn = true;
 				} else {
 					System.out.println("login failed");
