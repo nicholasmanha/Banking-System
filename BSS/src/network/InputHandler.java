@@ -16,27 +16,33 @@ public class InputHandler implements Runnable {
 	}
 
 	public void run() {
-		// put requests in queue for processing (which is done in the ClientHandler.run())
-		while (running) {
-			try {
-				List<Request> requests = (List<Request>) inputStream.readObject();
-				if (requests != null) {
-					requestQueue.add(requests);
-				}
-			} catch (IOException | ClassNotFoundException e) {
-				e.printStackTrace();
-				running = false;
-			}
+	    while (running) {
+	        try {
+	            // Read objects from the input stream
+	            List<Request> requests = (List<Request>) inputStream.readObject();
+	            if (requests != null) {
+	                requestQueue.add(requests);
+	            }
+	        } catch (IOException e) {
+	            if (e instanceof java.io.EOFException) {
+	                System.out.println("Connection closed by server.");
+	            } else {
+	                e.printStackTrace();
+	            }
+	            running = false; // Stop the thread
+	        } catch (ClassNotFoundException e) {
+	            e.printStackTrace();
+	            this.stop();
+	        }
 
-			try {
-
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-		}
+	        try {
+	            Thread.sleep(200); // Avoid busy-waiting
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
+
 
 	public void stop() {
 		running = false;
@@ -44,5 +50,9 @@ public class InputHandler implements Runnable {
 
 	public List<Request> getNextRequest() {
 		return requestQueue.poll();
+	}
+	
+	public ObjectInputStream getInputStream() {
+	    return inputStream;
 	}
 }

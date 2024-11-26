@@ -32,7 +32,7 @@ public class Customer extends User{
 	public Account getAccount(int in_id, String in_pin) { //,int in_index) {
 		Account A =  new Account();
 		for (int i = 0; i < accounts.size(); i++ ) {
-			if (accounts.get(i).getAccountID() == in_id && accounts.get(i).getPin() == in_pin) {
+			if (accounts.get(i).getAccountID() == in_id && accounts.get(i).getPin().equals(in_pin)) {
 				A = accounts.get(i);
 				break;
 			}

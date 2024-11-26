@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import bss.ATM;
 import bss.Account;
 import bss.Bank;
+import bss.Customer;
 import bss.Session;
 import bss.Teller;
 import enums.*;
@@ -87,12 +88,19 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
+			Customer customer = new Customer();
+			
+			
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
+			customer.addAccount(testAccount);
+			testAccount.addUser(customer);
+			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
-
+			
+			
 			for (Account account : bank.getAccounts()) {
 				System.out.println(account.getAccountID());
 			}
@@ -161,7 +169,7 @@ public class Server {
 		}
 
 		private static void doLogin(Request request) {
-			System.out.println("login request recieved");
+			System.out.println("Login Request Received");
 			String username_string = request.getTexts().get(0);
 			int username = Integer.parseInt(username_string);
 			String password = request.getTexts().get(1);
@@ -184,7 +192,7 @@ public class Server {
 					// initialized global session variable
 					session = atm.logIn(acc);
 				} else {
-					// user credentials were incorrect, send failure reponse
+					// user credentials were incorrect, send failure response
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
@@ -224,12 +232,12 @@ public class Server {
 					outputHandler.enqueueRequest(depositResponses);
 
 					// debug
-					System.out.println("new balance: " + session.getAccount().getAmount());
+					System.out.println("New Balance: " + session.getAccount().getAmount());
 				} else {
 					// send deposit failure response if the account is occupied
 					List<Request> accountOccupiedResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied");
+					errorMessage.add("Account Occupied\n");
 					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 					accountOccupiedResponses.add(accountOccupiedResponse);
 
@@ -259,7 +267,7 @@ public class Server {
 					withdrawResponses.add(withdrawResponse);
 
 					outputHandler.enqueueRequest(withdrawResponses);
-					System.out.println("new balance: " + session.getAccount().getAmount());
+					System.out.println("New Balance: " + session.getAccount().getAmount());
 				}
 
 			}
@@ -271,7 +279,7 @@ public class Server {
 				if (session.getAccount().getAmount() < request.getAmount()) {
 					List<Request> insufficientFundsResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Insufficient Funds");
+					errorMessage.add("Insufficient Funds\n");
 					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 					insufficientFundsResponses.add(insufficientFundsResponse);
 
@@ -283,7 +291,7 @@ public class Server {
 					if (to_account == null) {
 						List<Request> accountNotFoundResponses = new ArrayList<>();
 						ArrayList<String> errorMessage = new ArrayList<String>();
-						errorMessage.add("Account Not Found");
+						errorMessage.add("Account Not Found\n");
 						Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
 								Status.FAILURE);
 						accountNotFoundResponses.add(accountNotFoundResponse);
@@ -297,7 +305,7 @@ public class Server {
 						transferResponses.add(transferResponse);
 
 						outputHandler.enqueueRequest(transferResponses);
-						System.out.println("new balance: " + session.getAccount().getAmount());
+						System.out.println("New Balance: " + session.getAccount().getAmount());
 					}
 
 				}
@@ -324,7 +332,7 @@ public class Server {
 			if (acc == null) {
 				teller = bank.findTeller(userID);
 				if (teller == null) {
-					System.out.println("account undefined");
+					System.out.println("Account Undefined\n");
 					return UserType.Undefined;
 				}
 				return UserType.Teller;

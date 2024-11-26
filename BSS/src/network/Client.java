@@ -1,190 +1,215 @@
 package network;
 
-import java.util.Scanner;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import bss.BSSConsoleUI;
+import enums.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import enums.*;
-
 public class Client {
-	private static OutputHandler outputHandler;
-	private static boolean alive = true;
-	private static boolean loggedIn;
-	private static boolean isProcessing;
-	private static String responseMessage;
+    private final InputHandler inputHandler;
+    private final OutputHandler outputHandler;
+    private boolean alive = true;
+    private boolean loggedIn = false;
+    private boolean isProcessing = false;
+    private String responseMessage;
 
-	public Client(OutputHandler outputHandler) {
-		loggedIn = false;
-		Client.outputHandler = outputHandler;
-	}
+    public Client(InputHandler inputHandler, OutputHandler outputHandler) {
+        this.inputHandler = inputHandler;
+        this.outputHandler = outputHandler;
+    }
 
-	public static void main(String[] args) {
-		try (Socket socket = new Socket("localhost", 1234)) {
+    public static void main(String[] args) {
+        final String HOST = "localhost";
+        final int PORT = 1234;
 
-			// output, to send TO the server
-			OutputStream outputStream = socket.getOutputStream();
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-			
-			// input, receive FROM the server
-			InputStream inputStream = socket.getInputStream();
-			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+        Socket socket = null;
+        try {
+            // Establishing the socket connection
+            socket = new Socket(HOST, PORT);
 
-			// input handler setup
-			InputHandler inputHandler = new InputHandler(objectInputStream);
-			Thread inputThread = new Thread(inputHandler);
-			inputThread.start();
+            // Output stream setup
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            // Input stream setup
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
-			// output handler setup
-			OutputHandler outputHandler = new OutputHandler(objectOutputStream);
-			Thread outputThread = new Thread(outputHandler);
-			outputThread.start();
-			Client client = new Client(outputHandler);
+            // Handlers
+            InputHandler inputHandler = new InputHandler(objectInputStream);
+            OutputHandler outputHandler = new OutputHandler(objectOutputStream);
 
-			// start GUI on thread
-			BSSConsoleUI UI = new BSSConsoleUI(client);
-			Thread consoleThread = new Thread(UI);
-			consoleThread.start();
+            // Threads for handlers
+            Thread inputThread = new Thread(inputHandler);
+            Thread outputThread = new Thread(outputHandler);
+            inputThread.start();
+            outputThread.start();
 
-			// process responses every 200ms
-			while (alive) {
-				List<Request> req = inputHandler.getNextRequest();
-				if (req != null) {
+            // Create client instance
+            Client client = new Client(inputHandler, outputHandler);
 
-					processResponse(req);
-				}
+            // Start GUI
+            BSSConsoleUI UI = new BSSConsoleUI(client);
+            Thread consoleThread = new Thread(UI);
+            consoleThread.start();
 
-				Thread.sleep(200);
-			}
+            // Process server responses
+            while (client.alive) {
+                List<Request> req = inputHandler.getNextRequest();
+                if (req != null) {
+                    client.processResponse(req);
+                }
+                Thread.sleep(200);
+            }
 
-			System.out.println("Closing socket");
+            System.out.println("Closing socket...");
 
-			socket.close();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            // Ensuring the socket is closed, even if an exception occurred
+            try {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace(); // Handle error closing the socket
+            }
+        }
+    }
 
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
 
-	}
 
-	/*
-	 * RESPONSE PROCESSING
-	 */
+    /*
+     * RESPONSE PROCESSING
+     *  Added empty checks
+     */
+    private void processResponse(List<Request> req) {
+        for (Request request : req) {
+            if (request.getType() == RequestType.LOGIN) {
+                if (request.getStatus() == Status.SUCCESS) {
+                    loggedIn = true;
+                } else {
+                    System.out.println("Login failed");
+                }
+            } else if (request.getType() == RequestType.LOGOUT) {
+                if (request.getStatus() == Status.SUCCESS) {
+                    System.out.println("Logging out...");
+                    createLogoutRequest(); // Graceful shutdown
+                }
+            } else if (request.getType() == RequestType.DEPOSIT) {
+                if (request.getStatus() == Status.SUCCESS) {
+                    isProcessing = false;
+                    responseMessage = "Deposit Successful";
+                }
+            } else if (request.getType() == RequestType.WITHDRAW) {
+                if (request.getStatus() == Status.SUCCESS) {
+                    isProcessing = false;
+                    responseMessage = "Withdraw Successful";
+                } else if (request.getTexts() != null && !request.getTexts().isEmpty()) {
+                    isProcessing = false;
+                    responseMessage = request.getTexts().get(0);
+                }
+            } else if (request.getType() == RequestType.TRANSFER) {
+                if (request.getStatus() == Status.SUCCESS) {
+                    isProcessing = false;
+                    responseMessage = "Transfer Successful";
+                } else if (request.getTexts() != null && !request.getTexts().isEmpty()) {
+                    isProcessing = false;
+                    responseMessage = request.getTexts().get(0);
+                }
+            }
+        }
+    }
 
-	private static void processResponse(List<Request> req) {
-		for (Request request : req) {
-			if (request.getType() == RequestType.LOGIN) {
-				if (request.getStatus() == Status.SUCCESS) {
-					loggedIn = true;
-				} else {
-					System.out.println("login failed");
-				}
-			}
-			if (request.getType() == RequestType.LOGOUT) {
-				if (request.getStatus() == Status.SUCCESS) {
-					System.out.println("logging out");
-					alive = false;
-					loggedIn = false;
-				}
-			}
-			if (request.getType() == RequestType.DEPOSIT) {
-				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
-					responseMessage = "Deposit Successful";
-				}
-			}
-			if (request.getType() == RequestType.WITHDRAW) {
-				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
-					responseMessage = "Withdraw Successful";
-				} else {
-					isProcessing = false;
-					responseMessage = request.getTexts().get(0);
-				}
-			}
-			if (request.getType() == RequestType.TRANSFER) {
-				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
-					responseMessage = "Transfer Successful";
-				} else {
-					isProcessing = false;
-					responseMessage = request.getTexts().get(0);
-				}
-			}
-		}
-	}
 
-	/*
-	 * METHODS FOR GUI
-	 */
+    /*
+     * METHODS FOR GUI
+     */
+    public boolean getIsProcessing() {
+        return isProcessing;
+    }
 
-	public boolean getIsProcessing() {
-		return isProcessing;
-	}
 
-	public String getResponseMessage() {
-		return responseMessage;
-	}
+    public String getResponseMessage() {
+        return responseMessage;
+    }
 
-	public boolean getLoggedIn() {
-		return loggedIn;
-	}
+    public boolean getLoggedIn() {
+        return loggedIn;
+    }
 
-	public void createLoginRequest(String username, String password) {
-		ArrayList<String> userAndPass = new ArrayList<String>();
-		userAndPass.add(username);
-		userAndPass.add(password);
-		Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
-		List<Request> requests = new ArrayList<Request>();
-		requests.add(loginRequest);
+    public void createLoginRequest(String username, String password) {
+        ArrayList<String> userAndPass = new ArrayList<>();
+        userAndPass.add(username);
+        userAndPass.add(password);
+        Request loginRequest = new Request(userAndPass, RequestType.LOGIN, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(loginRequest);
 
-		outputHandler.enqueueRequest(requests);
-	}
+        outputHandler.enqueueRequest(requests);
+    }
 
-	public void createDepositRequest(double amount) {
-		isProcessing = true;
-		Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
-		List<Request> requests = new ArrayList<Request>();
-		requests.add(depositRequest);
-		outputHandler.enqueueRequest(requests);
+    public void createDepositRequest(double amount) {
+        isProcessing = true;
+        Request depositRequest = new Request(amount, RequestType.DEPOSIT, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(depositRequest);
+        outputHandler.enqueueRequest(requests);
+    }
 
-	}
+    public void createWithdrawRequest(double amount) {
+        isProcessing = true;
+        Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(withdrawRequest);
+        outputHandler.enqueueRequest(requests);
+    }
 
-	public void createWithdrawRequest(double amount) {
-		isProcessing = true;
-		Request withdrawRequest = new Request(amount, RequestType.WITHDRAW, Status.REQUEST);
-		List<Request> requests = new ArrayList<Request>();
-		requests.add(withdrawRequest);
-		outputHandler.enqueueRequest(requests);
+    public void createTransferRequest(int toAccountID, double amount) {
+        isProcessing = true;
+        ArrayList<String> ID = new ArrayList<>();
+        ID.add(String.valueOf(toAccountID));
+        Request transferRequest = new Request(ID, amount, RequestType.TRANSFER, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(transferRequest);
 
-	}
+        outputHandler.enqueueRequest(requests);
+    }
 
-	public void createTransferRequest(int toAccountID, double amount) {
-		isProcessing = true;
-		ArrayList<String> ID = new ArrayList<String>();
-		ID.add(toAccountID + "");
-		Request transferRequest = new Request(ID, amount, RequestType.TRANSFER, Status.REQUEST);
-		List<Request> requests = new ArrayList<Request>();
-		requests.add(transferRequest);
 
-		outputHandler.enqueueRequest(requests);
 
-	}
 
-	public void createLogoutRequest() {
-		List<Request> requests = new ArrayList<Request>();
-		requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
-		outputHandler.enqueueRequest(requests);
-	}
+    public void createLogoutRequest() {
+    	List<Request> requests = new ArrayList<>();
+    	requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
+    	outputHandler.enqueueRequest(requests);
 
+	    // Shutdown
+	    try {
+	        System.out.println("Stopping Handlers...");
+	        inputHandler.stop();
+	        outputHandler.stop();
+	        alive = false;
 	
+	        // Wait for threads to finish
+	        Thread inputThread = new Thread(inputHandler);
+	        Thread outputThread = new Thread(outputHandler);
+	        inputThread.join();
+	        outputThread.join();
+	
+	        // Close the socket and streams
+	        if (inputHandler.getInputStream() != null) {
+	            inputHandler.getInputStream().close();
+	        }
+	        if (outputHandler.getOutputStream() != null) {
+	            outputHandler.getOutputStream().close();
+	        }
+	    } catch (IOException | InterruptedException e) {
+	        e.printStackTrace();
+	    }
+}
+
+
+
 }
