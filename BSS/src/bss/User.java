@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 public class User {
 
-    protected static int id;
+    protected int id;
     private LocalDateTime created;
-    static int count = 0;
+    static protected int count = 0;
 
     // Set id and date of creation
     public User() {
@@ -14,7 +14,7 @@ public class User {
         this.created = LocalDateTime.now(); 
     }
 
-    public static int getId() {
+    public int getId() {
         return id;
     }
 

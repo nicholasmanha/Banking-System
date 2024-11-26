@@ -87,23 +87,30 @@ public class Server {
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
-
+			for (Teller teller : bank.getTellers()) {
+				System.out.println("teller #" + teller.getId());
+			}
 			Customer customer = new Customer();
-			
+			bank.addCustomer(customer);
+			for (Customer customers : bank.getCustomers()) {
+				System.out.println("customer #" + customers.getId());
+			}
 			
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-			customer.addAccount(testAccount);
-			testAccount.addUser(0);
+			for (Account account : bank.getAccounts()) {
+				System.out.println("account #" + account.getAccountID());
+			}
+			for (Teller teller : bank.getTellers()) {
+				System.out.println("teller #" + teller.getId());
+			}
+//			customer.addAccount(testAccount);
+//			testAccount.addUser(0);
 			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
 			
-			
-			for (Teller teller : bank.getTellers()) {
-				System.out.println(teller.getId());
-			}
 
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
