@@ -87,31 +87,26 @@ public class Server {
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
-			for (Teller teller : bank.getTellers()) {
-				System.out.println("teller #" + teller.getId());
-			}
+			
 			Customer customer = new Customer();
 			bank.addCustomer(customer);
-			for (Customer customers : bank.getCustomers()) {
-				System.out.println("customer #" + customers.getId());
-			}
 			
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-			for (Account account : bank.getAccounts()) {
-				System.out.println("account #" + account.getAccountID());
-			}
-			for (Teller teller : bank.getTellers()) {
-				System.out.println("teller #" + teller.getId());
-			}
 //			customer.addAccount(testAccount);
 //			testAccount.addUser(0);
 			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
 			
-
+			for (Account account : bank.getAccounts()) {
+				System.out.println("account #" + account.getId());
+			}
+			
+			for (Teller teller : bank.getTellers()) {
+				System.out.println("teller #" + teller.getId());
+			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
 			 * initialize threads for them and process requests in a regular interval
@@ -208,7 +203,15 @@ public class Server {
 				}
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
-				System.out.println("teller");
+				if(teller.checkCredentials(username, password)) {
+					List<Request> loginResponses = new ArrayList<>();
+					Request loginResponse = new Request(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
+					loginResponses.add(loginResponse);
+
+					outputHandler.enqueueRequest(loginResponses);
+					loggedIn = true;
+				}
+				
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
