@@ -177,13 +177,13 @@ public class Server {
 
 			userType = determineUserType(bank, username);
 
-			if (userType == UserType.Customer) {
+			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password, 0)) {
 
 					// send login success
 					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
+					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
 
 					outputHandler.enqueueRequest(loginResponses);
@@ -194,19 +194,19 @@ public class Server {
 				} else {
 					// user credentials were incorrect, send failure response
 					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
 
 					outputHandler.enqueueRequest(loginResponses);
 				}
-			} else if (userType == UserType.Teller) {
+			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
 
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
 				List<Request> loginResponses = new ArrayList<>();
-				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+				Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
 
 				outputHandler.enqueueRequest(loginResponses);
@@ -333,11 +333,11 @@ public class Server {
 				teller = bank.findTeller(userID);
 				if (teller == null) {
 					System.out.println("Account Undefined\n");
-					return UserType.Undefined;
+					return UserType.UNDEFINED;
 				}
-				return UserType.Teller;
+				return UserType.TELLER;
 			}
-			return UserType.Customer;
+			return UserType.CUSTOMER;
 		}
 
 	}
