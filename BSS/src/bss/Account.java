@@ -9,7 +9,8 @@ public class Account {
 	static private int count = 0;
 	private int account_ID;
 	private String pin;
-	private ArrayList<Customer> users;
+	//these Customers can access this account, but do not own this account
+	private ArrayList<Integer> userIDs;
 	private boolean frozen;
 	private double amount;
 	private AccountType AccountType;
@@ -17,28 +18,31 @@ public class Account {
 	public Account() {
 		this.account_ID = count++;
 		this.pin = "";
-		this.users = new ArrayList<Customer>();
+		this.userIDs = new ArrayList<Integer>();
+		this.frozen = false;
+		this.amount = 0.0;
+		this.AccountType = AccountType.Undefined;
+	}
+	
+	public Account(int in_id) {
+		this.account_ID = in_id;
+		count = in_id;
+		count++;
+		this.pin = "";
+		this.userIDs = new ArrayList<Integer>();
 		this.frozen = false;
 		this.amount = 0.0;
 		this.AccountType = AccountType.Undefined;
 	}
 	
 	// Check the credentials the customer gives to verify access to this account
-    public boolean checkCredentials(int in_account_ID, String in_pin) {
+    public boolean checkCredentials(int in_account_ID, String in_pin, int userID) {
     	//do the credentials match this account? ok check if the user is authorized
-    	if (this.account_ID == in_account_ID && this.pin.equals(in_pin)) { 
-    		//for each user in users
-    		for (Customer customer : users) {
-
-    			Account a = new Account();
-    			//see if an account with these credentials is in their accounts ArrayList 
-    			a = customer.getAccount(in_account_ID, in_pin);
-    			//if so, credentials check out
-    			if (a != null) {
-    				return true;
-    			}
+    	if (this.account_ID == in_account_ID && this.pin == in_pin) { 
+    		if (userIDs.contains(userID)) { 
+    			return true;
     		}
-    	} 
+    	}
     	//otherwise:
         return false;
     }
@@ -67,12 +71,24 @@ public class Account {
     	return;
     }
     // Get list of users associated with this account
-    public ArrayList<Customer> getUsers() {
-    	return this.users;
+    public ArrayList<Integer> getUsers() {
+    	return this.userIDs;
     }
+    // Print users
+	public String printUsers() {
+		String s = "";
+		String Customer_ID = "Customer_ID";
+		for (int i = 0; i < userIDs.size(); i++) {
+			s = s + Customer_ID + " " + userIDs.get(i);
+			if (i != userIDs.size() - 1) {
+				s = s + ",";
+			}
+		}
+		return s;
+	}
     // Add a user to this account
-    public void addUser(Customer in_user) {
-    	users.add(in_user);
+    public void addUser(int in_userID) {
+    	userIDs.add(in_userID);
     }
     // Get the current pin
     public String getPin() {

@@ -12,13 +12,16 @@ public class ParseTester {
 	    	Bank B = new Bank();
 	    	
 	        try {
-	            // Read from a file												//insert full file path before "/" to test for now 
-	            ArrayList<Customer> customers = Parser.readFromFile("/TestCustomers.txt", B.getAccounts());
+	            // Read from a file												//insert full file path before "/" to test for now /Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
+	            ArrayList<Customer> customers = Parser.load(B.getCustomers(), B.getAccounts(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
 	            // change data
+	            //ArrayList<Account> accounts = B.getAccounts();
 	            System.out.println("Customers loaded: " + customers.size());
 	            System.out.println("Accounts loaded: " + B.getAccounts().size());
 	            // writing back to file
-	           // Parser.writeToFile(customers, "output.txt");
+	            
+	            //remove b.get accounts
+	           Parser.writeToFile(customers, "output.txt");
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }

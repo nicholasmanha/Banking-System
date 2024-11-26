@@ -1,33 +1,26 @@
 package lang;
 import java.io.*;
 import java.util.ArrayList;
-
+import java.util.HashMap;
 import bss.Account;
 import bss.Customer;
 import enums.AccountType;
-/* Text Format for our Bank's Customer/Account Info
- Customer:
- 	Accounts:
- 		Account_ID: 0
- 		Pin: "1234"
- 		Users: [Customer_ID: 1, Customer_ID: 2]
- 		Frozen: false
- 		Amount: 1500.75
- 		AccountType: Savings
- 		
- 	Accounts:
- 		Account_ID: 1
- 		Pin: "5678"
- 		Users: [Customer_ID: 3, Customer_ID: 4]
- 		Frozen: false
- 		Amount: 100.35
- 		AccountType: Checking
- */
 
 public class Parser {
-    // Method to read file, populate Customer objects, Populate Account objects
-    public static ArrayList<Customer> readFromFile(String filePath, ArrayList<Account> accounts) throws IOException {
-        ArrayList<Customer> customers = new ArrayList<>();
+	
+	public static ArrayList<Customer> load(ArrayList<Customer> customers, ArrayList<Account> accounts, String filePath) throws IOException {
+		//first create objects to fill with Customer info from .txt file
+		HashMap<Integer, Customer> a = countCustomers(filePath);
+		//do the same for Account info from .txt file
+		HashMap<Integer, Account> b = countAccounts(filePath);
+		//readFromFile will populate each Customer with the accounts that belong to it
+		return customers = readFromFile(filePath, accounts, a, b); 
+	}
+	
+	// record the number of customers, create the Customer Objects to fill later
+    public static HashMap<Integer, Customer> countCustomers(String filePath) throws IOException {
+    	HashMap<Integer, Customer> customerCount = new HashMap<Integer, Customer>();
+  
         FileReader fileReader = new FileReader(filePath); 
         BufferedReader reader = new BufferedReader(fileReader);
         String line;
@@ -36,126 +29,221 @@ public class Parser {
         while ((line = reader.readLine()) != null) {
             line = line.trim();
 
-            if (line.equals("Customer:")) {
-            	// create a new customer to store customer data into
-                currentCustomer = new Customer();
-                //add into customers arrayList
-                customers.add(currentCustomer);
+            if (line.startsWith("Customer_ID:")) {
+            	int temp = Integer.parseInt(line.split(":")[1].trim());
+            	// create a new customer to later store customer account data into
+                currentCustomer = new Customer(temp);
+                //add into customer into HASHMAP
+                customerCount.put(temp, currentCustomer);
+                System.out.println("Customer_ID: " + temp + " -> " + currentCustomer);
             } 
-            else if (line.startsWith("Accounts:")) {
-                if (currentCustomer != null) {
-                	// get account info
-                    Account account = parseAccount(reader);
-                    // add account to previously made customer
-                    currentCustomer.addAccount(account);
-                    // add account to Bank's passed in accounts ArrayList
-                    accounts.add(account);
-                }
-            }
         }
         reader.close();
-        return customers;
+        //return hashmap of new Customer Objects
+        return customerCount;
+    }
+    
+	// record the number of Accounts, create the Account Objects to fill later
+    public static HashMap<Integer, Account> countAccounts(String filePath) throws IOException {
+    	HashMap<Integer, Account> accountCount = new HashMap<Integer, Account>();
+    	
+        FileReader fileReader = new FileReader(filePath); 
+        BufferedReader reader = new BufferedReader(fileReader);
+        String line;
+        Account currentAccount = null;
+
+        while ((line = reader.readLine()) != null) {
+            line = line.trim(); 
+
+            if (line.startsWith("Account_ID:")) {
+            	int temp = Integer.parseInt(line.split(":")[1].trim());
+            	// create a new account to store own data into
+            	currentAccount= new Account(temp);
+                //add account object and its ID into HASHMAP
+            	accountCount.put(temp, currentAccount);
+            	System.out.println("Account_ID: " + temp + " -> " + currentAccount);
+            } 
+        }
+        reader.close();
+        //return hashmap of new Customer Objects
+        return accountCount;
+    }
+	
+    
+    // Method to populate Customer objects, Populate Account objects
+    //accounts is the Bank's ArrayList<Account
+    //customerCount is the map of premade objects from first pass of file which we will populate
+    //accountCount is the map of premade objects of all accounts from first pass to put into customers
+    public static ArrayList<Customer> readFromFile(String filePath, ArrayList<Account> accounts, 
+    	HashMap<Integer, Customer> customerCount, HashMap<Integer, Account> accountCount) 
+    	throws IOException {
+    	//get the total number of accounts
+    	int numCustomers = customerCount.size();
+    	//ArrayList to store accounts for Customer
+    	ArrayList<Account> custAccounts = new ArrayList<Account>();
+    	//arrayList to store customers for Bank
+        ArrayList<Customer> bankCustomers = new ArrayList<Customer>();
+        //ArrayList to store accounts for Bank is passed in as an argument "accounts"
+        
+        FileReader fileReader = new FileReader(filePath); 
+        BufferedReader reader = new BufferedReader(fileReader);
+        
+        String line;
+     
+        Customer currentCustomer = null;
+        int temp;
+
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            
+            if (line.startsWith("Customer_ID:")) {
+            	temp = Integer.parseInt(line.split(":")[1].trim());
+            	// get the corresponding existing customer from the map via key aka Customer ID
+                currentCustomer = customerCount.get(temp);
+                if (currentCustomer == null) {
+                    throw new IllegalStateException("Customer_ID not found: " + temp);
+                }
+            } 
+            
+            //was else if 
+  //           if (line.startsWith("Account_ID:")) { //remove all after &&
+             if (currentCustomer != null) {
+                	// get accounts' info
+                	custAccounts = parseAccount(reader, accountCount);
+                	if (currentCustomer.getAccounts().isEmpty()) {
+                	// add these accounts to previously made customer
+                    currentCustomer.setAccounts(custAccounts);
+                    // add accounts to Bank's passed in accounts ArrayList
+                    for (Account a : custAccounts) {
+                    	//accounts.add(a);
+                    	if (!accounts.contains(a)) { // Avoid duplicate entries
+                            accounts.add(a);
+                        }
+                    }
+                  // add complete Customer into bank's customers arrayList after its been populated with its accounts info
+                	if (!bankCustomers.contains(currentCustomer)) { // Avoid duplicate entries
+                		bankCustomers.add(currentCustomer);
+                    }
+                    //bankCustomers.add(currentCustomer);
+                   
+                   
+        //       }
+                	}
+                	// Reset for the next customer
+                    custAccounts = new ArrayList<>(); // Reset for the next customer
+             }
+        }
+        reader.close();
+        return bankCustomers;
     }
 
-    // Helper method to parse an Account from lines
-    private static Account parseAccount(BufferedReader reader) throws IOException {
-        Account account = new Account();
+    // Helper method to parse and popluate Accounts from file
+    private static ArrayList<Account> parseAccount(BufferedReader reader, HashMap<Integer, Account> accountCount)
+    		throws IOException {
+ 
+    	ArrayList<Account> accounts = new ArrayList<Account>();
+    	Account temp = null;
         String line;
         
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             // End of account block
             if (line.isEmpty()) break; 
-            // Grab the value after the colon on the line read and assign to appropriate attribute
-            // Account
+            // Grab the value after the colon on the line read to assign values to appropriate account from MAP 
             if (line.startsWith("Account_ID:")) {   
-            	//account for deleted accounts when assigning account ID's using static
-                account.matchUpAccountID(Integer.parseInt(line.split(":")[1].trim()));
+            	int id = Integer.parseInt(line.split(":")[1].trim());
+                temp = accountCount.get(id);
+                //System.out.println("Account_ID: " + temp.getAccountID() + " assigned to customer.");
+                //System.out.println(accountCount.get(id));
             } 
             // Pin
-            else if (line.startsWith("Pin:")) {
-                account.setPin(line.split(":")[1].trim().replace("\"", ""));
+            if (line.startsWith("Pin:")) {
+                temp.setPin(line.split(":")[1].trim().replace("\"", ""));
             } 
             // Customers ArrayList
-            else if (line.startsWith("Users:")) {
-            	System.out.println(line);
+            if (line.startsWith("Users:")) {
                 String usersStr = line.split(":")[1].trim();
-                System.out.println(usersStr);
+
                 // remove the brackets [] that denote the arrayList of Customers w/ access to this account
                 usersStr = usersStr.substring(1, usersStr.length() - 1); 
-                System.out.println(usersStr);
+
                 // split by , to properly read each customer's ID if there are multiple customer ID's
                 if (usersStr.contains(",")) {
                     String[] userIDs = usersStr.split(",");
                     for (String userID : userIDs) {
-                    	System.out.println(userID);
+                    	//get each customer ID in the line
                         int customerID = Integer.parseInt(userID.split("!")[1].trim());
-                        System.out.println(customerID);
-                        //this constructor accounts for removed Customers when assigning account ID's using static
-                        Customer customerToAdd = new Customer(customerID);
-                        account.getUsers().add(customerToAdd);
+                        //add it to the account's userIDs ArrayList
+                        temp.getUsers().add(customerID);
                     }
                 }
+                // handle case of only one entry in userIDs
                 else {
                 	int customerID = Integer.parseInt(usersStr.split("!")[1].trim());
-                    Customer customerToAdd = new Customer(customerID);
-                    account.getUsers().add(customerToAdd);
+                	temp.getUsers().add(customerID);
                 }
                
             }
             // Frozen
             else if (line.startsWith("Frozen:")) {
-                account.setFrozen(Boolean.parseBoolean(line.split(":")[1].trim()));
+                temp.setFrozen(Boolean.parseBoolean(line.split(":")[1].trim()));
             }
             // Amount
             else if (line.startsWith("Amount:")) {
-                account.setAmount(Double.parseDouble(line.split(":")[1].trim()));
+                temp.setAmount(Double.parseDouble(line.split(":")[1].trim()));
             }
             // Account type
             else if (line.startsWith("AccountType:")) {
             	if(line.split(":")[1].trim().equals("Undefined")) {
-            		account.setAccountTypeUndefined();
+            		temp.setAccountTypeUndefined();
             	}
             	if(line.split(":")[1].trim().equals("Checkings")) {
-            		account.setAccountTypeCheckings();
+            		temp.setAccountTypeCheckings();
             	}            	
             	if(line.split(":")[1].trim().equals("Savings")) {
-            		account.setAccountTypeSavings();
+            		temp.setAccountTypeSavings();
             	}
             }
+            //add the current account to the arraylist which will hold accounts for each customer
+            if (!accounts.contains(temp)) {
+                accounts.add(temp);
+            }
+            //accounts.add(temp);
         }
-        return account;
+        return accounts;
     }
-    
- // Method to write Customers and Accounts to file
+   
     public static void writeToFile(ArrayList<Customer> customers, String filePath) throws IOException {
         FileWriter fileWriter = new FileWriter(filePath);
         BufferedWriter writer = new BufferedWriter(fileWriter);
-        //for each customer
+
         for (Customer customer : customers) {
-            writer.write("Customer:\n");
-            // look at each of their accounts and write to .txt file
+            // Write Customer ID
+            writer.write("Customer_ID: " + customer.getId() + "\n");
+            System.out.println("Writing Customer_ID: " + customer.getId());
+            
+            // Write each account belonging to this customer
             for (Account account : customer.getAccounts()) {
-            	writer.write("\tAccounts:\n");
-                writer.write("\t\tAccount_ID: " + account.getAccountID() + "\n");
+                writer.write("\tAccount_ID: " + account.getAccountID() + "\n");
                 writer.write("\t\tPin: \"" + account.getPin() + "\"\n");
-                // denote start Account's ArrayList<Customer> users
+
+                // Write Users
                 writer.write("\t\tUsers: [");
-                // look at each customer that has access to this account, write to .txt
                 for (int i = 0; i < account.getUsers().size(); i++) {
-                    writer.write("Customer_ID: " + account.getUsers().get(i).getId());
+                    writer.write("Customer_ID! " + account.getUsers().get(i));
                     if (i < account.getUsers().size() - 1) {
                         writer.write(", ");
                     }
                 }
-                //finish writting ArrayList
-                writer.write("]\n");
+                writer.write("]\n");  
+
+                // Write other account details
                 writer.write("\t\tFrozen: " + account.getFrozen() + "\n");
                 writer.write("\t\tAmount: " + account.getAmount() + "\n");
-                writer.write("\t\tAccountType: " + account.getAccountType() + "\n\n");
+                writer.write("\t\tAccountType: " + account.getAccountType() + "\n");
             }
         }
-        //close resources
+        // Close the writer to flush data to the file
         writer.close();
     }
 
