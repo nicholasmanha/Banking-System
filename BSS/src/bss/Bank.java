@@ -39,10 +39,10 @@ public class Bank {
 		tellers.add(teller);
 	}
 	// find an account by account ID
-	public Account findAccount(int account_id){
+	public Account findAccount(int account_id, String account_password){
 		for (Account account : accounts) 
 		{
-	        if (account.getAccountID() == account_id) 
+	        if (account.checkCredentials(account_id, account_password)) 
 	        {
 	            return account;
 	        }
@@ -50,10 +50,10 @@ public class Bank {
 		
 	    return null;
 	}
-	public Teller findTeller(int teller_id){
+	public Teller findTeller(int teller_id, String teller_password){
 		for (Teller teller : tellers) 
 		{
-	        if (teller.getId() == teller_id) 
+	        if (teller.checkCredentials(teller_id, teller_password)) 
 	        {
 	            return teller;
 	        }

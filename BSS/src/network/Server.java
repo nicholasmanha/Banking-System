@@ -176,7 +176,7 @@ public class Server {
 			System.out.println(username + ", " + password);
 
 			userType = determineUserType(bank, username);
-
+			System.out.println(userType + "");
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
@@ -201,7 +201,7 @@ public class Server {
 				}
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
-
+				System.out.println("teller");
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
