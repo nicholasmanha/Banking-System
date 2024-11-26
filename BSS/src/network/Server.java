@@ -95,7 +95,7 @@ public class Server {
 			bank.addAccount(testAccount);
 
 			customer.addAccount(testAccount);
-			testAccount.addUser(customer);
+			testAccount.addUser(0);
 			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
@@ -179,7 +179,7 @@ public class Server {
 
 			if (userType == UserType.Customer) {
 				Account acc = bank.findAccount(username);
-				if (acc.checkCredentials(username, password)) {
+				if (acc.checkCredentials(username, password, 0)) {
 
 					// send login success
 					List<Request> loginResponses = new ArrayList<>();
