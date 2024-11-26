@@ -2,6 +2,7 @@ package bss;
 
 import java.util.*;
 
+import enums.UserType;
 import network.Client;
 
 /**
@@ -39,6 +40,9 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
+		if(client.getUserType() == UserType.Customer) {
+			
+		}
 		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
 
 		int choice;
