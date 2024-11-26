@@ -38,10 +38,12 @@ public class Account {
 	// Check the credentials the customer gives to verify access to this account
     public boolean checkCredentials(int in_account_ID, String in_pin, int userID) {
     	//do the credentials match this account? ok check if the user is authorized
-    	if (this.account_ID == in_account_ID && this.pin == in_pin) { 
-    		if (userIDs.contains(userID)) { 
-    			return true;
-    		}
+    	if (this.account_ID == in_account_ID && this.pin == in_pin) {
+    		// check if customer is associated with the account, removed for now, add back if necessary/possible
+//    		if (userIDs.contains(userID)) { 
+//    			return true;
+//    		}
+    		return true;
     	}
     	//otherwise:
         return false;

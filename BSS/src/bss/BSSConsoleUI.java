@@ -41,7 +41,10 @@ public class BSSConsoleUI implements Runnable {
 		}
 		System.out.println(client.getResponseMessage());
 		if(client.getUserType() == UserType.CUSTOMER) {
-			
+			System.out.println("customer");
+		}
+		else {
+			System.out.println("teller");
 		}
 		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
 
