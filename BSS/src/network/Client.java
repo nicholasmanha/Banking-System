@@ -90,6 +90,7 @@ public class Client {
             if (request.getType() == RequestType.LOGIN) {
                 if (request.getStatus() == Status.SUCCESS) {
                     loggedIn = true;
+                    responseMessage = "Login Successful";
                     userType = request.getUserType();
                 } else {
                     System.out.println("Login failed");

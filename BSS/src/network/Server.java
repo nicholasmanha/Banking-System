@@ -101,8 +101,8 @@ public class Server {
 			bank.addAccount(testAccount2);
 			
 			
-			for (Account account : bank.getAccounts()) {
-				System.out.println(account.getAccountID());
+			for (Teller teller : bank.getTellers()) {
+				System.out.println(teller.getId());
 			}
 
 			/*
@@ -179,7 +179,7 @@ public class Server {
 
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
-				if (acc.checkCredentials(username, password, 0)) {
+				if (acc.checkCredentials(username, password)) {
 
 					// send login success
 					List<Request> loginResponses = new ArrayList<>();
