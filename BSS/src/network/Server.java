@@ -331,6 +331,11 @@ public class Server {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
 					Account account = bank.findAccount(acc_ID);
 					account.setFrozen(true);
+					List<Request> freezeResponses = new ArrayList<>();
+					Request freezeResponse = new Request(RequestType.FREEZE, Status.SUCCESS);
+					freezeResponses.add(freezeResponse);
+
+					outputHandler.enqueueRequest(freezeResponses);
 				}
 				
 				
