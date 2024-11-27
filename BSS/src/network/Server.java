@@ -140,49 +140,52 @@ public class Server {
 		}
 
 		/*
-		 * Conditionals for processing incoming requests
+		 * Switch statement for processing incoming requests
 		 */
 		private static void processRequest(List<Request> req) {
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
 				RequestType type = request.getType();
-				switch(type) {
-					case RequestType.LOGIN:
-						doLogin(request);
-					case RequestType.LOGOUT:
-						doLogout(request);
-					case RequestType.DEPOSIT:
-						doDeposit(request);
-					case RequestType.WITHDRAW:
-						doWithdraw(request);
-					case RequestType.TRANSFER:
-						doTransfer(request);
-					case RequestType.FREEZE:
-						doFreeze(request);
+				switch (type) {
+				case RequestType.LOGIN:
+					doLogin(request);
+				case RequestType.LOGOUT:
+					doLogout(request);
+				case RequestType.DEPOSIT:
+					doDeposit(request);
+				case RequestType.WITHDRAW:
+					doWithdraw(request);
+				case RequestType.TRANSFER:
+					doTransfer(request);
+				case RequestType.FREEZE:
+					doFreeze(request);
 				}
 			}
 		}
 
+		private static void sendRequest(UserType userType, RequestType requestType, Status status) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(userType, requestType, status);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+		
 		private static void doLogin(Request request) {
 			System.out.println("Login Request Received");
-			String username_string = request.getTexts().get(0);
-			int username = Integer.parseInt(username_string);
+			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
-			System.out.println(username + ", " + password);
 
 			userType = determineUserType(bank, username);
+			
 			System.out.println(userType + "");
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
 
 					// send login success
-					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
-					loginResponses.add(loginResponse);
-
-					outputHandler.enqueueRequest(loginResponses);
+					sendRequest(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					
 					loggedIn = true;
 
 					// initialized global session variable
@@ -275,8 +278,7 @@ public class Server {
 						outputHandler.enqueueRequest(withdrawResponses);
 						System.out.println("New Balance: " + session.getAccount().getAmount());
 					}
-				}
-				else {
+				} else {
 					// send deposit failure response if the account is occupied
 					List<Request> accountOccupiedResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
