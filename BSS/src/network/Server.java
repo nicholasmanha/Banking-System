@@ -167,6 +167,9 @@ public class Server {
 				if (type == RequestType.TRANSFER) {
 					doTransfer(request);
 				}
+				if (type == RequestType.FREEZE) {
+					doFreeze(request);
+				}
 			}
 		}
 
