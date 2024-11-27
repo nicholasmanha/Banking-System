@@ -122,6 +122,12 @@ public class Client {
                     responseMessage = request.getTexts().get(0);
                 }
             }
+            else if(request.getType() == RequestType.FREEZE) {
+            	if(request.getStatus() == Status.SUCCESS) {
+            		isProcessing = false;
+            		responseMessage = "Freeze Successful";
+            	}
+            }
         }
     }
 
