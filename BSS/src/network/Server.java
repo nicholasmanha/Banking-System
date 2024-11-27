@@ -136,19 +136,28 @@ public class Server {
 			for (Request request : req) {
 				RequestType type = request.getType();
 				switch (type) {
-				case RequestType.LOGIN:
+				case LOGIN:
 					doLogin(request);
-				case RequestType.LOGOUT:
+					break;
+				case LOGOUT:
 					doLogout(request);
-				case RequestType.DEPOSIT:
+					break;
+				case DEPOSIT:
 					doDeposit(request);
-				case RequestType.WITHDRAW:
+					break;
+				case WITHDRAW:
 					doWithdraw(request);
-				case RequestType.TRANSFER:
+					break;
+				case TRANSFER:
 					doTransfer(request);
-				case RequestType.FREEZE:
+					break;
+				case FREEZE:
 					doFreeze(request);
+					break;
+				default:
+					break;
 				}
+
 			}
 		}
 
@@ -174,13 +183,11 @@ public class Server {
 		}
 
 		private static void doLogin(Request request) {
-			System.out.println("Login Request Received");
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
 
 			userType = determineUserType(bank, username);
 
-			System.out.println(userType + "");
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
