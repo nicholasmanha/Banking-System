@@ -1,18 +1,13 @@
 package network;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import bss.ATM;
 import bss.Account;
 import bss.Bank;
@@ -26,7 +21,6 @@ public class Server {
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
-
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
@@ -34,7 +28,6 @@ public class Server {
 			// running infinite loop for getting
 			// client request
 			while (true) {
-
 				// socket object to receive incoming client
 				// requests
 				Socket client = server.accept();
@@ -61,7 +54,6 @@ public class Server {
 				}
 			}
 		}
-
 	}
 
 	private static class ClientHandler implements Runnable {
@@ -94,9 +86,6 @@ public class Server {
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-//			customer.addAccount(testAccount);
-//			testAccount.addUser(0);
-
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
 
@@ -112,7 +101,6 @@ public class Server {
 			 * initialize threads for them and process requests in a regular interval
 			 */
 			try {
-
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				ObjectInputStream objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
 
@@ -164,59 +152,57 @@ public class Server {
 			}
 		}
 
-		private static void sendRequest(UserType userType, RequestType requestType, Status status) {
+		private static void sendResponse(UserType userType, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(userType, requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
-		
+
+		private static void sendResponse(RequestType requestType, Status status) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(requestType, status);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
+		private static void sendResponse(ArrayList<String> messages, RequestType requestType, Status status) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(messages, requestType, status);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
 		private static void doLogin(Request request) {
 			System.out.println("Login Request Received");
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
 
 			userType = determineUserType(bank, username);
-			
+
 			System.out.println(userType + "");
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
-
-					// send login success
-					sendRequest(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
-					
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
 					loggedIn = true;
 
 					// initialized global session variable
 					session = atm.logIn(acc);
 				} else {
 					// user credentials were incorrect, send failure response
-					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
-					loginResponses.add(loginResponse);
-
-					outputHandler.enqueueRequest(loginResponses);
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 				}
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
 				if (teller.checkCredentials(username, password)) {
-					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
-					loginResponses.add(loginResponse);
-
-					outputHandler.enqueueRequest(loginResponses);
+					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
 					loggedIn = true;
 				}
-
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
-				List<Request> loginResponses = new ArrayList<>();
-				Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
-				loginResponses.add(loginResponse);
-
-				outputHandler.enqueueRequest(loginResponses);
+				sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 			}
 		}
 
@@ -230,27 +216,13 @@ public class Server {
 					session.getAccount().deposit(request.getAmount());
 					session.getAccount().setFrozen(false);
 
-					// make the deposit response
-					List<Request> depositResponses = new ArrayList<>();
-					Request depositResponse = new Request(RequestType.DEPOSIT, Status.SUCCESS);
-					depositResponses.add(depositResponse);
-
-					// enqueue the response so it can be delivered
-					outputHandler.enqueueRequest(depositResponses);
-
-					// debug
-					System.out.println("New Balance: " + session.getAccount().getAmount());
+					sendResponse(RequestType.DEPOSIT, Status.SUCCESS);
 				} else {
 					// send deposit failure response if the account is occupied
-					List<Request> accountOccupiedResponses = new ArrayList<>();
-					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied or Frozen\n");
-					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
-					accountOccupiedResponses.add(accountOccupiedResponse);
-
-					outputHandler.enqueueRequest(accountOccupiedResponses);
+					ArrayList<String> errorMessage = new ArrayList<String>(
+							Arrays.asList("Account Occupied or Frozen\n"));
+					sendResponse(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 				}
-
 			}
 		}
 
@@ -259,34 +231,17 @@ public class Server {
 				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 					// if they have insufficient funds
 					if (session.getAccount().getAmount() < request.getAmount()) {
-						List<Request> insufficientFundsResponses = new ArrayList<>();
-						ArrayList<String> errorMessage = new ArrayList<String>();
-						errorMessage.add("Insufficient Funds");
-						Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
-								Status.FAILURE);
-						insufficientFundsResponses.add(insufficientFundsResponse);
-
-						outputHandler.enqueueRequest(insufficientFundsResponses);
+						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds"));
+						sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 					} else {
 						// Account has sufficient funds, withdraw and send success
-
-						session.getAccount().withdraw(request.getAmount());
-						List<Request> withdrawResponses = new ArrayList<>();
-						Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
-						withdrawResponses.add(withdrawResponse);
-
-						outputHandler.enqueueRequest(withdrawResponses);
-						System.out.println("New Balance: " + session.getAccount().getAmount());
+						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
 					}
 				} else {
 					// send deposit failure response if the account is occupied
-					List<Request> accountOccupiedResponses = new ArrayList<>();
-					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied or Frozen\n");
-					Request accountOccupiedResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
-					accountOccupiedResponses.add(accountOccupiedResponse);
-
-					outputHandler.enqueueRequest(accountOccupiedResponses);
+					ArrayList<String> errorMessage = new ArrayList<String>(
+							Arrays.asList("Account Occupied or Frozen\n"));
+					sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 				}
 			}
 		}
@@ -296,50 +251,28 @@ public class Server {
 				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 					// Account has insufficient funds, send failure
 					if (session.getAccount().getAmount() < request.getAmount()) {
-						List<Request> insufficientFundsResponses = new ArrayList<>();
-						ArrayList<String> errorMessage = new ArrayList<String>();
-						errorMessage.add("Insufficient Funds\n");
-						Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
-								Status.FAILURE);
-						insufficientFundsResponses.add(insufficientFundsResponse);
-
-						outputHandler.enqueueRequest(insufficientFundsResponses);
+						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds\n"));
+						sendResponse(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 					} else {
 						// to_account wasn't found, send failure
 						session.getAccount().withdraw(request.getAmount());
 						Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
 						if (to_account == null) {
-							List<Request> accountNotFoundResponses = new ArrayList<>();
-							ArrayList<String> errorMessage = new ArrayList<String>();
-							errorMessage.add("Account Not Found\n");
-							Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
-									Status.FAILURE);
-							accountNotFoundResponses.add(accountNotFoundResponse);
-
-							outputHandler.enqueueRequest(accountNotFoundResponses);
+							ArrayList<String> errorMessage = new ArrayList<String>(
+									Arrays.asList("Account Not Found\n"));
+							sendResponse(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 						} else {
 							// Account has sufficient funds, transfer and send success
 							to_account.deposit(request.getAmount());
-							List<Request> transferResponses = new ArrayList<>();
-							Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
-							transferResponses.add(transferResponse);
-
-							outputHandler.enqueueRequest(transferResponses);
-							System.out.println("New Balance: " + session.getAccount().getAmount());
+							sendResponse(RequestType.TRANSFER, Status.SUCCESS);
 						}
-
 					}
 				} else {
 					// send deposit failure response if the account is occupied
-					List<Request> accountOccupiedResponses = new ArrayList<>();
-					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied or Frozen\n");
-					Request accountOccupiedResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
-					accountOccupiedResponses.add(accountOccupiedResponse);
-
-					outputHandler.enqueueRequest(accountOccupiedResponses);
+					ArrayList<String> errorMessage = new ArrayList<String>(
+							Arrays.asList("Account Occupied or Frozen\n"));
+					sendResponse(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 				}
-
 			}
 		}
 
@@ -349,30 +282,20 @@ public class Server {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
 					Account account = bank.findAccount(acc_ID);
 					account.setFrozen(true);
-					List<Request> freezeResponses = new ArrayList<>();
-					Request freezeResponse = new Request(RequestType.FREEZE, Status.SUCCESS);
-					freezeResponses.add(freezeResponse);
-
-					outputHandler.enqueueRequest(freezeResponses);
+					sendResponse(RequestType.FREEZE, Status.SUCCESS);
 				}
-
 			}
 		}
 
 		private static void doLogout(Request request) {
 			if (loggedIn) {
 				atm.logOut();
-				List<Request> logoutResponses = new ArrayList<>();
-				Request logoutResponse = new Request(RequestType.LOGOUT, Status.SUCCESS);
-				logoutResponses.add(logoutResponse);
-
-				outputHandler.enqueueRequest(logoutResponses);
+				sendResponse(RequestType.LOGOUT, Status.SUCCESS);
 			}
 		}
 
 		// based on the given username, determine if it is for an account or a teller
 		private static UserType determineUserType(Bank bank, int userID) {
-
 			Teller teller;
 			Account acc;
 			acc = bank.findAccount(userID);
@@ -386,6 +309,5 @@ public class Server {
 			}
 			return UserType.CUSTOMER;
 		}
-
 	}
 }
