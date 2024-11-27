@@ -105,6 +105,10 @@ public class Client {
                     isProcessing = false;
                     responseMessage = "Deposit Successful";
                 }
+                if (request.getStatus() == Status.FAILURE) {
+                    isProcessing = false;
+                    responseMessage = request.getTexts().get(0);
+                }
             } else if (request.getType() == RequestType.WITHDRAW) {
                 if (request.getStatus() == Status.SUCCESS) {
                     isProcessing = false;
