@@ -17,7 +17,6 @@ import bss.Teller;
 import enums.*;
 
 public class Server {
-
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
