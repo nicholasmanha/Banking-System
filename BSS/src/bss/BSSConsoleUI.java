@@ -129,7 +129,7 @@ public class BSSConsoleUI implements Runnable {
 		}
 		System.out.println(client.getResponseMessage());
 		if(client.getAccountAccessed()) {
-			
+			customerView();
 		}
 		
 	}
