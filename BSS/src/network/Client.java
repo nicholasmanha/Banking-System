@@ -2,7 +2,6 @@ package network;
 
 import bss.BSSConsoleUI;
 import enums.*;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -84,8 +83,11 @@ public class Client {
 	 * RESPONSE PROCESSING Added empty checks
 	 */
 	private void processResponse(List<Request> req) {
+		isProcessing = false;
 		for (Request request : req) {
-			if (request.getType() == RequestType.LOGIN) {
+			RequestType requestType = request.getType();
+			switch(requestType) {
+			case LOGIN:
 				if (request.getStatus() == Status.SUCCESS) {
 					loggedIn = true;
 					responseMessage = "Login Successful";
@@ -93,41 +95,42 @@ public class Client {
 				} else {
 					System.out.println("Login failed");
 				}
-			} else if (request.getType() == RequestType.LOGOUT) {
+				break;
+			case LOGOUT:
 				if (request.getStatus() == Status.SUCCESS) {
 					System.out.println("Logging out...");
 					createLogoutRequest(); // Graceful shutdown
 				}
-			} else if (request.getType() == RequestType.DEPOSIT) {
+				break;
+			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
 					responseMessage = "Deposit Successful";
 				}
 				if (request.getStatus() == Status.FAILURE) {
-					isProcessing = false;
 					responseMessage = request.getTexts().get(0);
 				}
-			} else if (request.getType() == RequestType.WITHDRAW) {
+				break;
+			case WITHDRAW:
 				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
 					responseMessage = "Withdraw Successful";
 				} else if (request.getTexts() != null && !request.getTexts().isEmpty()) {
-					isProcessing = false;
 					responseMessage = request.getTexts().get(0);
 				}
-			} else if (request.getType() == RequestType.TRANSFER) {
+				break;
+			case TRANSFER:
 				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
 					responseMessage = "Transfer Successful";
-				} else if (request.getTexts() != null && !request.getTexts().isEmpty()) {
-					isProcessing = false;
+				} else if (request.getStatus() == Status.FAILURE) {
 					responseMessage = request.getTexts().get(0);
 				}
-			} else if (request.getType() == RequestType.FREEZE) {
+				break;
+			case FREEZE:
 				if (request.getStatus() == Status.SUCCESS) {
-					isProcessing = false;
 					responseMessage = "Freeze Successful";
 				}
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -235,5 +238,4 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-
 }
