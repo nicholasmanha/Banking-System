@@ -40,12 +40,72 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
+		
+		
 		if(client.getUserType() == UserType.CUSTOMER) {
-			System.out.println("customer");
+			customerView();
+			
 		}
 		else {
-			System.out.println("teller");
+			tellerView();
 		}
+		
+
+	}
+
+	private void tellerView() {
+		String[] commands = { "View Accounts", "Freeze", "Read Logs", "Logout" };
+
+		int choice;
+
+		do {
+			for (int i = 0; i < commands.length; i++) {
+				System.out.println("Select " + i + ": " + commands[i]);
+			}
+			try {
+				choice = scan.nextInt();
+				scan.nextLine();
+				switch (choice) {
+				case 0:
+					doViewAccounts();
+					break;
+				case 1:
+					doFreeze();
+					break;
+				case 2:
+					doReadLogs();
+					break;
+				case 3:
+					doLogout();
+					break;
+				default:
+					System.out.println("INVALID CHOICE - TRY AGAIN");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("INVALID CHOICE - TRY AGAIN");
+				scan.nextLine();
+				choice = -1;
+			}
+		} while (choice != commands.length - 1);
+		
+	}
+
+	private void doReadLogs() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void doFreeze() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void doViewAccounts() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void customerView() {
 		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
 
 		int choice;
@@ -79,7 +139,7 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-
+		
 	}
 
 	private void doDeposit() {
