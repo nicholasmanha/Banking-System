@@ -116,7 +116,7 @@ public class BSSConsoleUI implements Runnable {
 	private void doEnterAccount() {
 		System.out.println("Enter Account ID:");
 		int acc_ID = scan.nextInt();
-		client.createFreezeRequest(acc_ID);
+		client.createEnterAccountRequest(acc_ID);
 		System.out.print("Accessing Account");
 		while (client.getIsProcessing()) {
 			try {
@@ -128,6 +128,9 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
+		if(client.getAccountAccessed()) {
+			
+		}
 		
 	}
 
