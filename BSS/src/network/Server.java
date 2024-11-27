@@ -87,23 +87,23 @@ public class Server {
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
-			
+
 			Customer customer = new Customer();
 			bank.addCustomer(customer);
-			
+
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
 //			customer.addAccount(testAccount);
 //			testAccount.addUser(0);
-			
+
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
-			
+
 			for (Account account : bank.getAccounts()) {
 				System.out.println("account #" + account.getId());
 			}
-			
+
 			for (Teller teller : bank.getTellers()) {
 				System.out.println("teller #" + teller.getId());
 			}
@@ -167,6 +167,9 @@ public class Server {
 				if (type == RequestType.TRANSFER) {
 					doTransfer(request);
 				}
+				if (type == RequestType.FREEZE) {
+					doFreeze(request);
+				}
 			}
 		}
 
@@ -203,7 +206,7 @@ public class Server {
 				}
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
-				if(teller.checkCredentials(username, password)) {
+				if (teller.checkCredentials(username, password)) {
 					List<Request> loginResponses = new ArrayList<>();
 					Request loginResponse = new Request(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
@@ -211,7 +214,7 @@ public class Server {
 					outputHandler.enqueueRequest(loginResponses);
 					loggedIn = true;
 				}
-				
+
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
@@ -227,7 +230,7 @@ public class Server {
 			if (loggedIn == true) {
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
-				if (session.getAccount().getOccupied() == false) {
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 					// set the frozen flag to true on account whilst interacting with it
 					session.getAccount().setFrozen(true);
 					session.getAccount().deposit(request.getAmount());
@@ -247,7 +250,7 @@ public class Server {
 					// send deposit failure response if the account is occupied
 					List<Request> accountOccupiedResponses = new ArrayList<>();
 					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Account Occupied\n");
+					errorMessage.add("Account Occupied or Frozen\n");
 					Request accountOccupiedResponse = new Request(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 					accountOccupiedResponses.add(accountOccupiedResponse);
 
@@ -259,66 +262,107 @@ public class Server {
 
 		private static void doWithdraw(Request request) {
 			if (loggedIn == true) {
-				// if they have insufficient funds
-				if (session.getAccount().getAmount() < request.getAmount()) {
-					List<Request> insufficientFundsResponses = new ArrayList<>();
-					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Insufficient Funds");
-					Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
-					insufficientFundsResponses.add(insufficientFundsResponse);
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+					// if they have insufficient funds
+					if (session.getAccount().getAmount() < request.getAmount()) {
+						List<Request> insufficientFundsResponses = new ArrayList<>();
+						ArrayList<String> errorMessage = new ArrayList<String>();
+						errorMessage.add("Insufficient Funds");
+						Request insufficientFundsResponse = new Request(errorMessage, RequestType.WITHDRAW,
+								Status.FAILURE);
+						insufficientFundsResponses.add(insufficientFundsResponse);
 
-					outputHandler.enqueueRequest(insufficientFundsResponses);
-				} else {
-					// Account has sufficient funds, withdraw and send success
+						outputHandler.enqueueRequest(insufficientFundsResponses);
+					} else {
+						// Account has sufficient funds, withdraw and send success
 
-					session.getAccount().withdraw(request.getAmount());
-					List<Request> withdrawResponses = new ArrayList<>();
-					Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
-					withdrawResponses.add(withdrawResponse);
+						session.getAccount().withdraw(request.getAmount());
+						List<Request> withdrawResponses = new ArrayList<>();
+						Request withdrawResponse = new Request(RequestType.WITHDRAW, Status.SUCCESS);
+						withdrawResponses.add(withdrawResponse);
 
-					outputHandler.enqueueRequest(withdrawResponses);
-					System.out.println("New Balance: " + session.getAccount().getAmount());
+						outputHandler.enqueueRequest(withdrawResponses);
+						System.out.println("New Balance: " + session.getAccount().getAmount());
+					}
 				}
+				else {
+					// send deposit failure response if the account is occupied
+					List<Request> accountOccupiedResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Account Occupied or Frozen\n");
+					Request accountOccupiedResponse = new Request(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
+					accountOccupiedResponses.add(accountOccupiedResponse);
 
+					outputHandler.enqueueRequest(accountOccupiedResponses);
+				}
 			}
 		}
 
 		private static void doTransfer(Request request) {
 			if (loggedIn == true) {
-				// Account has insufficient funds, send failure
-				if (session.getAccount().getAmount() < request.getAmount()) {
-					List<Request> insufficientFundsResponses = new ArrayList<>();
-					ArrayList<String> errorMessage = new ArrayList<String>();
-					errorMessage.add("Insufficient Funds\n");
-					Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
-					insufficientFundsResponses.add(insufficientFundsResponse);
-
-					outputHandler.enqueueRequest(insufficientFundsResponses);
-				} else {
-					// to_account wasn't found, send failure
-					session.getAccount().withdraw(request.getAmount());
-					Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
-					if (to_account == null) {
-						List<Request> accountNotFoundResponses = new ArrayList<>();
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+					// Account has insufficient funds, send failure
+					if (session.getAccount().getAmount() < request.getAmount()) {
+						List<Request> insufficientFundsResponses = new ArrayList<>();
 						ArrayList<String> errorMessage = new ArrayList<String>();
-						errorMessage.add("Account Not Found\n");
-						Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+						errorMessage.add("Insufficient Funds\n");
+						Request insufficientFundsResponse = new Request(errorMessage, RequestType.TRANSFER,
 								Status.FAILURE);
-						accountNotFoundResponses.add(accountNotFoundResponse);
+						insufficientFundsResponses.add(insufficientFundsResponse);
 
-						outputHandler.enqueueRequest(accountNotFoundResponses);
+						outputHandler.enqueueRequest(insufficientFundsResponses);
 					} else {
-						// Account has sufficient funds, transfer and send success
-						to_account.deposit(request.getAmount());
-						List<Request> transferResponses = new ArrayList<>();
-						Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
-						transferResponses.add(transferResponse);
+						// to_account wasn't found, send failure
+						session.getAccount().withdraw(request.getAmount());
+						Account to_account = bank.findAccount(Integer.parseInt(request.getTexts().get(0)));
+						if (to_account == null) {
+							List<Request> accountNotFoundResponses = new ArrayList<>();
+							ArrayList<String> errorMessage = new ArrayList<String>();
+							errorMessage.add("Account Not Found\n");
+							Request accountNotFoundResponse = new Request(errorMessage, RequestType.TRANSFER,
+									Status.FAILURE);
+							accountNotFoundResponses.add(accountNotFoundResponse);
 
-						outputHandler.enqueueRequest(transferResponses);
-						System.out.println("New Balance: " + session.getAccount().getAmount());
+							outputHandler.enqueueRequest(accountNotFoundResponses);
+						} else {
+							// Account has sufficient funds, transfer and send success
+							to_account.deposit(request.getAmount());
+							List<Request> transferResponses = new ArrayList<>();
+							Request transferResponse = new Request(RequestType.TRANSFER, Status.SUCCESS);
+							transferResponses.add(transferResponse);
+
+							outputHandler.enqueueRequest(transferResponses);
+							System.out.println("New Balance: " + session.getAccount().getAmount());
+						}
+
 					}
+				} else {
+					// send deposit failure response if the account is occupied
+					List<Request> accountOccupiedResponses = new ArrayList<>();
+					ArrayList<String> errorMessage = new ArrayList<String>();
+					errorMessage.add("Account Occupied or Frozen\n");
+					Request accountOccupiedResponse = new Request(errorMessage, RequestType.TRANSFER, Status.FAILURE);
+					accountOccupiedResponses.add(accountOccupiedResponse);
 
+					outputHandler.enqueueRequest(accountOccupiedResponses);
 				}
+
+			}
+		}
+
+		private static void doFreeze(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account account = bank.findAccount(acc_ID);
+					account.setFrozen(true);
+					List<Request> freezeResponses = new ArrayList<>();
+					Request freezeResponse = new Request(RequestType.FREEZE, Status.SUCCESS);
+					freezeResponses.add(freezeResponse);
+
+					outputHandler.enqueueRequest(freezeResponses);
+				}
+
 			}
 		}
 

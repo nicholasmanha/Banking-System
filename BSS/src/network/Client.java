@@ -105,6 +105,10 @@ public class Client {
                     isProcessing = false;
                     responseMessage = "Deposit Successful";
                 }
+                if (request.getStatus() == Status.FAILURE) {
+                    isProcessing = false;
+                    responseMessage = request.getTexts().get(0);
+                }
             } else if (request.getType() == RequestType.WITHDRAW) {
                 if (request.getStatus() == Status.SUCCESS) {
                     isProcessing = false;
@@ -121,6 +125,12 @@ public class Client {
                     isProcessing = false;
                     responseMessage = request.getTexts().get(0);
                 }
+            }
+            else if(request.getType() == RequestType.FREEZE) {
+            	if(request.getStatus() == Status.SUCCESS) {
+            		isProcessing = false;
+            		responseMessage = "Freeze Successful";
+            	}
             }
         }
     }
@@ -182,10 +192,17 @@ public class Client {
 
         outputHandler.enqueueRequest(requests);
     }
-
-
-
-
+    
+    public void createFreezeRequest(int acc_ID) {
+        isProcessing = true;
+        ArrayList<String> ID = new ArrayList<>();
+        ID.add(acc_ID + "");
+        Request freezeRequest = new Request(ID, RequestType.FREEZE, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(freezeRequest);
+        outputHandler.enqueueRequest(requests);
+    }
+    
     public void createLogoutRequest() {
     	List<Request> requests = new ArrayList<>();
     	requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
