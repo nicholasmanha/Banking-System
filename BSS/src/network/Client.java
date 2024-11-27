@@ -182,6 +182,16 @@ public class Client {
 
         outputHandler.enqueueRequest(requests);
     }
+    
+    public void createFreezeRequest(int acc_ID) {
+        isProcessing = true;
+        ArrayList<String> ID = new ArrayList<>();
+        ID.add(acc_ID + "");
+        Request freezeRequest = new Request(ID, RequestType.FREEZE, Status.REQUEST);
+        List<Request> requests = new ArrayList<>();
+        requests.add(freezeRequest);
+        outputHandler.enqueueRequest(requests);
+    }
 
 
 
