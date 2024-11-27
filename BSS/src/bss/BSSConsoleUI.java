@@ -91,17 +91,30 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doReadLogs() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	private void doFreeze() {
-		// TODO Auto-generated method stub
+		System.out.println("Enter account ID:");
+		int acc_ID = scan.nextInt();
+		client.createFreezeRequest(acc_ID);
+		System.out.print("Freezing Account");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
 		
 	}
 
 	private void doViewAccounts() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
