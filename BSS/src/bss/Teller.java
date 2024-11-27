@@ -15,7 +15,7 @@ public class Teller extends User{
 	}
 	
 	public boolean checkCredentials(int teller_id, String teller_password) {
-		if(this.id == teller_id && this.password == teller_password) {
+		if(this.id == teller_id && this.password.equals(teller_password)) {
 			return true;
 		}
 		else {

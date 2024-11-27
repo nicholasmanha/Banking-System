@@ -87,24 +87,26 @@ public class Server {
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
-
-			Customer customer = new Customer();
 			
+			Customer customer = new Customer();
+			bank.addCustomer(customer);
 			
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-			customer.addAccount(testAccount);
-			testAccount.addUser(customer);
+//			customer.addAccount(testAccount);
+//			testAccount.addUser(0);
 			
 			Account testAccount2 = firstTeller.createAccount("321");
 			bank.addAccount(testAccount2);
 			
-			
 			for (Account account : bank.getAccounts()) {
-				System.out.println(account.getAccountID());
+				System.out.println("account #" + account.getId());
 			}
-
+			
+			for (Teller teller : bank.getTellers()) {
+				System.out.println("teller #" + teller.getId());
+			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
 			 * initialize threads for them and process requests in a regular interval
@@ -176,14 +178,14 @@ public class Server {
 			System.out.println(username + ", " + password);
 
 			userType = determineUserType(bank, username);
-
-			if (userType == UserType.Customer) {
+			System.out.println(userType + "");
+			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
 
 					// send login success
 					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.SUCCESS);
+					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
 					loginResponses.add(loginResponse);
 
 					outputHandler.enqueueRequest(loginResponses);
@@ -194,19 +196,27 @@ public class Server {
 				} else {
 					// user credentials were incorrect, send failure response
 					List<Request> loginResponses = new ArrayList<>();
-					Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+					Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 					loginResponses.add(loginResponse);
 
 					outputHandler.enqueueRequest(loginResponses);
 				}
-			} else if (userType == UserType.Teller) {
+			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
+				if(teller.checkCredentials(username, password)) {
+					List<Request> loginResponses = new ArrayList<>();
+					Request loginResponse = new Request(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
+					loginResponses.add(loginResponse);
 
+					outputHandler.enqueueRequest(loginResponses);
+					loggedIn = true;
+				}
+				
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
 				List<Request> loginResponses = new ArrayList<>();
-				Request loginResponse = new Request(Requester.USER, RequestType.LOGIN, Status.FAILURE);
+				Request loginResponse = new Request(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 				loginResponses.add(loginResponse);
 
 				outputHandler.enqueueRequest(loginResponses);
@@ -333,11 +343,11 @@ public class Server {
 				teller = bank.findTeller(userID);
 				if (teller == null) {
 					System.out.println("Account Undefined\n");
-					return UserType.Undefined;
+					return UserType.UNDEFINED;
 				}
-				return UserType.Teller;
+				return UserType.TELLER;
 			}
-			return UserType.Customer;
+			return UserType.CUSTOMER;
 		}
 
 	}

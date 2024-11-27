@@ -15,6 +15,7 @@ public class Client {
     private boolean loggedIn = false;
     private boolean isProcessing = false;
     private String responseMessage;
+    private UserType userType;
 
     public Client(InputHandler inputHandler, OutputHandler outputHandler) {
         this.inputHandler = inputHandler;
@@ -89,6 +90,8 @@ public class Client {
             if (request.getType() == RequestType.LOGIN) {
                 if (request.getStatus() == Status.SUCCESS) {
                     loggedIn = true;
+                    responseMessage = "Login Successful";
+                    userType = request.getUserType();
                 } else {
                     System.out.println("Login failed");
                 }
@@ -126,6 +129,9 @@ public class Client {
     /*
      * METHODS FOR GUI
      */
+    public UserType getUserType() {
+    	return userType;
+    }
     public boolean getIsProcessing() {
         return isProcessing;
     }

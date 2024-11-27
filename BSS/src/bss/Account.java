@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import enums.AccountType;
 
-public class Account {
+public class Account extends User{
 	// not sure about static
-	static private int count = 0;
-	private int account_ID;
+//	static private int count = 0;
+//	private int account_ID;
 	private String pin;
 	//these Customers can access this account, but do not own this account
 	private ArrayList<Integer> userIDs;
@@ -16,7 +16,7 @@ public class Account {
 	private AccountType AccountType;
 
 	public Account() {
-		this.account_ID = count++;
+//		this.account_ID = count++;
 		this.pin = "";
 		this.userIDs = new ArrayList<Integer>();
 		this.frozen = false;
@@ -25,9 +25,9 @@ public class Account {
 	}
 	
 	public Account(int in_id) {
-		this.account_ID = in_id;
-		count = in_id;
-		count++;
+		super.id = in_id;
+		super.count = in_id;
+		super.count++;
 		this.pin = "";
 		this.userIDs = new ArrayList<Integer>();
 		this.frozen = false;
@@ -36,19 +36,21 @@ public class Account {
 	}
 	
 	// Check the credentials the customer gives to verify access to this account
-    public boolean checkCredentials(int in_account_ID, String in_pin, int userID) {
+    public boolean checkCredentials(int in_account_ID, String in_pin) {
     	//do the credentials match this account? ok check if the user is authorized
-    	if (this.account_ID == in_account_ID && this.pin == in_pin) { 
-    		if (userIDs.contains(userID)) { 
-    			return true;
-    		}
+    	if (super.id == in_account_ID && this.pin.equals(in_pin)) {
+    		// check if customer is associated with the account, removed for now, add back if necessary/possible
+//    		if (userIDs.contains(userID)) { 
+//    			return true;
+//    		}
+    		return true;
     	}
     	//otherwise:
         return false;
     }
     // Get the account ID
     public int getAccountID() {
-        return account_ID;
+        return super.id;
     }
     // Get frozen status
     public boolean getOccupied() {
@@ -67,7 +69,7 @@ public class Account {
     	while(count != in_id) {
     		count++;
     	}
-    	this.account_ID = count;
+    	super.id = count;
     	return;
     }
     // Get list of users associated with this account

@@ -6,7 +6,7 @@ public class User {
 
     protected int id;
     private LocalDateTime created;
-    static int count = 0;
+    static protected int count = 0;
 
     // Set id and date of creation
     public User() {
