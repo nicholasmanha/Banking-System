@@ -321,6 +321,15 @@ public class Server {
 				}
 			}
 		}
+		
+		private static void doFreeze(Request request) {
+			if(loggedIn) {
+				int acc_ID = Integer.parseInt(request.getTexts().get(0));
+				Account account = bank.findAccount(acc_ID);
+				account.setFrozen(true);
+				
+			}
+		}
 
 		private static void doLogout(Request request) {
 			if (loggedIn) {

@@ -192,10 +192,7 @@ public class Client {
         requests.add(freezeRequest);
         outputHandler.enqueueRequest(requests);
     }
-
-
-
-
+    
     public void createLogoutRequest() {
     	List<Request> requests = new ArrayList<>();
     	requests.add(new Request(RequestType.LOGOUT, Status.REQUEST));
