@@ -54,7 +54,7 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void tellerView() {
-		String[] commands = { "View Accounts", "Freeze", "Read Logs", "Logout" };
+		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Logout" };
 
 		int choice;
 
@@ -67,7 +67,7 @@ public class BSSConsoleUI implements Runnable {
 				scan.nextLine();
 				switch (choice) {
 				case 0:
-					doViewAccounts();
+					doEnterAccount();
 					break;
 				case 1:
 					doFreeze();
@@ -94,7 +94,7 @@ public class BSSConsoleUI implements Runnable {
 		
 		
 	}
-
+	
 	private void doFreeze() {
 		System.out.println("Enter account ID:");
 		int acc_ID = scan.nextInt();
@@ -113,8 +113,21 @@ public class BSSConsoleUI implements Runnable {
 		
 	}
 
-	private void doViewAccounts() {
-		
+	private void doEnterAccount() {
+		System.out.println("Enter Account ID:");
+		int acc_ID = scan.nextInt();
+		client.createFreezeRequest(acc_ID);
+		System.out.print("Accessing Account");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
 		
 	}
 
