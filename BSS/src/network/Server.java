@@ -129,16 +129,13 @@ public class Server {
 				while (true) {
 					List<Request> req = inputHandler.getNextRequest();
 					if (req != null) {
-
 						processRequest(req);
 					}
-
 					Thread.sleep(200);
 				}
 
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
-
 			}
 		}
 
@@ -150,25 +147,19 @@ public class Server {
 			// for every request in the list of requests that was received
 			for (Request request : req) {
 				RequestType type = request.getType();
-				Status status = request.getStatus();
-
-				if (type == RequestType.LOGIN && request.getStatus() == Status.REQUEST) {
-					doLogin(request);
-				}
-				if (type == RequestType.LOGOUT && request.getStatus() == Status.REQUEST) {
-					doLogout(request);
-				}
-				if (type == RequestType.DEPOSIT) {
-					doDeposit(request);
-				}
-				if (type == RequestType.WITHDRAW) {
-					doWithdraw(request);
-				}
-				if (type == RequestType.TRANSFER) {
-					doTransfer(request);
-				}
-				if (type == RequestType.FREEZE) {
-					doFreeze(request);
+				switch(type) {
+					case RequestType.LOGIN:
+						doLogin(request);
+					case RequestType.LOGOUT:
+						doLogout(request);
+					case RequestType.DEPOSIT:
+						doDeposit(request);
+					case RequestType.WITHDRAW:
+						doWithdraw(request);
+					case RequestType.TRANSFER:
+						doTransfer(request);
+					case RequestType.FREEZE:
+						doFreeze(request);
 				}
 			}
 		}
