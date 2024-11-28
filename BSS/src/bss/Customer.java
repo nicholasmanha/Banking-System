@@ -14,20 +14,20 @@ public class Customer extends User{
 	}
 	//pass in Customer id read in from .txt file
     public void matchUpCustomerID(int in_id) {
-    	//do nothing if count == id, 
     	if (count == in_id) {
+    		this.setID(in_id);
+    		count++;
     		return;
     	}
-    	// if after new Customer(), count is not equal to in_id, increment until it is.
-    	// this is to consider the deleted Customers from a previous session as we make new Customers and assign IDs w/ static
-    	// count as we read them in from our .txt file 
-    	// w/o this, Customers "desync" their assigned IDs from previous session if less Customers exist now then in previous session
-    	while(count != in_id) {
+    	// if after new Customer(), count is <  in_id, make count == in_id
+    	while (count <= in_id) {
+    		this.setID(in_id);
     		count++;
+    		return;
     	}
-    	setID(count);
     	return;
     }
+    
     //not sure if we need index
 	public Account getAccount(int in_id, String in_pin) { //,int in_index) {
 		Account A =  new Account();
@@ -54,4 +54,8 @@ public class Customer extends User{
 		return accounts;
 	}
 	
+	public void setAccounts(ArrayList<Account> in_accounts) {
+		this.accounts = in_accounts;
+	}
+
 }

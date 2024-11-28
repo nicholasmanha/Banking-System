@@ -4,20 +4,32 @@ import java.util.ArrayList;
 
 import enums.AccountType;
 
-public class Account {
+public class Account extends User{
 	// not sure about static
-	static private int count = 0;
-	private int account_ID;
+//	static private int count = 0;
+//	private int account_ID;
 	private String pin;
-	private ArrayList<Customer> users;
+	//these Customers can access this account, but do not own this account
+	private ArrayList<Integer> userIDs;
 	private boolean frozen;
 	private double amount;
 	private AccountType AccountType;
 
 	public Account() {
-		this.account_ID = count++;
+//		this.account_ID = count++;
 		this.pin = "";
-		this.users = new ArrayList<Customer>();
+		this.userIDs = new ArrayList<Integer>();
+		this.frozen = false;
+		this.amount = 0.0;
+		this.AccountType = AccountType.Undefined;
+	}
+	
+	public Account(int in_id) {
+		super.id = in_id;
+		super.count = in_id;
+		super.count++;
+		this.pin = "";
+		this.userIDs = new ArrayList<Integer>();
 		this.frozen = false;
 		this.amount = 0.0;
 		this.AccountType = AccountType.Undefined;
@@ -26,25 +38,19 @@ public class Account {
 	// Check the credentials the customer gives to verify access to this account
     public boolean checkCredentials(int in_account_ID, String in_pin) {
     	//do the credentials match this account? ok check if the user is authorized
-    	if (this.account_ID == in_account_ID && this.pin.equals(in_pin)) { 
-    		//for each user in users
-    		for (Customer customer : users) {
-
-    			Account a = new Account();
-    			//see if an account with these credentials is in their accounts ArrayList 
-    			a = customer.getAccount(in_account_ID, in_pin);
-    			//if so, credentials check out
-    			if (a != null) {
-    				return true;
-    			}
-    		}
-    	} 
+    	if (super.id == in_account_ID && this.pin.equals(in_pin)) {
+    		// check if customer is associated with the account, removed for now, add back if necessary/possible
+//    		if (userIDs.contains(userID)) { 
+//    			return true;
+//    		}
+    		return true;
+    	}
     	//otherwise:
         return false;
     }
     // Get the account ID
     public int getAccountID() {
-        return account_ID;
+        return super.id;
     }
     // Get frozen status
     public boolean getOccupied() {
@@ -63,16 +69,28 @@ public class Account {
     	while(count != in_id) {
     		count++;
     	}
-    	this.account_ID = count;
+    	super.id = count;
     	return;
     }
     // Get list of users associated with this account
-    public ArrayList<Customer> getUsers() {
-    	return this.users;
+    public ArrayList<Integer> getUsers() {
+    	return this.userIDs;
     }
+    // Print users
+	public String printUsers() {
+		String s = "";
+		String Customer_ID = "Customer_ID";
+		for (int i = 0; i < userIDs.size(); i++) {
+			s = s + Customer_ID + " " + userIDs.get(i);
+			if (i != userIDs.size() - 1) {
+				s = s + ",";
+			}
+		}
+		return s;
+	}
     // Add a user to this account
-    public void addUser(Customer in_user) {
-    	users.add(in_user);
+    public void addUser(int in_userID) {
+    	userIDs.add(in_userID);
     }
     // Get the current pin
     public String getPin() {

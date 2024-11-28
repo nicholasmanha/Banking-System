@@ -22,6 +22,10 @@ public class Bank {
 		return this.customers;
 	}
 	
+	public ArrayList<Teller> getTellers() {
+		return this.tellers;
+	}
+	
 	// add an account to the bank
 	public void addAccount(Account account) {
 		this.accounts.add(account);

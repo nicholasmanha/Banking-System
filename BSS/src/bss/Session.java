@@ -9,7 +9,7 @@ public class Session {
 	private ArrayList<Log> logs;
 	
 	public Session() {
-		this.account = new Account();
+		
 		this.setStart_time(LocalDateTime.now());
 		this.setEnd_time(LocalDateTime.now());
 		this.logs = new ArrayList<Log>();
@@ -17,6 +17,7 @@ public class Session {
 
     // Start a session with a given account
     public boolean startSession(Account in_account) {
+    	this.account = in_account;
     	// note start time of the session
     	this.setStart_time(LocalDateTime.now());
     	//insert code for interacting with server

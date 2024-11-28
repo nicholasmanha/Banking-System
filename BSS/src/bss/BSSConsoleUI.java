@@ -2,6 +2,7 @@ package bss;
 
 import java.util.*;
 
+import enums.UserType;
 import network.Client;
 
 /**
@@ -39,6 +40,85 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
+		
+		
+		if(client.getUserType() == UserType.CUSTOMER) {
+			customerView();
+			
+		}
+		else {
+			tellerView();
+		}
+		
+
+	}
+
+	private void tellerView() {
+		String[] commands = { "View Accounts", "Freeze", "Read Logs", "Logout" };
+
+		int choice;
+
+		do {
+			for (int i = 0; i < commands.length; i++) {
+				System.out.println("Select " + i + ": " + commands[i]);
+			}
+			try {
+				choice = scan.nextInt();
+				scan.nextLine();
+				switch (choice) {
+				case 0:
+					doViewAccounts();
+					break;
+				case 1:
+					doFreeze();
+					break;
+				case 2:
+					doReadLogs();
+					break;
+				case 3:
+					doLogout();
+					break;
+				default:
+					System.out.println("INVALID CHOICE - TRY AGAIN");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("INVALID CHOICE - TRY AGAIN");
+				scan.nextLine();
+				choice = -1;
+			}
+		} while (choice != commands.length - 1);
+		
+	}
+
+	private void doReadLogs() {
+		
+		
+	}
+
+	private void doFreeze() {
+		System.out.println("Enter account ID:");
+		int acc_ID = scan.nextInt();
+		client.createFreezeRequest(acc_ID);
+		System.out.print("Freezing Account");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
+		
+	}
+
+	private void doViewAccounts() {
+		
+		
+	}
+
+	private void customerView() {
 		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
 
 		int choice;
@@ -72,7 +152,7 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-
+		
 	}
 
 	private void doDeposit() {
