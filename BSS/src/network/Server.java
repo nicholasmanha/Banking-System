@@ -15,6 +15,10 @@ import bss.Customer;
 import bss.Session;
 import bss.Teller;
 import enums.*;
+import java.io.File;
+import java.util.Scanner;
+import bss.Log;
+
 
 public class Server {
 	public static void main(String[] args) {
@@ -153,8 +157,11 @@ public class Server {
 				case FREEZE:
 					doFreeze(request);
 					break;
-				default:
-					break;
+				case TEXT:
+				    doReadLogs(request);;
+	                break;
+	            default:
+	                break;
 				}
 
 			}
@@ -291,6 +298,44 @@ public class Server {
 					sendResponse(RequestType.FREEZE, Status.SUCCESS);
 				}
 			}
+		}
+		
+		private static void doReadLogs(Request request) {
+			if (loggedIn && userType == UserType.TELLER) {
+		        try {
+		            File tempFile = new File("temp_logs.txt");
+		            if (tempFile.exists()) {
+		                tempFile.delete();
+		            }
+		            tempFile.createNewFile();
+		            
+		            if (session != null) {
+		                for (Log log : session.getLogs()) {
+		                    log.writeLogToFile(tempFile); // Write each log to the file
+		                }
+		            }
+
+		            // read back the content of the file and prepare response
+		            ArrayList<String> logContents = new ArrayList<>();
+		            try (Scanner scanner = new Scanner(tempFile)) {
+		                while (scanner.hasNextLine()) {
+		                    logContents.add(scanner.nextLine());
+		                    
+		                }
+		            }
+
+		            // send logs back to the client
+		            sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
+		            tempFile.delete();
+		        } catch (IOException e) {
+		        	
+		            e.printStackTrace();
+		            sendResponse(new ArrayList<>(Arrays.asList("Failed to get logs")), RequestType.TEXT, Status.FAILURE);
+		        }
+		    } else {
+		    	
+		        sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
+		    }
 		}
 
 		private static void doLogout(Request request) {
