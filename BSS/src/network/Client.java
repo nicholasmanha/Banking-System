@@ -129,6 +129,16 @@ public class Client {
 					responseMessage = "Freeze Successful";
 				}
 				break;
+			case TEXT:
+			    if (request.getStatus() == Status.SUCCESS) {
+			        System.out.println("Logs:");
+			        for (String log : request.getTexts()) {
+			            System.out.println(log);
+			        }
+			    } else {
+			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
+			    }
+			    break;
 			default:
 				break;
 			}
@@ -237,5 +247,10 @@ public class Client {
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
+	}
+	
+	public void createReadLogsRequest() {
+	    isProcessing = true;
+	    sendRequest(RequestType.TEXT, Status.REQUEST);
 	}
 }
