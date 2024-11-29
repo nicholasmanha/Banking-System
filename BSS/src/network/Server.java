@@ -314,7 +314,7 @@ public class Server {
 		                    log.writeLogToFile(tempFile); // Write each log to the file
 		                }
 		            }
-
+		            
 		            // read back the content of the file and prepare response
 		            ArrayList<String> logContents = new ArrayList<>();
 		            try (Scanner scanner = new Scanner(tempFile)) {
