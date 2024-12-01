@@ -339,6 +339,7 @@ public class Server {
 		    	
 		        sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
 		    }
+		}
 
 		private static void doEnter(Request request) {
 			if (loggedIn) {
