@@ -146,6 +146,12 @@ public class Client {
 					responseMessage = request.getTexts().get(0);
 				}
 				break;
+			case LEAVE:
+				if (request.getStatus() == Status.SUCCESS) {
+					accountAccessed = false;
+					responseMessage = "Account Left Successfully";
+				}
+				break;
 			default:
 				break;
 			}
@@ -170,7 +176,7 @@ public class Client {
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}
-	
+
 	public boolean getAccountAccessed() {
 		return accountAccessed;
 	}
@@ -219,7 +225,7 @@ public class Client {
 		isProcessing = true;
 		sendRequest(RequestType.LEAVE, Status.REQUEST);
 	}
-	
+
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
