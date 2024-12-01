@@ -215,6 +215,11 @@ public class Client {
 		sendRequest(RequestType.TEXT, Status.REQUEST);
 	}
 
+	public void createLeaveRequest() {
+		isProcessing = true;
+		sendRequest(RequestType.LEAVE, Status.REQUEST);
+	}
+	
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 

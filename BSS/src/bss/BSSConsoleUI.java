@@ -249,5 +249,10 @@ public class BSSConsoleUI implements Runnable {
 		client.createLogoutRequest();
 
 	}
+	
+	private void doLeave() {
+		System.out.println("Leaving Account");
+		client.createLeaveRequest();
+	}
 
 }
