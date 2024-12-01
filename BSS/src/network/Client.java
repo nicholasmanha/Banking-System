@@ -131,12 +131,13 @@ public class Client {
 				break;
 			case TEXT:
 			    if (request.getStatus() == Status.SUCCESS) {
+			    	responseMessage = "Logs: ";
 			        System.out.println("Logs:");
 			        for (String log : request.getTexts()) {
-			            System.out.println(log);
+			            responseMessage += "\n" + log;
 			        }
 			    } else {
-			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
+			    	responseMessage = request.getTexts().get(0);
 			    }
 			    break;
 			default:
