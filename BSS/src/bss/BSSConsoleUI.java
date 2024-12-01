@@ -91,7 +91,7 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doReadLogs() {
-		
+		client.createReadLogsRequest();
 		
 	}
 	
@@ -128,9 +128,9 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
-		if(client.getAccountAccessed()) {
-			customerView();
-		}
+//		if(client.getAccountAccessed()) {
+//			customerView();
+//		}
 		
 	}
 
