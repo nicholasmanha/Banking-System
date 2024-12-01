@@ -131,12 +131,13 @@ public class Client {
 				break;
 			case TEXT:
 			    if (request.getStatus() == Status.SUCCESS) {
+			    	responseMessage = "Logs: ";
 			        System.out.println("Logs:");
 			        for (String log : request.getTexts()) {
-			            System.out.println(log);
+			            responseMessage += "\n" + log;
 			        }
 			    } else {
-			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
+			    	responseMessage = request.getTexts().get(0);
 			    }
 			    break;
 			default:
@@ -199,6 +200,11 @@ public class Client {
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 	
+	public void createReadLogsRequest() {
+	    isProcessing = true;
+	    sendRequest(RequestType.TEXT, Status.REQUEST);
+	}
+	
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
@@ -255,8 +261,5 @@ public class Client {
 		outputHandler.enqueueRequest(responses);
 	}
 	
-	public void createReadLogsRequest() {
-	    isProcessing = true;
-	    sendRequest(RequestType.TEXT, Status.REQUEST);
-	}
+	
 }

@@ -91,8 +91,18 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doReadLogs() {
-		
-		
+		client.createReadLogsRequest();
+		System.out.print("Getting Logs");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		System.out.println(client.getResponseMessage());
 	}
 	
 	private void doFreeze() {
@@ -128,9 +138,9 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
-		if(client.getAccountAccessed()) {
-			customerView();
-		}
+//		if(client.getAccountAccessed()) {
+//			customerView();
+//		}
 		
 	}
 
