@@ -20,7 +20,6 @@ import log.Log;
 import java.io.File;
 import java.util.Scanner;
 
-
 public class Server {
 	public static void main(String[] args) {
 		ServerSocket server = null;
@@ -159,10 +158,13 @@ public class Server {
 					doFreeze(request);
 					break;
 				case TEXT:
-				  doReadLogs(request);;
-	        break;
+					doReadLogs(request);
+					break;
 				case ENTER:
 					doEnter(request);
+					break;
+				case LEAVE:
+					doLeave(request);
 					break;
 				default:
 					break;
@@ -303,50 +305,64 @@ public class Server {
 				}
 			}
 		}
-		
+
 		private static void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
-		        try {
-		            File tempFile = new File("temp_logs.txt");
-		            if (tempFile.exists()) {
-		                tempFile.delete();
-		            }
-		            tempFile.createNewFile();
-		            
-		            if (session != null) {
-		                for (Log log : session.getLogs()) {
-		                    log.writeLogToFile(tempFile); // Write each log to the file
-		                }
-		            }
-		            
-		            // read back the content of the file and prepare response
-		            ArrayList<String> logContents = new ArrayList<>();
-		            try (Scanner scanner = new Scanner(tempFile)) {
-		                while (scanner.hasNextLine()) {
-		                    logContents.add(scanner.nextLine());
-		                    
-		                }
-		            }
+				try {
+					File tempFile = new File("temp_logs.txt");
+					if (tempFile.exists()) {
+						tempFile.delete();
+					}
+					tempFile.createNewFile();
 
-		            // send logs back to the client
-		            sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
-		            tempFile.delete();
-		        } catch (IOException e) {
-		        	
-		            e.printStackTrace();
-		            sendResponse(new ArrayList<>(Arrays.asList("Failed to get logs")), RequestType.TEXT, Status.FAILURE);
-		        }
-		    } else {
-		    	
-		        sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
-		    }
+					if (session != null) {
+						for (Log log : session.getLogs()) {
+							log.writeLogToFile(tempFile); // Write each log to the file
+						}
+					}
+
+					// read back the content of the file and prepare response
+					ArrayList<String> logContents = new ArrayList<>();
+					try (Scanner scanner = new Scanner(tempFile)) {
+						while (scanner.hasNextLine()) {
+							logContents.add(scanner.nextLine());
+
+						}
+					}
+
+					// send logs back to the client
+					sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
+					tempFile.delete();
+				} catch (IOException e) {
+
+					e.printStackTrace();
+					sendResponse(new ArrayList<>(Arrays.asList("Failed to get logs")), RequestType.TEXT,
+							Status.FAILURE);
+				}
+			} else {
+
+				sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT,
+						Status.FAILURE);
+			}
 		}
 
 		private static void doEnter(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account acc = bank.findAccount(acc_ID);
+					session = atm.logIn(acc);
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
+				}
+			}
+		}
+
+		private static void doLeave(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+
+					atm.logOut();
+					sendResponse(RequestType.LEAVE, Status.SUCCESS);
 				}
 			}
 		}
