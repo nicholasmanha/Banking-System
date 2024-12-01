@@ -40,16 +40,13 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
-		
-		
-		if(client.getUserType() == UserType.CUSTOMER) {
-			customerView();
-			
-		}
-		else {
+
+		if (client.getUserType() == UserType.CUSTOMER) {
+			customerView(true);
+
+		} else {
 			tellerView();
 		}
-		
 
 	}
 
@@ -87,7 +84,7 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-		
+
 	}
 
 	private void doReadLogs() {
@@ -104,7 +101,7 @@ public class BSSConsoleUI implements Runnable {
 		}
 		System.out.println(client.getResponseMessage());
 	}
-	
+
 	private void doFreeze() {
 		System.out.println("Enter account ID:");
 		int acc_ID = scan.nextInt();
@@ -120,7 +117,7 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
-		
+
 	}
 
 	private void doEnterAccount() {
@@ -138,14 +135,19 @@ public class BSSConsoleUI implements Runnable {
 			System.out.print(".");
 		}
 		System.out.println(client.getResponseMessage());
-		if(client.getAccountAccessed()) {
-			customerView();
+		if (client.getAccountAccessed()) {
+			customerView(false);
 		}
-		
+
 	}
 
-	private void customerView() {
-		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
+	private void customerView(boolean customer) {
+		String[] commands;
+		if (customer) {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Logout" };
+		} else {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Leave Account" };
+		}
 
 		int choice;
 
@@ -167,7 +169,13 @@ public class BSSConsoleUI implements Runnable {
 					doTransfer();
 					break;
 				case 3:
-					doLogout();
+					if(customer) {
+						doLogout();
+					}
+					else {
+						doLeave();
+					}
+					
 					break;
 				default:
 					System.out.println("INVALID CHOICE - TRY AGAIN");
@@ -178,7 +186,7 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-		
+
 	}
 
 	private void doDeposit() {
@@ -222,7 +230,7 @@ public class BSSConsoleUI implements Runnable {
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createTransferRequest(id, amount);
-		
+
 		System.out.print("Transfering");
 		while (client.getIsProcessing()) {
 			try {

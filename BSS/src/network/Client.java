@@ -170,6 +170,10 @@ public class Client {
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}
+	
+	public boolean getAccountAccessed() {
+		return accountAccessed;
+	}
 
 	public void createLoginRequest(String username, String password) {
 		ArrayList<String> userAndPass = new ArrayList<>();

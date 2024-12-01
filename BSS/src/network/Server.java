@@ -346,6 +346,8 @@ public class Server {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account acc = bank.findAccount(acc_ID);
+					session = atm.logIn(acc);
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
 				}
 			}
