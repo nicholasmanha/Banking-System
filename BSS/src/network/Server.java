@@ -352,6 +352,14 @@ public class Server {
 				}
 			}
 		}
+		private static void doLeave(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					atm.logOut();
+					sendResponse(RequestType.LEAVE, Status.SUCCESS);
+				}
+			}
+		}
 
 		private static void doLogout(Request request) {
 			if (loggedIn) {
