@@ -1,17 +1,17 @@
-package bss;
+package log;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class WithdrawLog implements Log {
-
+public class DepositLog implements Log {
+	
 	private int id;
     private String message;
     private LocalDateTime timeStamp;
     private int accountID;
 
-    public WithdrawLog(int id, String message,  int accountID) {
+    public DepositLog(int id, String message, int accountID) {
         
     	this.id = id;
         this.message = message;
@@ -36,4 +36,5 @@ public class WithdrawLog implements Log {
             e.printStackTrace();
         }
     }
+    
 }

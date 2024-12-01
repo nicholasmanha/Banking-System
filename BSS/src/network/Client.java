@@ -129,6 +129,17 @@ public class Client {
 					responseMessage = "Freeze Successful";
 				}
 				break;
+			case TEXT:
+			    if (request.getStatus() == Status.SUCCESS) {
+			    	responseMessage = "Logs: ";
+			        System.out.println("Logs:");
+			        for (String log : request.getTexts()) {
+			            responseMessage += "\n" + log;
+			        }
+			    } else {
+			    	responseMessage = request.getTexts().get(0);
+			    }
+			    break;
 			default:
 				break;
 			}
@@ -183,6 +194,17 @@ public class Client {
 		sendRequest(ID, RequestType.FREEZE, Status.REQUEST);
 	}
 
+	public void createEnterAccountRequest(int acc_ID) {
+		isProcessing = true;
+		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
+		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
+	}
+	
+	public void createReadLogsRequest() {
+	    isProcessing = true;
+	    sendRequest(RequestType.TEXT, Status.REQUEST);
+	}
+	
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
@@ -238,4 +260,6 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
+	
+	
 }

@@ -10,5 +10,6 @@ public enum RequestType {
 	FREEZE,
 	CREATEACCOUNT,
 	TRANSFER,
+	ENTER,
 	UNDEFINED
 }

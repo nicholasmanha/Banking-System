@@ -2,6 +2,8 @@ package bss;
 
 import java.util.ArrayList;
 
+import log.Log;
+
 public class ATM {
 	private Session session;
     private double balance;
