@@ -153,6 +153,9 @@ public class Server {
 				case FREEZE:
 					doFreeze(request);
 					break;
+				case ENTER:
+					doEnter(request);
+					break;
 				default:
 					break;
 				}
@@ -289,6 +292,15 @@ public class Server {
 					Account account = bank.findAccount(acc_ID);
 					account.setFrozen(true);
 					sendResponse(RequestType.FREEZE, Status.SUCCESS);
+				}
+			}
+		}
+		
+		private static void doEnter(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					sendResponse(RequestType.ENTER, Status.SUCCESS);
 				}
 			}
 		}

@@ -183,6 +183,12 @@ public class Client {
 		sendRequest(ID, RequestType.FREEZE, Status.REQUEST);
 	}
 
+	public void createEnterAccountRequest(int acc_ID) {
+		isProcessing = true;
+		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
+		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
+	}
+	
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
