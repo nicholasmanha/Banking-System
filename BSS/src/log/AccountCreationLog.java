@@ -1,25 +1,25 @@
-package bss;
+package log;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class TransferLog implements Log {
+public class AccountCreationLog implements Log {
 	
 	private int id;
+	private int teller_ID;
     private String message;
     private LocalDateTime timeStamp;
     private int accountID;
-    private int toAccountID;
     
-    public TransferLog(int id, String message, LocalDateTime timeStamp, 
-    		int accountID, int toAccountID) {
+    public AccountCreationLog(int id, int teller_ID, String message, 
+    		LocalDateTime timeStamp, int accountID) {
     	
         this.id = id;
+        this.teller_ID = teller_ID;
         this.message = message;
         this.timeStamp = timeStamp;
         this.accountID = accountID;
-        this.toAccountID = toAccountID;
     }
     
     @Override
@@ -28,10 +28,10 @@ public class TransferLog implements Log {
         try (FileWriter writer = new FileWriter(inOutFile, true)) 
         {
             writer.write("Log ID: " + id + "\n");
+            writer.write("Teller ID: " + teller_ID + "\n");
             writer.write("Message: " + message + "\n");
             writer.write("Timestamp: " + timeStamp.toString() + "\n");
-            writer.write("From Account ID: " + accountID + "\n");
-            writer.write("To Account ID: " + toAccountID + "\n");
+            writer.write("Account ID: " + accountID + "\n");
             writer.write("----\n");
         } 
         catch (IOException e) 
@@ -39,4 +39,5 @@ public class TransferLog implements Log {
             e.printStackTrace();
         }
     }
+
 }

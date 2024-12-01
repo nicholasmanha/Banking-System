@@ -15,9 +15,10 @@ import bss.Customer;
 import bss.Session;
 import bss.Teller;
 import enums.*;
+import log.Log;
+
 import java.io.File;
 import java.util.Scanner;
-import bss.Log;
 
 
 public class Server {
