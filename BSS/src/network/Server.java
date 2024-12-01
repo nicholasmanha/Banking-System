@@ -158,10 +158,13 @@ public class Server {
 					doFreeze(request);
 					break;
 				case TEXT:
-				    doReadLogs(request);;
-	                break;
-	            default:
-	                break;
+				  doReadLogs(request);;
+	        break;
+				case ENTER:
+					doEnter(request);
+					break;
+				default:
+					break;
 				}
 
 			}
@@ -336,6 +339,14 @@ public class Server {
 		    	
 		        sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
 		    }
+
+		private static void doEnter(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					sendResponse(RequestType.ENTER, Status.SUCCESS);
+				}
+			}
 		}
 
 		private static void doLogout(Request request) {
