@@ -1,4 +1,4 @@
-package bss;
+package log;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

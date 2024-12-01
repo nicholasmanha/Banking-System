@@ -1,5 +1,8 @@
 package bss;
 import java.util.ArrayList;
+
+import log.Log;
+
 import java.time.LocalDateTime;
 
 public class Session {
