@@ -199,6 +199,11 @@ public class Client {
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 	
+	public void createReadLogsRequest() {
+	    isProcessing = true;
+	    sendRequest(RequestType.TEXT, Status.REQUEST);
+	}
+	
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
@@ -255,8 +260,5 @@ public class Client {
 		outputHandler.enqueueRequest(responses);
 	}
 	
-	public void createReadLogsRequest() {
-	    isProcessing = true;
-	    sendRequest(RequestType.TEXT, Status.REQUEST);
-	}
+	
 }
