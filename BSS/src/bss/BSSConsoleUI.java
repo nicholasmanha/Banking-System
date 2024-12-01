@@ -169,13 +169,12 @@ public class BSSConsoleUI implements Runnable {
 					doTransfer();
 					break;
 				case 3:
-					if(customer) {
+					if (customer) {
 						doLogout();
-					}
-					else {
+					} else {
 						doLeave();
 					}
-					
+
 					break;
 				default:
 					System.out.println("INVALID CHOICE - TRY AGAIN");
@@ -249,10 +248,23 @@ public class BSSConsoleUI implements Runnable {
 		client.createLogoutRequest();
 
 	}
-	
+
 	private void doLeave() {
-		System.out.println("Leaving Account");
 		client.createLeaveRequest();
+		System.out.print("Leaving Account");
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			System.out.print(".");
+		}
+		if (!client.getAccountAccessed()) {
+			System.out.println();
+			tellerView();
+		}
 	}
 
 }
