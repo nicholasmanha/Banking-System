@@ -11,11 +11,11 @@ public class DepositLog implements Log {
     private LocalDateTime timeStamp;
     private int accountID;
 
-    public DepositLog(int id, String message, LocalDateTime timeStamp, int accountID) {
+    public DepositLog(int id, String message, int accountID) {
         
     	this.id = id;
         this.message = message;
-        this.timeStamp = timeStamp;
+        this.timeStamp = LocalDateTime.now();
         this.accountID = accountID;
     }
     

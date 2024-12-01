@@ -5,4 +5,5 @@ import java.io.File;
 
 public interface Log {
 	public void writeLogToFile(File inOutFile);
+	
 }

@@ -3,6 +3,7 @@ package bss;
 public class Teller extends User{
 
 	private String password;
+	
 	public Teller(String password) {
 		this.password = password;
 	}
