@@ -223,6 +223,11 @@ public class Client {
 	    dateRange.add(endDate);
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
+	
+	public void createAccountCreationRequest() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	public void createLeaveRequest() {
 		isProcessing = true;
@@ -284,5 +289,4 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-
 }

@@ -84,7 +84,11 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doCreateAccount() {
-		// TODO Auto-generated method stub
+		System.out.println("Enter Password");
+	    String password = scan.nextLine();
+	    client.createAccountCreationRequest();
+	    loadingDots();
+	    System.out.println(client.getResponseMessage());
 		
 	}
 
