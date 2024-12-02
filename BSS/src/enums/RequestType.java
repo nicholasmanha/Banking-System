@@ -11,5 +11,6 @@ public enum RequestType {
 	CREATEACCOUNT,
 	TRANSFER,
 	ENTER,
+	LEAVE,
 	UNDEFINED
 }

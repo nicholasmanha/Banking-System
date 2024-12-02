@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +20,6 @@ import log.Log;
 
 import java.io.File;
 import java.util.Scanner;
-
 
 public class Server {
 	public static void main(String[] args) {
@@ -159,10 +159,13 @@ public class Server {
 					doFreeze(request);
 					break;
 				case TEXT:
-				  doReadLogs(request);;
-	        break;
+					doReadLogs(request);
+					break;
 				case ENTER:
 					doEnter(request);
+					break;
+				case LEAVE:
+					doLeave(request);
 					break;
 				default:
 					break;
@@ -193,15 +196,17 @@ public class Server {
 		}
 
 		private static void doLogin(Request request) {
+			
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
 
 			userType = determineUserType(bank, username);
-
+			
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
 					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					
 					loggedIn = true;
 
 					// initialized global session variable
@@ -303,42 +308,39 @@ public class Server {
 				}
 			}
 		}
-		
+
 		private static void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
 		        try {
-		            File tempFile = new File("temp_logs.txt");
-		            if (tempFile.exists()) {
-		                tempFile.delete();
+		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
+		            LocalDateTime end = LocalDateTime.parse(request.getTexts().get(1));
+
+		            File logFile = new File("Logs.txt");
+		            if (!logFile.exists()) {
+		                sendResponse(new ArrayList<>(Arrays.asList("Log file not found")), RequestType.TEXT, Status.FAILURE);
+		                return;
 		            }
-		            tempFile.createNewFile();
-		            
-		            if (session != null) {
-		                for (Log log : session.getLogs()) {
-		                    log.writeLogToFile(tempFile); // Write each log to the file
-		                }
-		            }
-		            
-		            // read back the content of the file and prepare response
+
 		            ArrayList<String> logContents = new ArrayList<>();
-		            try (Scanner scanner = new Scanner(tempFile)) {
+		            try (Scanner scanner = new Scanner(logFile)) {
 		                while (scanner.hasNextLine()) {
-		                    logContents.add(scanner.nextLine());
-		                    
+		                    String line = scanner.nextLine();
+		                    LocalDateTime logTime = LocalDateTime.parse(line.split(" : ")[0]);
+		                    if (!logTime.isBefore(start) && !logTime.isAfter(end)) {
+		                        logContents.add(line);
+		                    }
 		                }
 		            }
 
-		            // send logs back to the client
 		            sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
-		            tempFile.delete();
-		        } catch (IOException e) {
-		        	
-		            e.printStackTrace();
-		            sendResponse(new ArrayList<>(Arrays.asList("Failed to get logs")), RequestType.TEXT, Status.FAILURE);
+		        } catch (Exception e) {
+		           
+		        	e.printStackTrace();
+		            sendResponse(new ArrayList<>(Arrays.asList("Error reading logs")), RequestType.TEXT, Status.FAILURE);
 		        }
 		    } else {
-		    	
-		        sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
+		        
+		    	sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
 		    }
 		}
 
@@ -346,7 +348,19 @@ public class Server {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account acc = bank.findAccount(acc_ID);
+					session = atm.logIn(acc);
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
+				}
+			}
+		}
+
+		private static void doLeave(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+
+					atm.logOut();
+					sendResponse(RequestType.LEAVE, Status.SUCCESS);
 				}
 			}
 		}

@@ -16,6 +16,7 @@ public class Client {
 	private boolean isProcessing = false;
 	private String responseMessage;
 	private UserType userType;
+	private boolean accountAccessed;
 
 	public Client(InputHandler inputHandler, OutputHandler outputHandler) {
 		this.inputHandler = inputHandler;
@@ -86,7 +87,7 @@ public class Client {
 		isProcessing = false;
 		for (Request request : req) {
 			RequestType requestType = request.getType();
-			switch(requestType) {
+			switch (requestType) {
 			case LOGIN:
 				if (request.getStatus() == Status.SUCCESS) {
 					loggedIn = true;
@@ -124,22 +125,32 @@ public class Client {
 					responseMessage = request.getTexts().get(0);
 				}
 				break;
+			case ENTER:
+				if (request.getStatus() == Status.SUCCESS) {
+					accountAccessed = true;
+					responseMessage = "Account Enter Successful";
+				}
 			case FREEZE:
 				if (request.getStatus() == Status.SUCCESS) {
 					responseMessage = "Freeze Successful";
 				}
 				break;
 			case TEXT:
-			    if (request.getStatus() == Status.SUCCESS) {
-			    	responseMessage = "Logs: ";
+				if (request.getStatus() == Status.SUCCESS) {
 			        System.out.println("Logs:");
 			        for (String log : request.getTexts()) {
-			            responseMessage += "\n" + log;
+			            System.out.println(log);
 			        }
 			    } else {
-			    	responseMessage = request.getTexts().get(0);
+			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
 			    }
 			    break;
+			case LEAVE:
+				if (request.getStatus() == Status.SUCCESS) {
+					accountAccessed = false;
+					responseMessage = "Account Left Successfully";
+				}
+				break;
 			default:
 				break;
 			}
@@ -165,7 +176,12 @@ public class Client {
 		return loggedIn;
 	}
 
+	public boolean getAccountAccessed() {
+		return accountAccessed;
+	}
+
 	public void createLoginRequest(String username, String password) {
+		isProcessing = true;
 		ArrayList<String> userAndPass = new ArrayList<>();
 		userAndPass.add(username);
 		userAndPass.add(password);
@@ -199,12 +215,20 @@ public class Client {
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
-	
-	public void createReadLogsRequest() {
+
+	public void createReadLogsRequest(String startDate, String endDate) {
 	    isProcessing = true;
-	    sendRequest(RequestType.TEXT, Status.REQUEST);
+	    ArrayList<String> dateRange = new ArrayList<>();
+	    dateRange.add(startDate);
+	    dateRange.add(endDate);
+	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
-	
+
+	public void createLeaveRequest() {
+		isProcessing = true;
+		sendRequest(RequestType.LEAVE, Status.REQUEST);
+	}
+
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 
@@ -246,20 +270,19 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-	
+
 	private void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(messages, amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-	
+
 	private void sendRequest(double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-	
-	
+
 }

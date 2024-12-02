@@ -30,26 +30,16 @@ public class BSSConsoleUI implements Runnable {
 		client.createLoginRequest(username, password);
 
 		System.out.print("Logging in");
-		while (!client.getLoggedIn()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
+		loadingDots();
+		
 		System.out.println(client.getResponseMessage());
-		
-		
-		if(client.getUserType() == UserType.CUSTOMER) {
-			customerView();
-			
-		}
-		else {
+
+		if (client.getUserType() == UserType.CUSTOMER) {
+			customerView(true);
+
+		} else {
 			tellerView();
 		}
-		
 
 	}
 
@@ -87,40 +77,29 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-		
+
 	}
 
 	private void doReadLogs() {
-		client.createReadLogsRequest();
-		System.out.print("Getting Logs");
-		while (client.getIsProcessing()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
-		System.out.println(client.getResponseMessage());
+		System.out.println("Enter start date-time (yyyy-MM-ddTHH:mm:ss):");
+	    String startDate = scan.nextLine();
+	    System.out.println("Enter end date-time (yyyy-MM-ddTHH:mm:ss):");
+	    String endDate = scan.nextLine();
+
+	    client.createReadLogsRequest(startDate, endDate);
+	    System.out.print("Getting Logs");
+	    loadingDots();
+	    System.out.println(client.getResponseMessage());
 	}
-	
+
 	private void doFreeze() {
 		System.out.println("Enter account ID:");
 		int acc_ID = scan.nextInt();
 		client.createFreezeRequest(acc_ID);
 		System.out.print("Freezing Account");
-		while (client.getIsProcessing()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
+		loadingDots();
 		System.out.println(client.getResponseMessage());
-		
+
 	}
 
 	private void doEnterAccount() {
@@ -128,24 +107,21 @@ public class BSSConsoleUI implements Runnable {
 		int acc_ID = scan.nextInt();
 		client.createEnterAccountRequest(acc_ID);
 		System.out.print("Accessing Account");
-		while (client.getIsProcessing()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
+		loadingDots();
 		System.out.println(client.getResponseMessage());
-//		if(client.getAccountAccessed()) {
-//			customerView();
-//		}
-		
+		if (client.getAccountAccessed()) {
+			customerView(false);
+		}
+
 	}
 
-	private void customerView() {
-		String[] commands = { "Deposit", "Withdraw", "Transfer", "Logout" };
+	private void customerView(boolean customer) {
+		String[] commands;
+		if (customer) {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Logout" };
+		} else {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Leave Account" };
+		}
 
 		int choice;
 
@@ -167,7 +143,12 @@ public class BSSConsoleUI implements Runnable {
 					doTransfer();
 					break;
 				case 3:
-					doLogout();
+					if (customer) {
+						doLogout();
+					} else {
+						doLeave();
+					}
+
 					break;
 				default:
 					System.out.println("INVALID CHOICE - TRY AGAIN");
@@ -178,7 +159,7 @@ public class BSSConsoleUI implements Runnable {
 				choice = -1;
 			}
 		} while (choice != commands.length - 1);
-		
+
 	}
 
 	private void doDeposit() {
@@ -187,15 +168,7 @@ public class BSSConsoleUI implements Runnable {
 		Double amount = scan.nextDouble();
 		client.createDepositRequest(amount);
 		System.out.print("Depositing");
-		while (client.getIsProcessing()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
+		loadingDots();
 		System.out.println(client.getResponseMessage());
 	}
 
@@ -204,15 +177,7 @@ public class BSSConsoleUI implements Runnable {
 		Double amount = scan.nextDouble();
 		client.createWithdrawRequest(amount);
 		System.out.print("Withdrawing");
-		while (client.getIsProcessing()) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.out.println("Thread was interrupted.");
-			}
-			System.out.print(".");
-		}
+		loadingDots();
 		System.out.println(client.getResponseMessage());
 	}
 
@@ -222,8 +187,29 @@ public class BSSConsoleUI implements Runnable {
 		System.out.println("Enter amount");
 		Double amount = scan.nextDouble();
 		client.createTransferRequest(id, amount);
-		
+
 		System.out.print("Transfering");
+		loadingDots();
+		System.out.println(client.getResponseMessage());
+	}
+
+	private void doLogout() {
+		System.out.println("cya");
+		client.createLogoutRequest();
+
+	}
+
+	private void doLeave() {
+		client.createLeaveRequest();
+		System.out.print("Leaving Account");
+		loadingDots();
+		if (!client.getAccountAccessed()) {
+			System.out.println();
+			tellerView();
+		}
+	}
+	
+	private void loadingDots() {
 		while (client.getIsProcessing()) {
 			try {
 				Thread.sleep(500);
@@ -233,13 +219,6 @@ public class BSSConsoleUI implements Runnable {
 			}
 			System.out.print(".");
 		}
-		System.out.println(client.getResponseMessage());
-	}
-
-	private void doLogout() {
-		System.out.println("cya");
-		client.createLogoutRequest();
-
 	}
 
 }

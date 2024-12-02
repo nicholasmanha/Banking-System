@@ -28,7 +28,7 @@ public class OutputHandler implements Runnable {
 
 					outputStream.writeObject(requests);
 					outputStream.flush();
-					System.out.println("\nSent Message");
+//					System.out.println("\nSent Message");
 
 				} catch (IOException e) {
 					this.stop();
