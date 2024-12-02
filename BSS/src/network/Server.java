@@ -85,22 +85,22 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-//			Customer customer = new Customer();
-//			bank.addCustomer(customer);
-//
-//			Account testAccount = firstTeller.createAccount("123");
-//			bank.addAccount(testAccount);
-//
-//			Account testAccount2 = firstTeller.createAccount("321");
-//			bank.addAccount(testAccount2);
-//
-//			for (Account account : bank.getAccounts()) {
-//				System.out.println("account #" + account.getId());
-//			}
-//
-//			for (Teller teller : bank.getTellers()) {
-//				System.out.println("teller #" + teller.getId());
-//			}
+			Customer customer = new Customer();
+			bank.addCustomer(customer);
+
+			Account testAccount = firstTeller.createAccount("123");
+			bank.addAccount(testAccount);
+
+			Account testAccount2 = firstTeller.createAccount("321");
+			bank.addAccount(testAccount2);
+
+			for (Account account : bank.getAccounts()) {
+				System.out.println("account #" + account.getId());
+			}
+
+			for (Teller teller : bank.getTellers()) {
+				System.out.println("teller #" + teller.getId());
+			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
 			 * initialize threads for them and process requests in a regular interval
