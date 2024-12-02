@@ -195,15 +195,17 @@ public class Server {
 		}
 
 		private static void doLogin(Request request) {
+			
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
 
 			userType = determineUserType(bank, username);
-
+			
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
 					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					
 					loggedIn = true;
 
 					// initialized global session variable

@@ -31,6 +31,7 @@ public class BSSConsoleUI implements Runnable {
 
 		System.out.print("Logging in");
 		loadingDots();
+		
 		System.out.println(client.getResponseMessage());
 
 		if (client.getUserType() == UserType.CUSTOMER) {
