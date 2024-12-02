@@ -5,11 +5,6 @@ import java.util.*;
 import enums.UserType;
 import network.Client;
 
-/**
- * This class is an implementation of DVDUserInterface that uses the console to
- * display the menu of command choices
- */
-
 public class BSSConsoleUI implements Runnable {
 
 	private Scanner scan;
@@ -21,6 +16,7 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	public void run() {
+		// Logging in
 		System.out.println("Enter username");
 		String username = scan.nextLine();
 
@@ -34,8 +30,9 @@ public class BSSConsoleUI implements Runnable {
 		
 		System.out.println(client.getResponseMessage());
 
+		// determine which view to show based off who is logging in
 		if (client.getUserType() == UserType.CUSTOMER) {
-			customerView(true);
+			AccountView(true);
 
 		} else {
 			tellerView();
@@ -43,45 +40,9 @@ public class BSSConsoleUI implements Runnable {
 
 	}
 
-	private void tellerView() {
-		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Create Account", "Logout" };
-
-		int choice;
-
-		do {
-			for (int i = 0; i < commands.length; i++) {
-				System.out.println("Select " + i + ": " + commands[i]);
-			}
-			try {
-				choice = scan.nextInt();
-				scan.nextLine();
-				switch (choice) {
-				case 0:
-					doEnterAccount();
-					break;
-				case 1:
-					doFreeze();
-					break;
-				case 2:
-					doReadLogs();
-					break;
-				case 3:
-					doCreateAccount();
-					break;
-				case 4:
-					doLogout();
-					break;
-				default:
-					System.out.println("INVALID CHOICE - TRY AGAIN");
-				}
-			} catch (InputMismatchException e) {
-				System.out.println("INVALID CHOICE - TRY AGAIN");
-				scan.nextLine();
-				choice = -1;
-			}
-		} while (choice != commands.length - 1);
-
-	}
+	/*
+	 * Teller methods
+	 */
 
 	private void doCreateAccount() {
 		System.out.println("Enter Password");
@@ -122,58 +83,15 @@ public class BSSConsoleUI implements Runnable {
 		loadingDots();
 		System.out.println(client.getResponseMessage());
 		if (client.getAccountAccessed()) {
-			customerView(false);
+			AccountView(false);
 		}
 
 	}
-
-	private void customerView(boolean customer) {
-		String[] commands;
-		if (customer) {
-			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Logout" };
-		} else {
-			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Leave Account" };
-		}
-
-		int choice;
-
-		do {
-			for (int i = 0; i < commands.length; i++) {
-				System.out.println("Select " + i + ": " + commands[i]);
-			}
-			try {
-				choice = scan.nextInt();
-				scan.nextLine();
-				switch (choice) {
-				case 0:
-					doDeposit();
-					break;
-				case 1:
-					doWithdraw();
-					break;
-				case 2:
-					doTransfer();
-					break;
-				case 3:
-					if (customer) {
-						doLogout();
-					} else {
-						doLeave();
-					}
-
-					break;
-				default:
-					System.out.println("INVALID CHOICE - TRY AGAIN");
-				}
-			} catch (InputMismatchException e) {
-				System.out.println("INVALID CHOICE - TRY AGAIN");
-				scan.nextLine();
-				choice = -1;
-			}
-		} while (choice != commands.length - 1);
-
-	}
-
+	
+	/*
+	 * Account Methods
+	 */
+	
 	private void doDeposit() {
 
 		System.out.println("Enter amount");
@@ -220,7 +138,102 @@ public class BSSConsoleUI implements Runnable {
 			tellerView();
 		}
 	}
+
+	/*
+	 * Views
+	 */
 	
+	private void tellerView() {
+		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Create Account", "Logout" };
+
+		int choice;
+
+		do {
+			for (int i = 0; i < commands.length; i++) {
+				System.out.println("Select " + i + ": " + commands[i]);
+			}
+			try {
+				choice = scan.nextInt();
+				scan.nextLine();
+				switch (choice) {
+				case 0:
+					doEnterAccount();
+					break;
+				case 1:
+					doFreeze();
+					break;
+				case 2:
+					doReadLogs();
+					break;
+				case 3:
+					doCreateAccount();
+					break;
+				case 4:
+					doLogout();
+					break;
+				default:
+					System.out.println("INVALID CHOICE - TRY AGAIN");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("INVALID CHOICE - TRY AGAIN");
+				scan.nextLine();
+				choice = -1;
+			}
+		} while (choice != commands.length - 1);
+
+	}
+	
+	private void AccountView(boolean customer) {
+		String[] commands;
+		
+		// if the user is a customer, have the last option be "logout", if they are a teller then this means that they are
+		// accessing an account, so the last option is "Leave Account".
+		if (customer) {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Logout" };
+		} else {
+			commands = new String[] { "Deposit", "Withdraw", "Transfer", "Leave Account" };
+		}
+
+		int choice;
+
+		do {
+			for (int i = 0; i < commands.length; i++) {
+				System.out.println("Select " + i + ": " + commands[i]);
+			}
+			try {
+				choice = scan.nextInt();
+				scan.nextLine();
+				switch (choice) {
+				case 0:
+					doDeposit();
+					break;
+				case 1:
+					doWithdraw();
+					break;
+				case 2:
+					doTransfer();
+					break;
+				case 3:
+					if (customer) {
+						doLogout();
+					} else {
+						doLeave();
+					}
+
+					break;
+				default:
+					System.out.println("INVALID CHOICE - TRY AGAIN");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("INVALID CHOICE - TRY AGAIN");
+				scan.nextLine();
+				choice = -1;
+			}
+		} while (choice != commands.length - 1);
+
+	}
+	
+	// Display "...." for loading responses from server
 	private void loadingDots() {
 		while (client.getIsProcessing()) {
 			try {
