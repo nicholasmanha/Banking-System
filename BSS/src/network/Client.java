@@ -224,9 +224,10 @@ public class Client {
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
 	
-	public void createAccountCreationRequest() {
-		// TODO Auto-generated method stub
-		
+	public void createAccountCreationRequest(String password) {
+		isProcessing = true;
+		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
+		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
 	}
 
 	public void createLeaveRequest() {
