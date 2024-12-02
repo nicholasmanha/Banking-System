@@ -4,14 +4,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import enums.UserType;
+import network.Client;
 
 public class GUI {
 
     private JFrame frame;
-    private String userRole; 
+    private Client client;
+    private UserType userType; 
 
     public GUI() {
 
+    	this.client = client;
         initializeLoginScreen();
     }
 
@@ -30,26 +34,18 @@ public class GUI {
         JPasswordField pinField = new JPasswordField();
 
         JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(new ActionListener() 
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) 
-            {
-                String accountId = accountIdField.getText();
-                String pin = new String(pinField.getPassword());
-                handleLogin(accountId, pin);
-                
-            }
+        loginButton.addActionListener(e -> {
+            String username = accountIdField.getText();
+            String password = new String(pinField.getPassword());
+            handleLogin(username, password);
         });
 
-        
         frame.add(accountIdLabel);
         frame.add(accountIdField);
         frame.add(pinLabel);
         frame.add(pinField);
         frame.add(new JLabel()); // Spacer
         frame.add(loginButton);
-
         frame.setVisible(true);
     }
     
