@@ -44,7 +44,7 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void tellerView() {
-		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Logout" };
+		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Create Account", "Logout" };
 
 		int choice;
 
@@ -66,6 +66,9 @@ public class BSSConsoleUI implements Runnable {
 					doReadLogs();
 					break;
 				case 3:
+					doCreateAccount();
+					break;
+				case 4:
 					doLogout();
 					break;
 				default:
@@ -78,6 +81,15 @@ public class BSSConsoleUI implements Runnable {
 			}
 		} while (choice != commands.length - 1);
 
+	}
+
+	private void doCreateAccount() {
+		System.out.println("Enter Password");
+	    String password = scan.nextLine();
+	    client.createAccountCreationRequest(password);
+	    loadingDots();
+	    System.out.println(client.getResponseMessage());
+		
 	}
 
 	private void doReadLogs() {

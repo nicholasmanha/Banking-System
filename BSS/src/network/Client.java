@@ -145,6 +145,11 @@ public class Client {
 			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
 			    }
 			    break;
+			case CREATEACCOUNT:
+				if (request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Account Creation Successful";
+				}
+				break;
 			case LEAVE:
 				if (request.getStatus() == Status.SUCCESS) {
 					accountAccessed = false;
@@ -223,6 +228,12 @@ public class Client {
 	    dateRange.add(endDate);
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
+	
+	public void createAccountCreationRequest(String password) {
+		isProcessing = true;
+		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
+		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
+	}
 
 	public void createLeaveRequest() {
 		isProcessing = true;
@@ -284,5 +295,4 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-
 }
