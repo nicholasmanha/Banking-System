@@ -85,22 +85,22 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-			Customer customer = new Customer();
-			bank.addCustomer(customer);
-
-			Account testAccount = firstTeller.createAccount("123");
-			bank.addAccount(testAccount);
-
-			Account testAccount2 = firstTeller.createAccount("321");
-			bank.addAccount(testAccount2);
-
-			for (Account account : bank.getAccounts()) {
-				System.out.println("account #" + account.getId());
-			}
-
-			for (Teller teller : bank.getTellers()) {
-				System.out.println("teller #" + teller.getId());
-			}
+//			Customer customer = new Customer();
+//			bank.addCustomer(customer);
+//
+//			Account testAccount = firstTeller.createAccount("123");
+//			bank.addAccount(testAccount);
+//
+//			Account testAccount2 = firstTeller.createAccount("321");
+//			bank.addAccount(testAccount2);
+//
+//			for (Account account : bank.getAccounts()) {
+//				System.out.println("account #" + account.getId());
+//			}
+//
+//			for (Teller teller : bank.getTellers()) {
+//				System.out.println("teller #" + teller.getId());
+//			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
 			 * initialize threads for them and process requests in a regular interval
@@ -167,6 +167,7 @@ public class Server {
 					break;
 				case CREATEACCOUNT:
 					doCreateAccount(request);
+					break;
 				case LEAVE:
 					doLeave(request);
 					break;
@@ -352,8 +353,10 @@ public class Server {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					System.out.println("got here");
 					Account acc = bank.findAccount(acc_ID);
 					session = atm.logIn(acc);
+					
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
 				}
 			}

@@ -130,6 +130,7 @@ public class Client {
 					accountAccessed = true;
 					responseMessage = "Account Enter Successful";
 				}
+				break;
 			case FREEZE:
 				if (request.getStatus() == Status.SUCCESS) {
 					responseMessage = "Freeze Successful";
