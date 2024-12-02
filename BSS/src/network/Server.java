@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -310,42 +311,37 @@ public class Server {
 
 		private static void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
-				try {
-					File tempFile = new File("temp_logs.txt");
-					if (tempFile.exists()) {
-						tempFile.delete();
-					}
-					tempFile.createNewFile();
+		        try {
+		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
+		            LocalDateTime end = LocalDateTime.parse(request.getTexts().get(1));
 
-					if (session != null) {
-						for (Log log : session.getLogs()) {
-							log.writeLogToFile(tempFile); // Write each log to the file
-						}
-					}
+		            File logFile = new File("LogDatabase.txt");
+		            if (!logFile.exists()) {
+		                sendResponse(new ArrayList<>(Arrays.asList("Log file not found")), RequestType.TEXT, Status.FAILURE);
+		                return;
+		            }
 
-					// read back the content of the file and prepare response
-					ArrayList<String> logContents = new ArrayList<>();
-					try (Scanner scanner = new Scanner(tempFile)) {
-						while (scanner.hasNextLine()) {
-							logContents.add(scanner.nextLine());
+		            ArrayList<String> logContents = new ArrayList<>();
+		            try (Scanner scanner = new Scanner(logFile)) {
+		                while (scanner.hasNextLine()) {
+		                    String line = scanner.nextLine();
+		                    LocalDateTime logTime = LocalDateTime.parse(line.split(" : ")[0]);
+		                    if (!logTime.isBefore(start) && !logTime.isAfter(end)) {
+		                        logContents.add(line);
+		                    }
+		                }
+		            }
 
-						}
-					}
-
-					// send logs back to the client
-					sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
-					tempFile.delete();
-				} catch (IOException e) {
-
-					e.printStackTrace();
-					sendResponse(new ArrayList<>(Arrays.asList("Failed to get logs")), RequestType.TEXT,
-							Status.FAILURE);
-				}
-			} else {
-
-				sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT,
-						Status.FAILURE);
-			}
+		            sendResponse(logContents, RequestType.TEXT, Status.SUCCESS);
+		        } catch (Exception e) {
+		           
+		        	e.printStackTrace();
+		            sendResponse(new ArrayList<>(Arrays.asList("Error reading logs")), RequestType.TEXT, Status.FAILURE);
+		        }
+		    } else {
+		        
+		    	sendResponse(new ArrayList<>(Arrays.asList("Unauthorized or Not Logged In")), RequestType.TEXT, Status.FAILURE);
+		    }
 		}
 
 		private static void doEnter(Request request) {
