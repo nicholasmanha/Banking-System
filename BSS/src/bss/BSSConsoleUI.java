@@ -66,10 +66,10 @@ public class BSSConsoleUI implements Runnable {
 					doReadLogs();
 					break;
 				case 3:
-					doLogout();
+					doCreateAccount();
 					break;
 				case 4:
-					doCreateAccount();
+					doLogout();
 					break;
 				default:
 					System.out.println("INVALID CHOICE - TRY AGAIN");
