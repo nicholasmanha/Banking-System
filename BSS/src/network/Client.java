@@ -182,6 +182,7 @@ public class Client {
 	}
 
 	public void createLoginRequest(String username, String password) {
+		isProcessing = true;
 		ArrayList<String> userAndPass = new ArrayList<>();
 		userAndPass.add(username);
 		userAndPass.add(password);
