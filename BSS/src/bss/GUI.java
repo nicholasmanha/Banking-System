@@ -79,21 +79,26 @@ public class GUI {
             {
                 String response = client.getResponseMessage();
                 JOptionPane.showMessageDialog(frame, response);
-                userType = client.getUserType();
 
                 if (client.getLoggedIn()) 
                 {
-                    if (userType == UserType.TELLER) 
-                    {
-                        showTellerView();
-                    } 
-                    else if (userType == UserType.CUSTOMER) 
-                    {
-                        showCustomerView();
-                    }
+                    userType = client.getUserType();
+                    showUserView();
                 }
             }
         }.execute();
+    }
+    
+    private void showUserView() 
+    {
+        if (userType == UserType.TELLER) 
+        {
+            showTellerView();
+        } 
+        else if (userType == UserType.CUSTOMER) 
+        {
+            showCustomerView();
+        }
     }
     
 	// display the teller view
@@ -128,17 +133,17 @@ public class GUI {
 
         JButton depositButton = new JButton("Deposit");
         JButton withdrawButton = new JButton("Withdraw");
-        JButton viewBalanceButton = new JButton("View Balance");
+        JButton transferButton = new JButton("Transfer");
         JButton logoutButton = new JButton("Logout");
         
         depositButton.addActionListener(e -> handleDeposit());
         withdrawButton.addActionListener(e -> handleWithdraw());
-        viewBalanceButton.addActionListener(e -> handleViewBalance());
-        logoutButton.addActionListener(e -> initializeLoginScreen());
+        transferButton.addActionListener(e -> handleTransfer());
+        logoutButton.addActionListener(e -> handleLogout());
 
         frame.add(depositButton);
         frame.add(withdrawButton);
-        frame.add(viewBalanceButton);
+        frame.add(transferButton);
         frame.add(logoutButton);
         frame.revalidate();
         frame.repaint();
@@ -200,102 +205,38 @@ public class GUI {
         }
     }
 
-    // Placeholder: handle Deposit action
     private void handleDeposit() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(3, 2));
-
-        JLabel depositLabel = new JLabel("Enter Deposit Amount:");
-        JTextField depositField = new JTextField();
-
-        JButton confirmButton = new JButton("Confirm");
-        JButton backButton = new JButton("Back");
-
-        confirmButton.addActionListener(e -> {
-            String amountText = depositField.getText();
-            try 
-            {
-                double amount = Double.parseDouble(amountText);
-                System.out.println("Depositing amount: " + amount);
-                // Add logic to notify Client class
-            } 
-            catch (NumberFormatException ex) 
-            {
-                JOptionPane.showMessageDialog(frame, "Invalid amount. Please enter a valid number.");
-            }
-        });
-
-        backButton.addActionListener(e -> {
-            
-        	if ("customer".equalsIgnoreCase(userRole)) 
-            {
-                showCustomerView();
-            } 
-            else if ("teller".equalsIgnoreCase(userRole)) 
-            {
-                showTellerView();
-            }
-        });
-
-        frame.add(depositLabel);
-        frame.add(depositField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(confirmButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
+        String amount = JOptionPane.showInputDialog(frame, "Enter Deposit Amount:");
+        if (amount != null) 
+        {
+            client.createDepositRequest(Double.parseDouble(amount));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
-    // Placeholder: handle Withdraw action
     private void handleWithdraw() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(3, 2));
-
-        JLabel withdrawLabel = new JLabel("Enter Withdrawal Amount:");
-        JTextField withdrawField = new JTextField();
-
-        JButton confirmButton = new JButton("Confirm");
-        JButton backButton = new JButton("Back");
-
-        confirmButton.addActionListener(e -> {
-            String amountText = withdrawField.getText();
-            try 
-            {
-                double amount = Double.parseDouble(amountText);
-                System.out.println("Withdrawing amount: " + amount);
-                // Add logic to notify Client class
-            } 
-            catch (NumberFormatException ex) 
-            {
-                JOptionPane.showMessageDialog(frame, "Invalid amount. Please enter a valid number.");
-            }
-        });
-
-        backButton.addActionListener(e -> {
-            
-        	if ("customer".equalsIgnoreCase(userRole)) 
-            {
-                showCustomerView();
-            } 
-            else if ("teller".equalsIgnoreCase(userRole)) 
-            {
-                showTellerView();
-            }
-        });
-
-        frame.add(withdrawLabel);
-        frame.add(withdrawField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(confirmButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
+        String amount = JOptionPane.showInputDialog(frame, "Enter Withdrawal Amount:");
+        if (amount != null) 
+        {
+            client.createWithdrawRequest(Double.parseDouble(amount));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
+    }
+    
+    private void handleTransfer() 
+    {
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Transfer To:");
+        String amount = JOptionPane.showInputDialog(frame, "Enter Transfer Amount:");
+        if (accountId != null && amount != null) 
+        {
+            client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
+    /*
     // Placeholder: handle View Balance action
     private void handleViewBalance() 
     {
@@ -323,6 +264,7 @@ public class GUI {
         frame.revalidate();
         frame.repaint();
     }
+    */
     
     private void handleLogout() 
     {
