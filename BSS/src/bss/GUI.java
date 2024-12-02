@@ -13,7 +13,7 @@ public class GUI {
     private Client client;
     private UserType userType; 
 
-    public GUI() {
+    public GUI(Client client) {
 
     	this.client = client;
         initializeLoginScreen();
@@ -49,11 +49,51 @@ public class GUI {
         frame.setVisible(true);
     }
     
-    private void handleLogin(String accountId, String pin) 
+    private void handleLogin(String username, String password) 
     {
     	
-    	// notify the Client to send login request
-        System.out.println("Login attempted with ID: " + accountId + " and PIN: " + pin);
+    	client.createLoginRequest(username, password);
+        JOptionPane.showMessageDialog(frame, "Logging in...");
+        
+        new SwingWorker<Void, Void>() 
+        {
+            @Override
+            protected Void doInBackground() 
+            {
+                while (client.getIsProcessing()) 
+                {
+                    try 
+                    {
+                        Thread.sleep(200);
+                    } 
+                    catch (InterruptedException e) 
+                    {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() 
+            {
+                String response = client.getResponseMessage();
+                JOptionPane.showMessageDialog(frame, response);
+                userType = client.getUserType();
+
+                if (client.getLoggedIn()) 
+                {
+                    if (userType == UserType.TELLER) 
+                    {
+                        showTellerView();
+                    } 
+                    else if (userType == UserType.CUSTOMER) 
+                    {
+                        showCustomerView();
+                    }
+                }
+            }
+        }.execute();
     }
     
 	public void setUserRole(String role) 
