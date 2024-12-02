@@ -145,6 +145,11 @@ public class Client {
 			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
 			    }
 			    break;
+			case CREATEACCOUNT:
+				if (request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Account Creation Successful";
+				}
+				break;
 			case LEAVE:
 				if (request.getStatus() == Status.SUCCESS) {
 					accountAccessed = false;
