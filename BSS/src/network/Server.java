@@ -68,6 +68,7 @@ public class Server {
 		private static boolean loggedIn;
 		private static ATM atm;
 		private static Session session;
+		private static Teller teller;
 
 		public ClientHandler(Bank bank, Socket socket) {
 			atm = new ATM();
@@ -164,6 +165,8 @@ public class Server {
 				case ENTER:
 					doEnter(request);
 					break;
+				case CREATEACCOUNT:
+					doCreateAccount(request);
 				case LEAVE:
 					doLeave(request);
 					break;
@@ -218,6 +221,7 @@ public class Server {
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
 				if (teller.checkCredentials(username, password)) {
+					ClientHandler.teller = teller;
 					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
 					loggedIn = true;
 				}
@@ -353,6 +357,18 @@ public class Server {
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
 				}
 			}
+		}
+		
+
+		private static void doCreateAccount(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
+					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
+				}
+			}
+			
+			
 		}
 
 		private static void doLeave(Request request) {
