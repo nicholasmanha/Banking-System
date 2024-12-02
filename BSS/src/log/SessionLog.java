@@ -27,16 +27,24 @@ public class SessionLog implements Log {
     {
     	try (FileWriter writer = new FileWriter(inOutFile, true)) 
     	{
-            writer.write("Log ID: " + id + "\n");
-            writer.write("Message: " + message + "\n");
-            writer.write("Session Start: " + timeStart.toString() + "\n");
-            writer.write("Session End: " + timeEnd.toString() + "\n");
-            writer.write("Account ID: " + accountID + "\n");
-            writer.write("----\n");
+            writer.write(toLogString());
         } 
     	catch (IOException e) 
     	{
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public String toLogString() 
+    {
+        return String.format("%s - %s : Session | Log ID: %d | Account ID: %d | %s%n",
+                timeStart.toString(), timeEnd.toString(), id, accountID, message);
+    }
+
+    @Override
+    public LocalDateTime getTimeStamp() 
+    {
+        return timeStart;
     }
 }
