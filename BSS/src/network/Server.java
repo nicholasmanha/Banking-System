@@ -315,7 +315,7 @@ public class Server {
 		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
 		            LocalDateTime end = LocalDateTime.parse(request.getTexts().get(1));
 
-		            File logFile = new File("LogDatabase.txt");
+		            File logFile = new File("Logs.txt");
 		            if (!logFile.exists()) {
 		                sendResponse(new ArrayList<>(Arrays.asList("Log file not found")), RequestType.TEXT, Status.FAILURE);
 		                return;

@@ -81,10 +81,15 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	private void doReadLogs() {
-		client.createReadLogsRequest();
-		System.out.print("Getting Logs");
-		loadingDots();
-		System.out.println(client.getResponseMessage());
+		System.out.println("Enter start date-time (yyyy-MM-ddTHH:mm:ss):");
+	    String startDate = scan.nextLine();
+	    System.out.println("Enter end date-time (yyyy-MM-ddTHH:mm:ss):");
+	    String endDate = scan.nextLine();
+
+	    client.createReadLogsRequest(startDate, endDate);
+	    System.out.print("Getting Logs");
+	    loadingDots();
+	    System.out.println(client.getResponseMessage());
 	}
 
 	private void doFreeze() {
