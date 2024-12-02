@@ -137,15 +137,14 @@ public class Client {
 				break;
 			case TEXT:
 				if (request.getStatus() == Status.SUCCESS) {
-					responseMessage = "Logs: ";
-					System.out.println("Logs:");
-					for (String log : request.getTexts()) {
-						responseMessage += "\n" + log;
-					}
-				} else {
-					responseMessage = request.getTexts().get(0);
-				}
-				break;
+			        System.out.println("Logs:");
+			        for (String log : request.getTexts()) {
+			            System.out.println(log);
+			        }
+			    } else {
+			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
+			    }
+			    break;
 			case LEAVE:
 				if (request.getStatus() == Status.SUCCESS) {
 					accountAccessed = false;
@@ -217,9 +216,12 @@ public class Client {
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 
-	public void createReadLogsRequest() {
-		isProcessing = true;
-		sendRequest(RequestType.TEXT, Status.REQUEST);
+	public void createReadLogsRequest(String startDate, String endDate) {
+	    isProcessing = true;
+	    ArrayList<String> dateRange = new ArrayList<>();
+	    dateRange.add(startDate);
+	    dateRange.add(endDate);
+	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
 
 	public void createLeaveRequest() {
