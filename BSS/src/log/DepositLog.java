@@ -22,19 +22,27 @@ public class DepositLog implements Log {
     @Override
     public void writeLogToFile(File inOutFile) 
     {
-        try (FileWriter writer = new FileWriter(inOutFile, true)) 
-        {
-            writer.write("Log ID: " + id + "\n");
-            writer.write("Message: " + message + "\n");
-            writer.write("Timestamp: " + timeStamp.toString() + "\n");
-            writer.write("Account ID: " + accountID + "\n");
-            writer.write("----\n");
-            
+    	try (FileWriter writer = new FileWriter(inOutFile, true)) 
+    	{
+            writer.write(toLogString());
         } 
-        catch (IOException e) 
-        {
+    	catch (IOException e) 
+    	{
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public String toLogString() 
+    {
+        return String.format("%s : Deposit | Log ID: %d | Account ID: %d | %s%n",
+                timeStamp.toString(), id, accountID, message);
+    }
+
+    @Override
+    public LocalDateTime getTimeStamp() 
+    {
+        return timeStamp;
     }
     
 }
