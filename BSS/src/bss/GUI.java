@@ -96,44 +96,25 @@ public class GUI {
         }.execute();
     }
     
-	public void setUserRole(String role) 
-	{
-	        
-	    	this.userRole = role;
-	        
-	    	if (role.equalsIgnoreCase("teller")) 
-	    	{
-	            showTellerView();
-	        } 
-	    	else if (role.equalsIgnoreCase("customer")) 
-	        {
-	            showCustomerView();
-	        } 
-	    	else 
-	    	{
-	            JOptionPane.showMessageDialog(frame, "invalid role");
-	        }
-	}
-    
 	// display the teller view
     private void showTellerView() 
     {	
     	frame.getContentPane().removeAll();
         frame.setLayout(new GridLayout(4, 1));
 
-        JButton viewAccountsButton = new JButton("View Accounts");
-        JButton createAccountButton = new JButton("Create Account");
-        JButton readTransactionLogButton = new JButton("Read Transaction Log");
+        JButton enterAccountButton = new JButton("Enter Account");
+        JButton freezeAccountButton = new JButton("Freeze Account");
+        JButton readLogsButton = new JButton("Read Logs");
         JButton logoutButton = new JButton("Logout");
         
-        viewAccountsButton.addActionListener(e -> handleViewAccounts());
-        createAccountButton.addActionListener(e -> handleCreateAccount());
-        readTransactionLogButton.addActionListener(e -> handleReadTransactionLog());
-        logoutButton.addActionListener(e -> initializeLoginScreen());
+        enterAccountButton.addActionListener(e -> handleEnterAccount());
+        freezeAccountButton.addActionListener(e -> handleFreezeAccount());
+        readLogsButton.addActionListener(e -> handleReadLogs());
+        logoutButton.addActionListener(e -> handleLogout());
 
-        frame.add(viewAccountsButton);
-        frame.add(createAccountButton);
-        frame.add(readTransactionLogButton);
+        frame.add(enterAccountButton);
+        frame.add(freezeAccountButton);
+        frame.add(readLogsButton);
         frame.add(logoutButton);
         frame.revalidate();
         frame.repaint();
@@ -163,90 +144,60 @@ public class GUI {
         frame.repaint();
     }
     
-    // Placeholder: handle View Accounts action
-    private void handleViewAccounts() 
+    private void handleEnterAccount() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new BorderLayout());
-
-        JLabel headerLabel = new JLabel("Accounts:");
-        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JTextArea accountsArea = new JTextArea();
-        accountsArea.setEditable(false);
-        accountsArea.setText("Account 1: $0.00\nAccount 2: $100.00"); // Replace with real data later
-
-        JScrollPane scrollPane = new JScrollPane(accountsArea);
-
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(headerLabel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(backButton, BorderLayout.SOUTH);
-        frame.revalidate();
-        frame.repaint();
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID:");
+        if (accountId != null) 
+        {
+            client.createEnterAccountRequest(Integer.parseInt(accountId));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
-    // Placeholder: handle Create Account action
-    private void handleCreateAccount() 
+    private void handleFreezeAccount() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(4, 2));
-        
-
-        JLabel accountTypeLabel = new JLabel("Select Account Type:");
-        JComboBox<String> accountTypeDropdown = new JComboBox<>(new String[]{"Checkings", "Savings"});
-
-        JLabel pinLabel = new JLabel("Set PIN:");
-        JPasswordField pinField = new JPasswordField();
-
-        JButton createButton = new JButton("Create");
-        JButton backButton = new JButton("Back");
-
-        createButton.addActionListener(e -> {
-            String selectedType = (String) accountTypeDropdown.getSelectedItem();
-            String pin = new String(pinField.getPassword());
-            System.out.println("Creating account of type: " + selectedType + " with PIN: " + pin);
-            // need to logic to notify Client class
-        });
-
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(accountTypeLabel);
-        frame.add(accountTypeDropdown);
-        frame.add(pinLabel);
-        frame.add(pinField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(createButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Freeze:");
+        if (accountId != null) 
+        {
+            client.createFreezeRequest(Integer.parseInt(accountId));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
-    // Placeholder: handle Read Transaction Log action
-    private void handleReadTransactionLog() 
+    private void handleReadLogs() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new BorderLayout());
+        String startDate = JOptionPane.showInputDialog(frame, "Enter Start Date (yyyy-MM-ddTHH:mm:ss):");
+        String endDate = JOptionPane.showInputDialog(frame, "Enter End Date (yyyy-MM-ddTHH:mm:ss):");
+        if (startDate != null && endDate != null) 
+        {
+            client.createReadLogsRequest(startDate, endDate);
+            JOptionPane.showMessageDialog(frame, "Fetching logs...");
 
-        JLabel headerLabel = new JLabel("Transaction Log:");
-        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() 
+                {
+                    while (client.getIsProcessing()) 
+                    {
+                        try 
+                        {
+                            Thread.sleep(200);
+                        } 
+                        catch (InterruptedException e) 
+                        {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return null;
+                }
 
-        JTextArea logArea = new JTextArea();
-        logArea.setEditable(false);
-        logArea.setText("Transaction 1: $50 deposit\nTransaction 2: $20 withdrawal"); // Replace with real data later
-        JScrollPane scrollPane = new JScrollPane(logArea);
-
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(headerLabel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(backButton, BorderLayout.SOUTH);
-        frame.revalidate();
-        frame.repaint();
+                @Override
+                protected void done() 
+                {
+                    JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+                }
+            }.execute();
+        }
     }
 
     // Placeholder: handle Deposit action
@@ -371,6 +322,13 @@ public class GUI {
         frame.add(backButton);
         frame.revalidate();
         frame.repaint();
+    }
+    
+    private void handleLogout() 
+    {
+        client.createLogoutRequest();
+        JOptionPane.showMessageDialog(frame, "Logged out successfully.");
+        initializeLoginScreen();
     }
 
 }
