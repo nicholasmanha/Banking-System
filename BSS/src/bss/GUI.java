@@ -48,7 +48,7 @@ public class GUI implements Runnable{
         frame.setVisible(true);
     }
     
-    private void handleLogin(String username, String password) 
+    private synchronized void handleLogin(String username, String password) 
     {
     	
     	client.createLoginRequest(username, password);
@@ -88,7 +88,7 @@ public class GUI implements Runnable{
         }.execute();
     }
     
-    private void showUserView() 
+    private synchronized void showUserView() 
     {
         if (userType == UserType.TELLER) 
         {
@@ -101,7 +101,7 @@ public class GUI implements Runnable{
     }
     
 	// display the teller view
-    private void showTellerView() 
+    private synchronized void showTellerView() 
     {	
     	frame.getContentPane().removeAll();
     	frame.setTitle("Teller View");
@@ -126,7 +126,7 @@ public class GUI implements Runnable{
     }
     
     // display the customer view
-    private void showCustomerView() 
+    private synchronized void showCustomerView() 
     {
     	frame.getContentPane().removeAll();
     	frame.setTitle("Customer View");
@@ -150,7 +150,7 @@ public class GUI implements Runnable{
         frame.repaint();
     }
     
-    private void handleEnterAccount() 
+    private synchronized void handleEnterAccount() 
     {
         String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID:");
         if (accountId != null) 
@@ -160,7 +160,7 @@ public class GUI implements Runnable{
         }
     }
 
-    private void handleFreezeAccount() 
+    private synchronized void handleFreezeAccount() 
     {
         String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Freeze:");
         if (accountId != null) 
@@ -170,7 +170,7 @@ public class GUI implements Runnable{
         }
     }
 
-    private void handleReadLogs() 
+    private synchronized void handleReadLogs() 
     {
         String startDate = JOptionPane.showInputDialog(frame, "Enter Start Date (yyyy-MM-ddTHH:mm:ss):");
         String endDate = JOptionPane.showInputDialog(frame, "Enter End Date (yyyy-MM-ddTHH:mm:ss):");
@@ -206,17 +206,19 @@ public class GUI implements Runnable{
         }
     }
 
-    private void handleDeposit() 
+    private synchronized void handleDeposit() 
     {
         String amount = JOptionPane.showInputDialog(frame, "Enter Deposit Amount:");
+        
         if (amount != null) 
         {
             client.createDepositRequest(Double.parseDouble(amount));
+            
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
 
-    private void handleWithdraw() 
+    private synchronized void handleWithdraw() 
     {
         String amount = JOptionPane.showInputDialog(frame, "Enter Withdrawal Amount:");
         if (amount != null) 
@@ -226,7 +228,7 @@ public class GUI implements Runnable{
         }
     }
     
-    private void handleTransfer() 
+    private synchronized void handleTransfer() 
     {
         String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Transfer To:");
         String amount = JOptionPane.showInputDialog(frame, "Enter Transfer Amount:");
@@ -267,7 +269,7 @@ public class GUI implements Runnable{
     }
     */
     
-    private void handleLogout() 
+    private synchronized void handleLogout() 
     {
         client.createLogoutRequest();
         JOptionPane.showMessageDialog(frame, "Logged out successfully.");

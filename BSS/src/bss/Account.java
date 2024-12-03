@@ -36,7 +36,7 @@ public class Account extends User{
 	}
 	
 	// Check the credentials the customer gives to verify access to this account
-    public boolean checkCredentials(int in_account_ID, String in_pin) {
+    public synchronized boolean checkCredentials(int in_account_ID, String in_pin) {
     	//do the credentials match this account? ok check if the user is authorized
     	if (super.id == in_account_ID && this.pin.equals(in_pin)) {
     		// check if customer is associated with the account, removed for now, add back if necessary/possible
@@ -49,7 +49,7 @@ public class Account extends User{
         return false;
     }
     // Get the account ID
-    public int getAccountID() {
+    public synchronized int getAccountID() {
         return super.id;
     }
     // Get frozen status

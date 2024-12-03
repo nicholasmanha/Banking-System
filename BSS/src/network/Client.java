@@ -29,7 +29,7 @@ public class Client {
 		startConnection();
 	}
 	
-	private static void startConnection() {
+	private synchronized static void startConnection() {
 		final String HOST = "localhost";
 		final int PORT = 1234;
 
@@ -57,9 +57,9 @@ public class Client {
 			Client client = new Client(inputHandler, outputHandler);
 
 			// Start GUI
-			GUI gui = new GUI(client);
-			//BSSConsoleUI UI = new BSSConsoleUI(client);
-			Thread consoleThread = new Thread(gui);
+			//GUI UI = new GUI(client);
+			BSSConsoleUI UI = new BSSConsoleUI(client);
+			Thread consoleThread = new Thread(UI);
 			consoleThread.start();
 
 			// Process server responses
@@ -90,7 +90,7 @@ public class Client {
 	/*
 	 * RESPONSE PROCESSING Added empty checks
 	 */
-	private void processResponse(List<Request> req) {
+	private synchronized void processResponse(List<Request> req) {
 		isProcessing = false;
 		for (Request request : req) {
 			RequestType requestType = request.getType();
@@ -175,27 +175,27 @@ public class Client {
 	/*
 	 * METHODS FOR GUI
 	 */
-	public UserType getUserType() {
+	public synchronized UserType getUserType() {
 		return userType;
 	}
 
-	public boolean getIsProcessing() {
+	public synchronized boolean getIsProcessing() {
 		return isProcessing;
 	}
 
-	public String getResponseMessage() {
+	public synchronized String getResponseMessage() {
 		return responseMessage;
 	}
 
-	public boolean getLoggedIn() {
+	public synchronized boolean getLoggedIn() {
 		return loggedIn;
 	}
 
-	public boolean getAccountAccessed() {
+	public synchronized boolean getAccountAccessed() {
 		return accountAccessed;
 	}
 
-	public void createLoginRequest(String username, String password) {
+	public synchronized void createLoginRequest(String username, String password) {
 		isProcessing = true;
 		ArrayList<String> userAndPass = new ArrayList<>();
 		userAndPass.add(username);
@@ -203,35 +203,35 @@ public class Client {
 		sendRequest(userAndPass, RequestType.LOGIN, Status.REQUEST);
 	}
 
-	public void createDepositRequest(double amount) {
+	public synchronized void createDepositRequest(double amount) {
 		isProcessing = true;
 		sendRequest(amount, RequestType.DEPOSIT, Status.REQUEST);
 	}
 
-	public void createWithdrawRequest(double amount) {
+	public synchronized void createWithdrawRequest(double amount) {
 		isProcessing = true;
 		sendRequest(amount, RequestType.WITHDRAW, Status.REQUEST);
 	}
 
-	public void createTransferRequest(int toAccountID, double amount) {
+	public synchronized void createTransferRequest(int toAccountID, double amount) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(toAccountID + ""));
 		sendRequest(ID, amount, RequestType.TRANSFER, Status.REQUEST);
 	}
 
-	public void createFreezeRequest(int acc_ID) {
+	public synchronized void createFreezeRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.FREEZE, Status.REQUEST);
 	}
 
-	public void createEnterAccountRequest(int acc_ID) {
+	public synchronized void createEnterAccountRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 
-	public void createReadLogsRequest(String startDate, String endDate) {
+	public synchronized void createReadLogsRequest(String startDate, String endDate) {
 	    isProcessing = true;
 	    ArrayList<String> dateRange = new ArrayList<>();
 	    dateRange.add(startDate);
@@ -239,46 +239,48 @@ public class Client {
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
 	
-	public void createAccountCreationRequest(String password) {
+	public synchronized void createAccountCreationRequest(String password) {
+		
 		isProcessing = true;
 		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
 		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
+		
 	}
 
-	public void createLeaveRequest() {
+	public synchronized void createLeaveRequest() {
 		isProcessing = true;
 		sendRequest(RequestType.LEAVE, Status.REQUEST);
 	}
 
-	public void createLogoutRequest() {
+	public synchronized void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 		isProcessing = true;
 		// Shutdown
 		
 	}
 
-	private void sendRequest(RequestType requestType, Status status) {
+	private synchronized void sendRequest(RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(ArrayList<String> messages, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(messages, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(messages, amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
