@@ -140,7 +140,7 @@ public class GUI implements Runnable {
 		frame.getContentPane().removeAll();
 		frame.setTitle("Customer View");
 		frame.setLayout(new GridLayout(4, 1));
-
+		JLabel balance = new JLabel("Balance: $" + client.getBal());
 		JButton depositButton = new JButton("Deposit");
 		JButton withdrawButton = new JButton("Withdraw");
 		JButton transferButton = new JButton("Transfer");
@@ -150,7 +150,8 @@ public class GUI implements Runnable {
 		withdrawButton.addActionListener(e -> handleWithdraw());
 		transferButton.addActionListener(e -> handleTransfer());
 		logoutButton.addActionListener(e -> handleLogout());
-
+		
+		frame.add(balance);
 		frame.add(depositButton);
 		frame.add(withdrawButton);
 		frame.add(transferButton);
@@ -213,6 +214,7 @@ public class GUI implements Runnable {
 			client.createDepositRequest(Double.parseDouble(amount));
 			loadingDots("Depositing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+			showCustomerView();
 		}
 	}
 
@@ -222,6 +224,7 @@ public class GUI implements Runnable {
 			client.createWithdrawRequest(Double.parseDouble(amount));
 			loadingDots("Withdrawing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+			showCustomerView();
 		}
 	}
 
@@ -232,6 +235,7 @@ public class GUI implements Runnable {
 			client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
 			loadingDots("Transferring");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+			showCustomerView();
 		}
 	}
 
