@@ -209,6 +209,27 @@ public class Server {
 			
 		}
 
+		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(userType, requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
+		private synchronized void sendResponse(RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
+		private synchronized void sendResponse(ArrayList<String> messages, RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(messages, requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+		
 		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(userType, requestType, status);
@@ -244,7 +265,7 @@ public class Server {
 
 					// initialized global session variable
 					session = atm.logIn(acc);
-					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS, acc.getAmount());
 					System.out.println("Balance: $" + session.getAccount().getAmount());
 					
 				} else {
@@ -279,7 +300,7 @@ public class Server {
 					session.getAccount().deposit(request.getAmount());
 					session.getAccount().setFrozen(false);
 
-					sendResponse(RequestType.DEPOSIT, Status.SUCCESS);
+					sendResponse(RequestType.DEPOSIT, Status.SUCCESS, session.getAccount().getAmount());
 					DepositLog depositLog = new DepositLog(session.getAccount().getId(), "Deposit", session.getAccount().getId());
                     logTransaction(depositLog);
 					
@@ -306,7 +327,7 @@ public class Server {
 					} else {
 						session.getAccount().withdraw(request.getAmount());
 						// Account has sufficient funds, withdraw and send success
-						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
+						sendResponse(RequestType.WITHDRAW, Status.SUCCESS, session.getAccount().getAmount());
 						WithdrawLog withdrawLog = new WithdrawLog(session.getAccount().getId(), "Withdraw", session.getAccount().getId());
                         logTransaction(withdrawLog);
 					}
@@ -339,7 +360,7 @@ public class Server {
 						} else {
 							// Account has sufficient funds, transfer and send success
 							to_account.deposit(request.getAmount());
-							sendResponse(RequestType.TRANSFER, Status.SUCCESS);
+							sendResponse(RequestType.TRANSFER, Status.SUCCESS, session.getAccount().getAmount());
 							TransferLog transferLog = new TransferLog(session.getAccount().getId(), "Transfer", session.getAccount().getId(), to_account.getId());
                             logTransaction(transferLog);
 						}
