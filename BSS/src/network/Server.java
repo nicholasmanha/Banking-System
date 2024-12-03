@@ -22,7 +22,11 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Server {
+    private static final String LOG_FILE_PATH = "BSS/src/log/ServerActions.txt";
+
+	
 	public static void main(String[] args) {
+		
 		ServerSocket server = null;
 		try {
 			// server is listening on port 1234
@@ -387,5 +391,13 @@ public class Server {
 			}
 			return UserType.CUSTOMER;
 		}
+		
+		
+		private static void logTransaction(Log log) {
+            File logFile = new File(LOG_FILE_PATH);
+            log.writeLogToFile(logFile);
+        }
+		
+		
 	}
 }

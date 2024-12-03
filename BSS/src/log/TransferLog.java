@@ -12,12 +12,12 @@ public class TransferLog implements Log {
     private int accountID;
     private int toAccountID;
     
-    public TransferLog(int id, String message, LocalDateTime timeStamp, 
+    public TransferLog(int id, String message,
     		int accountID, int toAccountID) {
     	
         this.id = id;
         this.message = message;
-        this.timeStamp = timeStamp;
+        this.timeStamp = LocalDateTime.now();
         this.accountID = accountID;
         this.toAccountID = toAccountID;
     }
