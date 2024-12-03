@@ -91,8 +91,8 @@ public class Server {
 			atm = new ATM();
 			//			this.loggedIn = false;
 			//this.bank = bank;
-			ClientHandler.loggedIn = false;
-			ClientHandler.bank = bank;
+			this.loggedIn = false;
+			this.bank = bank;
 			this.clientSocket = socket;
 		}
 
@@ -148,7 +148,7 @@ public class Server {
 		 * Switch statement for processing incoming requests
 		 */
 
-		private synchronized void processRequest(List<Request> req) {
+		private synchronized void processRequest(List<Request> req) throws IOException {
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
@@ -256,11 +256,8 @@ public class Server {
 		}
 
 
-		private static void doDeposit(Request request) {
-			if (loggedIn) {
-
 		private synchronized void doDeposit(Request request) {
-			if (loggedIn == true) {
+			if (loggedIn) {
 
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
@@ -285,13 +282,9 @@ public class Server {
 		}
 
 
-		private static void doWithdraw(Request request) {
+		private synchronized void doWithdraw(Request request) {
 			if (loggedIn) {
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
-
-		private synchronized void doWithdraw(Request request) {
-			if (loggedIn == true) {
-				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 
 					// if they have insufficient funds
 					if (session.getAccount().getAmount() < request.getAmount()) {
@@ -315,13 +308,9 @@ public class Server {
 		}
 
 
-		private static void doTransfer(Request request) {
+		private synchronized void doTransfer(Request request) {
 			if (loggedIn) {
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
-
-		private synchronized void doTransfer(Request request) {
-			if (loggedIn == true) {
-				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 
 					// Account has insufficient funds, send failure
 					if (session.getAccount().getAmount() < request.getAmount()) {

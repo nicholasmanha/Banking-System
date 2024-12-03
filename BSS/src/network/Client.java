@@ -255,7 +255,7 @@ public class Client {
 
 
 
-	public void createLogoutRequest() {
+	public synchronized void createLogoutRequest() {
 	    sendRequest(RequestType.LOGOUT, Status.REQUEST);
 	
 	    // Shutdown
@@ -282,17 +282,6 @@ public class Client {
 	    } catch (IOException | InterruptedException e) {
 	        e.printStackTrace();
 	    }
-	}
-
-
-
-	private void sendRequest(RequestType requestType, Status status) {
-
-	public synchronized void createLogoutRequest() {
-		sendRequest(RequestType.LOGOUT, Status.REQUEST);
-		isProcessing = true;
-		// Shutdown
-		
 	}
 
 	private synchronized void sendRequest(RequestType requestType, Status status) {
