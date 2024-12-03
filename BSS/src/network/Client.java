@@ -1,6 +1,7 @@
 package network;
 
 import bss.BSSConsoleUI;
+import bss.GUI;
 import enums.*;
 import java.io.*;
 import java.net.Socket;
@@ -51,9 +52,10 @@ public class Client {
 			Client client = new Client(inputHandler, outputHandler);
 
 			// Start GUI
-			BSSConsoleUI UI = new BSSConsoleUI(client);
-			Thread consoleThread = new Thread(UI);
-			consoleThread.start();
+			GUI gui = new GUI(client);
+			//BSSConsoleUI UI = new BSSConsoleUI(client);
+			//Thread consoleThread = new Thread(UI);
+			//consoleThread.start();
 
 			// Process server responses
 			while (client.alive) {
