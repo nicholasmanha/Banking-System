@@ -150,6 +150,11 @@ public class Client {
 					responseMessage = "Freeze Successful";
 				}
 				break;
+			case UNFREEZE:
+				if (request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Account Unfrozen";
+				}
+				break;
 			case TEXT:
 				if (request.getStatus() == Status.SUCCESS) {
 			        System.out.println("Logs:");
@@ -240,6 +245,14 @@ public class Client {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.FREEZE, Status.REQUEST, this.balance);
+	}
+	
+
+	public void createUnfreezeRequest(int acc_ID) {
+		isProcessing = true;
+		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
+		sendRequest(ID, RequestType.UNFREEZE, Status.REQUEST, this.balance);
+		
 	}
 
 	public synchronized void createEnterAccountRequest(int acc_ID) {

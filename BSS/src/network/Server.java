@@ -176,6 +176,9 @@ public class Server {
 				case FREEZE:
 					doFreeze(request);
 					break;
+				case UNFREEZE:
+					doUnfreeze(request);
+					break;
 				case TEXT:
 					doReadLogs(request);
 					break;
@@ -384,6 +387,18 @@ public class Server {
 					sendResponse(RequestType.FREEZE, Status.SUCCESS);
 				}
 			}
+		}
+		
+		private synchronized void doUnfreeze(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account account = bank.findAccount(acc_ID);
+					account.setFrozen(false);
+					sendResponse(RequestType.UNFREEZE, Status.SUCCESS);
+				}
+			}
+			
 		}
 
 		private synchronized void doReadLogs(Request request) {
