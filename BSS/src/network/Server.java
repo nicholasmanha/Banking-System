@@ -38,16 +38,16 @@ public class Server {
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
 			Bank bank = new Bank();
-			
+			Teller firstTeller = new Teller("password");
+			bank.addTeller(firstTeller);
+
 			try {
 				bank.loadData(bank.getCustomers(), bank.getAccounts(), "output.txt");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Teller firstTeller = new Teller("password");
-			bank.addTeller(firstTeller);
-
+			
 			// running infinite loop for getting
 			// client request
 			while (true) {

@@ -110,6 +110,8 @@ public class GUI implements Runnable {
 		frame.add(enterAccountButton);
 		frame.add(freezeAccountButton);
 		frame.add(readLogsButton);
+		frame.add(CreateCustomerButton);
+		frame.add(CreateAccountButton);
 		frame.add(logoutButton);
 		frame.revalidate();
 		frame.repaint();
