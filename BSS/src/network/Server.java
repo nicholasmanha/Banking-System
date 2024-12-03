@@ -449,7 +449,7 @@ public class Server {
 					Account acc = bank.findAccount(acc_ID);
 					session = atm.logIn(acc);
 					
-					sendResponse(RequestType.ENTER, Status.SUCCESS);
+					sendResponse(RequestType.ENTER, Status.SUCCESS, acc.getAmount());
 				}
 			}
 		}

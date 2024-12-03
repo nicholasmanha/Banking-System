@@ -143,6 +143,7 @@ public class Client {
 				break;
 			case ENTER:
 				if (request.getStatus() == Status.SUCCESS) {
+					setBal(request.getBal());
 					accountAccessed = true;
 					responseMessage = "Account Enter Successful";
 				}
