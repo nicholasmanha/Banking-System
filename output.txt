@@ -16,7 +16,7 @@ Customer_ID: 1
 		Pin: "5678"
 		Users: [Customer_ID! 1]
 		Frozen: false
-		Amount: 100.35
+		Amount: 100100.35
 		AccountType: Undefined
 Customer_ID: 2
 	Account_ID: 3

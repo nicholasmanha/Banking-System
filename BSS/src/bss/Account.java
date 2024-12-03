@@ -122,7 +122,9 @@ public class Account extends User{
     }
     // Deposit an amount into the account
     public void deposit(double in_amt) {
+    	System.out.println("AMOUNT BEING DEPOSITED: " + in_amt);
         this.amount = this.amount + in_amt;
+        System.out.println("CURRENT AMOUNT IN ACCOUNT: " + this.amount);
     }
     //retrieve AccountType
     public AccountType getAccountType() {
