@@ -105,6 +105,7 @@ public class GUI {
     private void showTellerView() 
     {	
     	frame.getContentPane().removeAll();
+    	frame.setTitle("Teller View");
         frame.setLayout(new GridLayout(4, 1));
 
         JButton enterAccountButton = new JButton("Enter Account");
@@ -129,6 +130,7 @@ public class GUI {
     private void showCustomerView() 
     {
     	frame.getContentPane().removeAll();
+    	frame.setTitle("Customer View");
         frame.setLayout(new GridLayout(4, 1));
 
         JButton depositButton = new JButton("Deposit");
@@ -270,6 +272,7 @@ public class GUI {
     {
         client.createLogoutRequest();
         JOptionPane.showMessageDialog(frame, "Logged out successfully.");
+        frame.dispose();
         initializeLoginScreen();
     }
 
