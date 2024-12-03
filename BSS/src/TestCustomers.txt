@@ -1,29 +1,25 @@
-Customer_ID: 0
+Customer_ID: 7
 	Account_ID: 0
 		Pin: "1234"
 		Users: [Customer_ID! 0, Customer_ID! 1]
 		Frozen: false
-		Amount: 1500.75
+		Amount: 1600.75
 		AccountType: Savings
 	Account_ID: 1
 		Pin: "5678"
 		Users: [Customer_ID! 0]
 		Frozen: false
 		Amount: 100.35
-		AccountType: Checking
-		
-Customer_ID: 1
+		AccountType: Undefined
 	Account_ID: 2
-		Pin: "5678"
+		Pin: "9100"
 		Users: [Customer_ID! 1]
 		Frozen: false
-		Amount: 100.35
-		AccountType: Checking
-			
-Customer_ID: 2
+		Amount: 17778.120000000003
+		AccountType: Undefined
 	Account_ID: 3
-		Pin: "5678"
+		Pin: "1112"
 		Users: [Customer_ID! 2]
 		Frozen: false
 		Amount: 100.35
-		AccountType: Checking
+		AccountType: Undefined

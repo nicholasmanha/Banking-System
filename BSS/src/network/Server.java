@@ -32,10 +32,20 @@ public class Server {
 		
 		ServerSocket server = null;
 		try {
+			Server serverObj = new Server();
+			
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
 			Bank bank = new Bank();
+			
+			try {
+				bank.loadData(bank.getCustomers(), bank.getAccounts(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			// running infinite loop for getting
 			// client request
 			while (true) {
@@ -48,7 +58,7 @@ public class Server {
 				System.out.println("New client connected" + client.getInetAddress().getHostAddress());
 
 				// create a new thread object
-				ClientHandler clientSock = new ClientHandler(bank, client);
+				ClientHandler clientSock = serverObj.new ClientHandler(bank, client);
 
 				// This thread will handle the client
 				// separately
@@ -67,43 +77,38 @@ public class Server {
 		}
 	}
 
-	private static class ClientHandler implements Runnable {
-		private static OutputHandler outputHandler;
+	private class ClientHandler implements Runnable {
+		private OutputHandler outputHandler;
 		private final Socket clientSocket;
-		private static Bank bank;
-		private static UserType userType;
-		private static boolean loggedIn;
-		private static ATM atm;
-		private static Session session;
+		private Bank bank;
+		private UserType userType;
+		private boolean loggedIn;
+		private ATM atm;
+		private Session session;
+		private Teller teller;
 
 		public ClientHandler(Bank bank, Socket socket) {
 			atm = new ATM();
-			this.loggedIn = false;
-			this.bank = bank;
+			//			this.loggedIn = false;
+			//this.bank = bank;
+			loggedIn = false;
+			bank = bank;
 			this.clientSocket = socket;
 		}
 
 		public void run() {
-
 			/*
 			 * creating accounts for debugging purposes
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-			Customer customer = new Customer();
-			bank.addCustomer(customer);
-
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-			Account testAccount2 = firstTeller.createAccount("321");
-			bank.addAccount(testAccount2);
-
 			for (Account account : bank.getAccounts()) {
-				System.out.println("account #" + account.getId());
+				System.out.println("account #" + account.getId() + " account pin: " + account.getPin());
 			}
-
 			for (Teller teller : bank.getTellers()) {
 				System.out.println("teller #" + teller.getId());
 			}
@@ -120,7 +125,7 @@ public class Server {
 				inputThread.start();
 
 				OutputHandler outHandler = new OutputHandler(objectOutputStream);
-				ClientHandler.outputHandler = outHandler;
+				outputHandler = outHandler;
 				Thread outputThread = new Thread(outHandler);
 				outputThread.start();
 
@@ -136,12 +141,14 @@ public class Server {
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
+			
 		}
 
 		/*
 		 * Switch statement for processing incoming requests
 		 */
-		private static void processRequest(List<Request> req) {
+
+		private synchronized void processRequest(List<Request> req) {
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
@@ -171,6 +178,9 @@ public class Server {
 				case ENTER:
 					doEnter(request);
 					break;
+				case CREATEACCOUNT:
+					doCreateAccount(request);
+					break;
 				case LEAVE:
 					doLeave(request);
 					break;
@@ -179,30 +189,40 @@ public class Server {
 				}
 
 			}
+			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
+			if (!bank.getCustomers().isEmpty()) {
+				System.out.println("CUSTOMERS NOT EMPTY");
+				try {
+					bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
-		private static void sendResponse(UserType userType, RequestType requestType, Status status) {
+		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(userType, requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void sendResponse(RequestType requestType, Status status) {
+		private synchronized void sendResponse(RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void sendResponse(ArrayList<String> messages, RequestType requestType, Status status) {
+		private synchronized void sendResponse(ArrayList<String> messages, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(messages, requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void doLogin(Request request) {
+		private synchronized void doLogin(Request request) {
 			
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
@@ -212,12 +232,13 @@ public class Server {
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
-					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
-					
 					loggedIn = true;
 
 					// initialized global session variable
 					session = atm.logIn(acc);
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					System.out.println("Balance: $" + session.getAccount().getAmount());
+					
 				} else {
 					// user credentials were incorrect, send failure response
 					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
@@ -225,18 +246,27 @@ public class Server {
 			} else if (userType == UserType.TELLER) {
 				Teller teller = bank.findTeller(username);
 				if (teller.checkCredentials(username, password)) {
-					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
+					this.teller = teller;
 					loggedIn = true;
+					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
+					
 				}
+				
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
 				sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 			}
+			
 		}
+
 
 		private static void doDeposit(Request request) {
 			if (loggedIn) {
+
+		private synchronized void doDeposit(Request request) {
+			if (loggedIn == true) {
+
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
@@ -256,16 +286,24 @@ public class Server {
 					sendResponse(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
+
 
 		private static void doWithdraw(Request request) {
 			if (loggedIn) {
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
+
+		private synchronized void doWithdraw(Request request) {
+			if (loggedIn == true) {
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+
 					// if they have insufficient funds
 					if (session.getAccount().getAmount() < request.getAmount()) {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds"));
 						sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 					} else {
+						session.getAccount().withdraw(request.getAmount());
 						// Account has sufficient funds, withdraw and send success
 						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
 						WithdrawLog withdrawLog = new WithdrawLog(session.getAccount().getId(), "Withdraw", session.getAccount().getId());
@@ -278,11 +316,18 @@ public class Server {
 					sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
+
 
 		private static void doTransfer(Request request) {
 			if (loggedIn) {
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
+
+		private synchronized void doTransfer(Request request) {
+			if (loggedIn == true) {
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+
 					// Account has insufficient funds, send failure
 					if (session.getAccount().getAmount() < request.getAmount()) {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds\n"));
@@ -310,9 +355,10 @@ public class Server {
 					sendResponse(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
 
-		private static void doFreeze(Request request) {
+		private synchronized void doFreeze(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
@@ -323,7 +369,7 @@ public class Server {
 			}
 		}
 
-		private static void doReadLogs(Request request) {
+		private synchronized void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
 		        try {
 		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
@@ -358,18 +404,36 @@ public class Server {
 		    }
 		}
 
-		private static void doEnter(Request request) {
+		private synchronized void doEnter(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
 					Account acc = bank.findAccount(acc_ID);
 					session = atm.logIn(acc);
+					
 					sendResponse(RequestType.ENTER, Status.SUCCESS);
 				}
 			}
 		}
+		
 
-		private static void doLeave(Request request) {
+		private synchronized void doCreateAccount(Request request) {
+			
+			if (loggedIn) {
+				System.out.println(userType);
+				if (userType == UserType.TELLER) {
+					
+					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
+					
+					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
+					
+				}
+			}
+			
+			
+		}
+
+		private synchronized void doLeave(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 
@@ -379,7 +443,7 @@ public class Server {
 			}
 		}
 
-		private static void doLogout(Request request) {
+		private synchronized void doLogout(Request request) {
 			if (loggedIn) {
 				atm.logOut();
 				sendResponse(RequestType.LOGOUT, Status.SUCCESS);
@@ -387,7 +451,7 @@ public class Server {
 		}
 
 		// based on the given username, determine if it is for an account or a teller
-		private static UserType determineUserType(Bank bank, int userID) {
+		private synchronized UserType determineUserType(Bank bank, int userID) {
 			Teller teller;
 			Account acc;
 			acc = bank.findAccount(userID);

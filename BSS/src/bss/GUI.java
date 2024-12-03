@@ -4,19 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import enums.UserType;
+import network.Client;
 
-public class GUI {
+public class GUI implements Runnable{
 
     private JFrame frame;
-    private String userRole; 
+    private Client client;
+    private UserType userType; 
 
-    public GUI() {
+    public GUI(Client client) {
 
-        initializeLoginScreen();
+    	this.client = client;
     }
 
     // initialize the login screen
-    private void initializeLoginScreen() 
+    public void run() 
     {
     	
     	frame = new JFrame("Banking System - Login");
@@ -30,285 +33,213 @@ public class GUI {
         JPasswordField pinField = new JPasswordField();
 
         JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(new ActionListener() 
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) 
-            {
-                String accountId = accountIdField.getText();
-                String pin = new String(pinField.getPassword());
-                handleLogin(accountId, pin);
-                
-            }
+        loginButton.addActionListener(e -> {
+            String username = accountIdField.getText();
+            String password = new String(pinField.getPassword());
+            handleLogin(username, password);
         });
 
-        
         frame.add(accountIdLabel);
         frame.add(accountIdField);
         frame.add(pinLabel);
         frame.add(pinField);
         frame.add(new JLabel()); // Spacer
         frame.add(loginButton);
-
         frame.setVisible(true);
     }
     
-    private void handleLogin(String accountId, String pin) 
+    private synchronized void handleLogin(String username, String password) 
     {
     	
-    	// notify the Client to send login request
-        System.out.println("Login attempted with ID: " + accountId + " and PIN: " + pin);
+    	client.createLoginRequest(username, password);
+        JOptionPane.showMessageDialog(frame, "Logging in...");
+        
+        new SwingWorker<Void, Void>() 
+        {
+            @Override
+            protected Void doInBackground() 
+            {
+                while (client.getIsProcessing()) 
+                {
+                    try 
+                    {
+                        Thread.sleep(200);
+                    } 
+                    catch (InterruptedException e) 
+                    {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() 
+            {
+                String response = client.getResponseMessage();
+                JOptionPane.showMessageDialog(frame, response);
+
+                if (client.getLoggedIn()) 
+                {
+                    userType = client.getUserType();
+                    showUserView();
+                }
+            }
+        }.execute();
     }
     
-	public void setUserRole(String role) 
-	{
-	        
-	    	this.userRole = role;
-	        
-	    	if (role.equalsIgnoreCase("teller")) 
-	    	{
-	            showTellerView();
-	        } 
-	    	else if (role.equalsIgnoreCase("customer")) 
-	        {
-	            showCustomerView();
-	        } 
-	    	else 
-	    	{
-	            JOptionPane.showMessageDialog(frame, "invalid role");
-	        }
-	}
+    private synchronized void showUserView() 
+    {
+        if (userType == UserType.TELLER) 
+        {
+            showTellerView();
+        } 
+        else if (userType == UserType.CUSTOMER) 
+        {
+            showCustomerView();
+        }
+    }
     
 	// display the teller view
-    private void showTellerView() 
+    private synchronized void showTellerView() 
     {	
     	frame.getContentPane().removeAll();
+    	frame.setTitle("Teller View");
         frame.setLayout(new GridLayout(4, 1));
 
-        JButton viewAccountsButton = new JButton("View Accounts");
-        JButton createAccountButton = new JButton("Create Account");
-        JButton readTransactionLogButton = new JButton("Read Transaction Log");
+        JButton enterAccountButton = new JButton("Enter Account");
+        JButton freezeAccountButton = new JButton("Freeze Account");
+        JButton readLogsButton = new JButton("Read Logs");
         JButton logoutButton = new JButton("Logout");
         
-        viewAccountsButton.addActionListener(e -> handleViewAccounts());
-        createAccountButton.addActionListener(e -> handleCreateAccount());
-        readTransactionLogButton.addActionListener(e -> handleReadTransactionLog());
-        logoutButton.addActionListener(e -> initializeLoginScreen());
+        enterAccountButton.addActionListener(e -> handleEnterAccount());
+        freezeAccountButton.addActionListener(e -> handleFreezeAccount());
+        readLogsButton.addActionListener(e -> handleReadLogs());
+        logoutButton.addActionListener(e -> handleLogout());
 
-        frame.add(viewAccountsButton);
-        frame.add(createAccountButton);
-        frame.add(readTransactionLogButton);
+        frame.add(enterAccountButton);
+        frame.add(freezeAccountButton);
+        frame.add(readLogsButton);
         frame.add(logoutButton);
         frame.revalidate();
         frame.repaint();
     }
     
     // display the customer view
-    private void showCustomerView() 
+    private synchronized void showCustomerView() 
     {
     	frame.getContentPane().removeAll();
+    	frame.setTitle("Customer View");
         frame.setLayout(new GridLayout(4, 1));
 
         JButton depositButton = new JButton("Deposit");
         JButton withdrawButton = new JButton("Withdraw");
-        JButton viewBalanceButton = new JButton("View Balance");
+        JButton transferButton = new JButton("Transfer");
         JButton logoutButton = new JButton("Logout");
         
         depositButton.addActionListener(e -> handleDeposit());
         withdrawButton.addActionListener(e -> handleWithdraw());
-        viewBalanceButton.addActionListener(e -> handleViewBalance());
-        logoutButton.addActionListener(e -> initializeLoginScreen());
+        transferButton.addActionListener(e -> handleTransfer());
+        logoutButton.addActionListener(e -> handleLogout());
 
         frame.add(depositButton);
         frame.add(withdrawButton);
-        frame.add(viewBalanceButton);
+        frame.add(transferButton);
         frame.add(logoutButton);
         frame.revalidate();
         frame.repaint();
     }
     
-    // Placeholder: handle View Accounts action
-    private void handleViewAccounts() 
+    private synchronized void handleEnterAccount() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new BorderLayout());
-
-        JLabel headerLabel = new JLabel("Accounts:");
-        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JTextArea accountsArea = new JTextArea();
-        accountsArea.setEditable(false);
-        accountsArea.setText("Account 1: $0.00\nAccount 2: $100.00"); // Replace with real data later
-
-        JScrollPane scrollPane = new JScrollPane(accountsArea);
-
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(headerLabel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(backButton, BorderLayout.SOUTH);
-        frame.revalidate();
-        frame.repaint();
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID:");
+        if (accountId != null) 
+        {
+            client.createEnterAccountRequest(Integer.parseInt(accountId));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
-    // Placeholder: handle Create Account action
-    private void handleCreateAccount() 
+    private synchronized void handleFreezeAccount() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(4, 2));
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Freeze:");
+        if (accountId != null) 
+        {
+            client.createFreezeRequest(Integer.parseInt(accountId));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
+    }
+
+    private synchronized void handleReadLogs() 
+    {
+        String startDate = JOptionPane.showInputDialog(frame, "Enter Start Date (yyyy-MM-ddTHH:mm:ss):");
+        String endDate = JOptionPane.showInputDialog(frame, "Enter End Date (yyyy-MM-ddTHH:mm:ss):");
+        if (startDate != null && endDate != null) 
+        {
+            client.createReadLogsRequest(startDate, endDate);
+            JOptionPane.showMessageDialog(frame, "Fetching logs...");
+
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() 
+                {
+                    while (client.getIsProcessing()) 
+                    {
+                        try 
+                        {
+                            Thread.sleep(200);
+                        } 
+                        catch (InterruptedException e) 
+                        {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() 
+                {
+                    JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+                }
+            }.execute();
+        }
+    }
+
+    private synchronized void handleDeposit() 
+    {
+        String amount = JOptionPane.showInputDialog(frame, "Enter Deposit Amount:");
         
-
-        JLabel accountTypeLabel = new JLabel("Select Account Type:");
-        JComboBox<String> accountTypeDropdown = new JComboBox<>(new String[]{"Checkings", "Savings"});
-
-        JLabel pinLabel = new JLabel("Set PIN:");
-        JPasswordField pinField = new JPasswordField();
-
-        JButton createButton = new JButton("Create");
-        JButton backButton = new JButton("Back");
-
-        createButton.addActionListener(e -> {
-            String selectedType = (String) accountTypeDropdown.getSelectedItem();
-            String pin = new String(pinField.getPassword());
-            System.out.println("Creating account of type: " + selectedType + " with PIN: " + pin);
-            // need to logic to notify Client class
-        });
-
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(accountTypeLabel);
-        frame.add(accountTypeDropdown);
-        frame.add(pinLabel);
-        frame.add(pinField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(createButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
-    }
-
-    // Placeholder: handle Read Transaction Log action
-    private void handleReadTransactionLog() 
-    {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new BorderLayout());
-
-        JLabel headerLabel = new JLabel("Transaction Log:");
-        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JTextArea logArea = new JTextArea();
-        logArea.setEditable(false);
-        logArea.setText("Transaction 1: $50 deposit\nTransaction 2: $20 withdrawal"); // Replace with real data later
-        JScrollPane scrollPane = new JScrollPane(logArea);
-
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> showTellerView());
-
-        frame.add(headerLabel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(backButton, BorderLayout.SOUTH);
-        frame.revalidate();
-        frame.repaint();
-    }
-
-    // Placeholder: handle Deposit action
-    private void handleDeposit() 
-    {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(3, 2));
-
-        JLabel depositLabel = new JLabel("Enter Deposit Amount:");
-        JTextField depositField = new JTextField();
-
-        JButton confirmButton = new JButton("Confirm");
-        JButton backButton = new JButton("Back");
-
-        confirmButton.addActionListener(e -> {
-            String amountText = depositField.getText();
-            try 
-            {
-                double amount = Double.parseDouble(amountText);
-                System.out.println("Depositing amount: " + amount);
-                // Add logic to notify Client class
-            } 
-            catch (NumberFormatException ex) 
-            {
-                JOptionPane.showMessageDialog(frame, "Invalid amount. Please enter a valid number.");
-            }
-        });
-
-        backButton.addActionListener(e -> {
+        if (amount != null) 
+        {
+            client.createDepositRequest(Double.parseDouble(amount));
             
-        	if ("customer".equalsIgnoreCase(userRole)) 
-            {
-                showCustomerView();
-            } 
-            else if ("teller".equalsIgnoreCase(userRole)) 
-            {
-                showTellerView();
-            }
-        });
-
-        frame.add(depositLabel);
-        frame.add(depositField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(confirmButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
-    // Placeholder: handle Withdraw action
-    private void handleWithdraw() 
+    private synchronized void handleWithdraw() 
     {
-    	frame.getContentPane().removeAll();
-        frame.setLayout(new GridLayout(3, 2));
-
-        JLabel withdrawLabel = new JLabel("Enter Withdrawal Amount:");
-        JTextField withdrawField = new JTextField();
-
-        JButton confirmButton = new JButton("Confirm");
-        JButton backButton = new JButton("Back");
-
-        confirmButton.addActionListener(e -> {
-            String amountText = withdrawField.getText();
-            try 
-            {
-                double amount = Double.parseDouble(amountText);
-                System.out.println("Withdrawing amount: " + amount);
-                // Add logic to notify Client class
-            } 
-            catch (NumberFormatException ex) 
-            {
-                JOptionPane.showMessageDialog(frame, "Invalid amount. Please enter a valid number.");
-            }
-        });
-
-        backButton.addActionListener(e -> {
-            
-        	if ("customer".equalsIgnoreCase(userRole)) 
-            {
-                showCustomerView();
-            } 
-            else if ("teller".equalsIgnoreCase(userRole)) 
-            {
-                showTellerView();
-            }
-        });
-
-        frame.add(withdrawLabel);
-        frame.add(withdrawField);
-        frame.add(new JLabel()); 
-        frame.add(new JLabel()); 
-        frame.add(confirmButton);
-        frame.add(backButton);
-        frame.revalidate();
-        frame.repaint();
+        String amount = JOptionPane.showInputDialog(frame, "Enter Withdrawal Amount:");
+        if (amount != null) 
+        {
+            client.createWithdrawRequest(Double.parseDouble(amount));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
+    }
+    
+    private synchronized void handleTransfer() 
+    {
+        String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Transfer To:");
+        String amount = JOptionPane.showInputDialog(frame, "Enter Transfer Amount:");
+        if (accountId != null && amount != null) 
+        {
+            client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
+            JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+        }
     }
 
+    /*
     // Placeholder: handle View Balance action
     private void handleViewBalance() 
     {
@@ -335,6 +266,14 @@ public class GUI {
         frame.add(backButton);
         frame.revalidate();
         frame.repaint();
+    }
+    */
+    
+    private synchronized void handleLogout() 
+    {
+        client.createLogoutRequest();
+        JOptionPane.showMessageDialog(frame, "Logged out successfully.");
+        frame.dispose();
     }
 
 }
