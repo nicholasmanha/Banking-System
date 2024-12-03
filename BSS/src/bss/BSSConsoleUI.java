@@ -64,6 +64,8 @@ public class BSSConsoleUI implements Runnable {
 	private void doCreateAccount() {
 		System.out.println("Enter Password");
 	    String password = scan.nextLine();
+	    System.out.println("Enter Customer ID to be Added");
+	    String cust_id = scan.nextLine();
 	    client.createAccountCreationRequest(password);
 	    loadingDots();
 	    System.out.println(client.getResponseMessage());
