@@ -74,7 +74,7 @@ public class Client {
 			System.out.println("Closing socket...");
 
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} finally {
 			// Ensuring the socket is closed, even if an exception occurred
 			try {
@@ -82,7 +82,7 @@ public class Client {
 					socket.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace(); // Handle error closing the socket
+				//e.printStackTrace(); // Handle error closing the socket
 			}
 		}
 	}
@@ -110,7 +110,7 @@ public class Client {
 					if (inputHandler != null) inputHandler.stop();
 					alive = false;
 				}
-				startConnection();
+				//startConnection();
 				break;
 			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
@@ -286,5 +286,10 @@ public class Client {
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
+	}
+
+	public void createCustomerCreationRequest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

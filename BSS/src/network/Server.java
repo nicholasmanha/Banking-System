@@ -45,6 +45,8 @@ public class Server {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			Teller firstTeller = new Teller("password");
+			bank.addTeller(firstTeller);
 
 			// running infinite loop for getting
 			// client request
@@ -100,8 +102,7 @@ public class Server {
 			/*
 			 * creating accounts for debugging purposes
 			 */
-			Teller firstTeller = new Teller("password");
-			bank.addTeller(firstTeller);
+			
 
 //			Account testAccount = firstTeller.createAccount("123");
 //			bank.addAccount(testAccount);
@@ -149,7 +150,16 @@ public class Server {
 		 */
 
 		private synchronized void processRequest(List<Request> req) {
-
+			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
+			if (!bank.getCustomers().isEmpty()) {
+				//System.out.println("CUSTOMERS NOT EMPTY");
+				try {
+					bank.saveData(bank.getCustomers(), "output.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			// for every request in the list of requests that was received
 			for (Request request : req) {
 				RequestType type = request.getType();
@@ -189,16 +199,7 @@ public class Server {
 				}
 
 			}
-			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
-			if (!bank.getCustomers().isEmpty()) {
-				//System.out.println("CUSTOMERS NOT EMPTY");
-				try {
-					bank.saveData(bank.getCustomers(), "output.txt");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			
 		}
 
 		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status) {
