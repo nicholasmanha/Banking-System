@@ -16,27 +16,34 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	public void run() {
-		// Logging in
-		System.out.println("Enter username");
-		String username = scan.nextLine();
+		boolean success = false;
+		while(!success) {
+			// Logging in
+			System.out.println("Enter username");
+			String username = scan.nextLine();
 
-		System.out.println("Enter password");
-		String password = scan.nextLine();
+			System.out.println("Enter password");
+			String password = scan.nextLine();
 
-		client.createLoginRequest(username, password);
+			client.createLoginRequest(username, password);
 
-		System.out.print("Logging in");
-		loadingDots();
-		
-		System.out.println(client.getResponseMessage());
+			System.out.print("Logging in");
+			loadingDots();
+			
+			System.out.println(client.getResponseMessage());
 
-		// determine which view to show based off who is logging in
-		if (client.getUserType() == UserType.CUSTOMER) {
-			AccountView(true);
+			// determine which view to show based off who is logging in
+			if (client.getUserType() == UserType.CUSTOMER) {
+				AccountView(true);
 
-		} else {
-			tellerView();
+			} else if(client.getUserType() == UserType.TELLER) {
+				tellerView();
+			}
+			else {
+				success = false;
+			}
 		}
+		
 
 	}
 

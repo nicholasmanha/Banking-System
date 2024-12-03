@@ -191,7 +191,7 @@ public class Server {
 			}
 			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
 			if (!bank.getCustomers().isEmpty()) {
-				System.out.println("CUSTOMERS NOT EMPTY");
+				//System.out.println("CUSTOMERS NOT EMPTY");
 				try {
 					bank.saveData(bank.getCustomers(), "output.txt");
 				} catch (IOException e) {

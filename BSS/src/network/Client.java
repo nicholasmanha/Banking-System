@@ -101,7 +101,7 @@ public class Client {
 					responseMessage = "Login Successful";
 					userType = request.getUserType();
 				} else {
-					System.out.println("Login failed");
+					responseMessage = "Incorrect Credentials";
 				}
 				break;
 			case LOGOUT:
