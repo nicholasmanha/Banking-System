@@ -1,6 +1,7 @@
 package network;
 
 import bss.BSSConsoleUI;
+import bss.GUI;
 import enums.*;
 import java.io.*;
 import java.net.Socket;
@@ -24,6 +25,11 @@ public class Client {
 	}
 
 	public static void main(String[] args) {
+		
+		startConnection();
+	}
+	
+	private static void startConnection() {
 		final String HOST = "localhost";
 		final int PORT = 1234;
 
@@ -51,8 +57,9 @@ public class Client {
 			Client client = new Client(inputHandler, outputHandler);
 
 			// Start GUI
-			BSSConsoleUI UI = new BSSConsoleUI(client);
-			Thread consoleThread = new Thread(UI);
+			GUI gui = new GUI(client);
+			//BSSConsoleUI UI = new BSSConsoleUI(client);
+			Thread consoleThread = new Thread(gui);
 			consoleThread.start();
 
 			// Process server responses
@@ -99,9 +106,11 @@ public class Client {
 				break;
 			case LOGOUT:
 				if (request.getStatus() == Status.SUCCESS) {
-					System.out.println("Logging out...");
-					createLogoutRequest(); // Graceful shutdown
+					if (outputHandler != null) outputHandler.stop();
+					if (inputHandler != null) inputHandler.stop();
+					alive = false;
 				}
+				startConnection();
 				break;
 			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
@@ -130,6 +139,7 @@ public class Client {
 					accountAccessed = true;
 					responseMessage = "Account Enter Successful";
 				}
+				break;
 			case FREEZE:
 				if (request.getStatus() == Status.SUCCESS) {
 					responseMessage = "Freeze Successful";
@@ -137,13 +147,17 @@ public class Client {
 				break;
 			case TEXT:
 				if (request.getStatus() == Status.SUCCESS) {
-					responseMessage = "Logs: ";
-					System.out.println("Logs:");
-					for (String log : request.getTexts()) {
-						responseMessage += "\n" + log;
-					}
-				} else {
-					responseMessage = request.getTexts().get(0);
+			        System.out.println("Logs:");
+			        for (String log : request.getTexts()) {
+			            System.out.println(log);
+			        }
+			    } else {
+			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
+			    }
+			    break;
+			case CREATEACCOUNT:
+				if (request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Account Creation Successful";
 				}
 				break;
 			case LEAVE:
@@ -217,9 +231,18 @@ public class Client {
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 
-	public void createReadLogsRequest() {
+	public void createReadLogsRequest(String startDate, String endDate) {
+	    isProcessing = true;
+	    ArrayList<String> dateRange = new ArrayList<>();
+	    dateRange.add(startDate);
+	    dateRange.add(endDate);
+	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
+	}
+	
+	public void createAccountCreationRequest(String password) {
 		isProcessing = true;
-		sendRequest(RequestType.TEXT, Status.REQUEST);
+		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
+		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
 	}
 
 	public void createLeaveRequest() {
@@ -229,30 +252,9 @@ public class Client {
 
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
-
+		isProcessing = true;
 		// Shutdown
-		try {
-			System.out.println("Stopping Handlers...");
-			inputHandler.stop();
-			outputHandler.stop();
-			alive = false;
-
-			// Wait for threads to finish
-			Thread inputThread = new Thread(inputHandler);
-			Thread outputThread = new Thread(outputHandler);
-			inputThread.join();
-			outputThread.join();
-
-			// Close the socket and streams
-			if (inputHandler.getInputStream() != null) {
-				inputHandler.getInputStream().close();
-			}
-			if (outputHandler.getOutputStream() != null) {
-				outputHandler.getOutputStream().close();
-			}
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	private void sendRequest(RequestType requestType, Status status) {
@@ -282,5 +284,4 @@ public class Client {
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
-
 }

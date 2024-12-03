@@ -25,18 +25,26 @@ public class TransferLog implements Log {
     @Override
     public void writeLogToFile(File inOutFile) 
     {
-        try (FileWriter writer = new FileWriter(inOutFile, true)) 
-        {
-            writer.write("Log ID: " + id + "\n");
-            writer.write("Message: " + message + "\n");
-            writer.write("Timestamp: " + timeStamp.toString() + "\n");
-            writer.write("From Account ID: " + accountID + "\n");
-            writer.write("To Account ID: " + toAccountID + "\n");
-            writer.write("----\n");
+    	try (FileWriter writer = new FileWriter(inOutFile, true)) 
+    	{
+            writer.write(toLogString());
         } 
-        catch (IOException e) 
-        {
+    	catch (IOException e) 
+    	{
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public String toLogString() 
+    {
+        return String.format("%s : Transfer | Log ID: %d | From Account ID: %d | To Account ID: %d | %s%n",
+                timeStamp.toString(), id, accountID, toAccountID, message);
+    }
+
+    @Override
+    public LocalDateTime getTimeStamp() 
+    {
+        return timeStamp;
     }
 }
