@@ -160,6 +160,11 @@ public class Client {
 					responseMessage = "Account Creation Successful";
 				}
 				break;
+			case CREATECUSTOMER:
+				if(request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Customer Creation Successful";
+				}
+				break;
 			case LEAVE:
 				if (request.getStatus() == Status.SUCCESS) {
 					accountAccessed = false;
@@ -239,6 +244,12 @@ public class Client {
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
 	
+
+	public void createCustomerCreationRequest() {
+		isProcessing = true;
+		sendRequest(RequestType.CREATECUSTOMER, Status.REQUEST);
+	}
+	
 	public synchronized void createAccountCreationRequest(String password) {
 		
 		isProcessing = true;
@@ -286,10 +297,5 @@ public class Client {
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
-	}
-
-	public void createCustomerCreationRequest() {
-		// TODO Auto-generated method stub
-		
 	}
 }
