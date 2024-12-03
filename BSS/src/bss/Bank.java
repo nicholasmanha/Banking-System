@@ -14,6 +14,7 @@ public class Bank {
 	private ArrayList<Account> accounts;
 	private ArrayList<Customer> customers;
 	private ArrayList<Teller> tellers;
+	private static boolean debug = false;
 	
 	public Bank() {
 		//
@@ -82,7 +83,10 @@ public class Bank {
         for (Customer customer : customers) {
             // Write Customer ID
             writer.write("Customer_ID: " + customer.getId() + "\n");
-            System.out.println("Writing Customer_ID: " + customer.getId());
+            if(debug) {
+            	System.out.println("Writing Customer_ID: " + customer.getId());
+            }
+            
             
             // Write each account belonging to this customer
             for (Account account : customer.getAccounts()) {
@@ -141,7 +145,10 @@ public class Bank {
                 currentCustomer = new Customer(temp);
                 //add into customer into HASHMAP
                 customerCount.put(temp, currentCustomer);
-                System.out.println("Customer_ID: " + temp + " -> " + currentCustomer);
+                if(debug) {
+                	System.out.println("Customer_ID: " + temp + " -> " + currentCustomer);
+                }
+                
             } 
         }
         reader.close();
@@ -166,7 +173,10 @@ public class Bank {
             	currentAccount= new Account(temp);
                 //add account object and its ID into HASHMAP
             	accountCount.put(temp, currentAccount);
-            	System.out.println("Account_ID: " + temp + " -> " + currentAccount);
+            	if(debug) {
+            		System.out.println("Account_ID: " + temp + " -> " + currentAccount);
+            	}
+            	
             } 
         }
         reader.close();
@@ -317,7 +327,10 @@ public class Bank {
         for (Customer customer : customers) {
             // Write Customer ID
             writer.write("Customer_ID: " + customer.getId() + "\n");
-            System.out.println("Writing Customer_ID: " + customer.getId());
+            if(debug) {
+            	System.out.println("Writing Customer_ID: " + customer.getId());
+            }
+            
             
             // Write each account belonging to this customer
             for (Account account : customer.getAccounts()) {

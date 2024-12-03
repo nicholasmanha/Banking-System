@@ -40,7 +40,7 @@ public class Server {
 			Bank bank = new Bank();
 			
 			try {
-				bank.loadData(bank.getCustomers(), bank.getAccounts(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				bank.loadData(bank.getCustomers(), bank.getAccounts(), "output.txt");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -103,8 +103,8 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-			Account testAccount = firstTeller.createAccount("123");
-			bank.addAccount(testAccount);
+//			Account testAccount = firstTeller.createAccount("123");
+//			bank.addAccount(testAccount);
 
 			for (Account account : bank.getAccounts()) {
 				System.out.println("account #" + account.getId() + " account pin: " + account.getPin());
@@ -192,7 +192,12 @@ public class Server {
 			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
 			if (!bank.getCustomers().isEmpty()) {
 				System.out.println("CUSTOMERS NOT EMPTY");
-				bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				try {
+					bank.saveData(bank.getCustomers(), "output.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
