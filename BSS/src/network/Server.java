@@ -224,14 +224,17 @@ public class Server {
 				Teller teller = bank.findTeller(username);
 				if (teller.checkCredentials(username, password)) {
 					ClientHandler.teller = teller;
-					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
 					loggedIn = true;
+					sendResponse(UserType.TELLER, RequestType.LOGIN, Status.SUCCESS);
+					
 				}
+				System.out.println("Balance: $" + session.getAccount().getAmount());
 			}
 			// user isn't a teller or a customer, send failure response
 			else {
 				sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
 			}
+			
 		}
 
 		private synchronized static void doDeposit(Request request) {
@@ -252,6 +255,7 @@ public class Server {
 					sendResponse(errorMessage, RequestType.DEPOSIT, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
 
 		private synchronized static void doWithdraw(Request request) {
@@ -273,6 +277,7 @@ public class Server {
 					sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
 
 		private synchronized static void doTransfer(Request request) {
@@ -303,6 +308,7 @@ public class Server {
 					sendResponse(errorMessage, RequestType.TRANSFER, Status.FAILURE);
 				}
 			}
+			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
 
 		private synchronized static void doFreeze(Request request) {

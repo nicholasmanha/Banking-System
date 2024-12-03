@@ -197,7 +197,7 @@ public class BSSConsoleUI implements Runnable {
 		int choice;
 
 		do {
-			System.out.println("Balance: $" + client.getBal());
+			System.out.println("Balance: $");
 			for (int i = 0; i < commands.length; i++) {
 				System.out.println("Select " + i + ": " + commands[i]);
 			}
