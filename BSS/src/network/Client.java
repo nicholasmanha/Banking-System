@@ -30,7 +30,7 @@ public class Client {
 	}
 	
 	private static void startConnection() {
-		final String HOST = "localhost";
+		final String HOST = "134.154.71.141";
 		final int PORT = 1234;
 
 		Socket socket = null;
@@ -90,7 +90,7 @@ public class Client {
 	/*
 	 * RESPONSE PROCESSING Added empty checks
 	 */
-	private void processResponse(List<Request> req) {
+	private synchronized void processResponse(List<Request> req) {
 		isProcessing = false;
 		for (Request request : req) {
 			RequestType requestType = request.getType();
@@ -195,7 +195,7 @@ public class Client {
 		return accountAccessed;
 	}
 
-	public void createLoginRequest(String username, String password) {
+	public synchronized void createLoginRequest(String username, String password) {
 		isProcessing = true;
 		ArrayList<String> userAndPass = new ArrayList<>();
 		userAndPass.add(username);
@@ -203,35 +203,35 @@ public class Client {
 		sendRequest(userAndPass, RequestType.LOGIN, Status.REQUEST);
 	}
 
-	public void createDepositRequest(double amount) {
+	public synchronized void createDepositRequest(double amount) {
 		isProcessing = true;
 		sendRequest(amount, RequestType.DEPOSIT, Status.REQUEST);
 	}
 
-	public void createWithdrawRequest(double amount) {
+	public synchronized void createWithdrawRequest(double amount) {
 		isProcessing = true;
 		sendRequest(amount, RequestType.WITHDRAW, Status.REQUEST);
 	}
 
-	public void createTransferRequest(int toAccountID, double amount) {
+	public synchronized void createTransferRequest(int toAccountID, double amount) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(toAccountID + ""));
 		sendRequest(ID, amount, RequestType.TRANSFER, Status.REQUEST);
 	}
 
-	public void createFreezeRequest(int acc_ID) {
+	public synchronized void createFreezeRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.FREEZE, Status.REQUEST);
 	}
 
-	public void createEnterAccountRequest(int acc_ID) {
+	public synchronized void createEnterAccountRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
 		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
 	}
 
-	public void createReadLogsRequest(String startDate, String endDate) {
+	public synchronized void createReadLogsRequest(String startDate, String endDate) {
 	    isProcessing = true;
 	    ArrayList<String> dateRange = new ArrayList<>();
 	    dateRange.add(startDate);
@@ -239,7 +239,7 @@ public class Client {
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
 	}
 	
-	public void createAccountCreationRequest(String password) {
+	public synchronized void createAccountCreationRequest(String password) {
 		isProcessing = true;
 		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
 		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);

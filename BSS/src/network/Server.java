@@ -135,7 +135,7 @@ public class Server {
 		/*
 		 * Switch statement for processing incoming requests
 		 */
-		private static void processRequest(List<Request> req) {
+		private synchronized static void processRequest(List<Request> req) {
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
@@ -178,28 +178,28 @@ public class Server {
 			}
 		}
 
-		private static void sendResponse(UserType userType, RequestType requestType, Status status) {
+		private synchronized static void sendResponse(UserType userType, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(userType, requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void sendResponse(RequestType requestType, Status status) {
+		private synchronized static void sendResponse(RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void sendResponse(ArrayList<String> messages, RequestType requestType, Status status) {
+		private synchronized static void sendResponse(ArrayList<String> messages, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(messages, requestType, status);
 			responses.add(response);
 			outputHandler.enqueueRequest(responses);
 		}
 
-		private static void doLogin(Request request) {
+		private synchronized static void doLogin(Request request) {
 			
 			int username = Integer.parseInt(request.getTexts().get(0));
 			String password = request.getTexts().get(1);
@@ -233,7 +233,7 @@ public class Server {
 			}
 		}
 
-		private static void doDeposit(Request request) {
+		private synchronized static void doDeposit(Request request) {
 			if (loggedIn == true) {
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
@@ -253,7 +253,7 @@ public class Server {
 			}
 		}
 
-		private static void doWithdraw(Request request) {
+		private synchronized static void doWithdraw(Request request) {
 			if (loggedIn == true) {
 				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 					// if they have insufficient funds
@@ -273,7 +273,7 @@ public class Server {
 			}
 		}
 
-		private static void doTransfer(Request request) {
+		private synchronized static void doTransfer(Request request) {
 			if (loggedIn == true) {
 				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
 					// Account has insufficient funds, send failure
@@ -303,7 +303,7 @@ public class Server {
 			}
 		}
 
-		private static void doFreeze(Request request) {
+		private synchronized static void doFreeze(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
@@ -314,7 +314,7 @@ public class Server {
 			}
 		}
 
-		private static void doReadLogs(Request request) {
+		private synchronized static void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
 		        try {
 		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
@@ -349,7 +349,7 @@ public class Server {
 		    }
 		}
 
-		private static void doEnter(Request request) {
+		private synchronized static void doEnter(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
@@ -362,7 +362,7 @@ public class Server {
 		}
 		
 
-		private static void doCreateAccount(Request request) {
+		private synchronized static void doCreateAccount(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
@@ -373,7 +373,7 @@ public class Server {
 			
 		}
 
-		private static void doLeave(Request request) {
+		private synchronized static void doLeave(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
 
@@ -383,7 +383,7 @@ public class Server {
 			}
 		}
 
-		private static void doLogout(Request request) {
+		private synchronized static void doLogout(Request request) {
 			if (loggedIn) {
 				atm.logOut();
 				sendResponse(RequestType.LOGOUT, Status.SUCCESS);
@@ -391,7 +391,7 @@ public class Server {
 		}
 
 		// based on the given username, determine if it is for an account or a teller
-		private static UserType determineUserType(Bank bank, int userID) {
+		private synchronized static UserType determineUserType(Bank bank, int userID) {
 			Teller teller;
 			Account acc;
 			acc = bank.findAccount(userID);
