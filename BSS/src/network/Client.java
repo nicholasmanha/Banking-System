@@ -162,7 +162,7 @@ public class Client {
 				break;
 			case CREATECUSTOMER:
 				if(request.getStatus() == Status.SUCCESS) {
-					responseMessage = "Customer Creation Successful";
+					responseMessage = "Customer #" + request.getTexts().get(0) + " Creation Successful";
 				}
 				break;
 			case LEAVE:
