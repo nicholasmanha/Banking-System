@@ -92,7 +92,7 @@ public class Server {
 			//			this.loggedIn = false;
 			//this.bank = bank;
 			loggedIn = false;
-			bank = bank;
+			this.bank = bank;
 			this.clientSocket = socket;
 		}
 
