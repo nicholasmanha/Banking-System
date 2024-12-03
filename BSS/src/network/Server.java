@@ -25,10 +25,19 @@ public class Server {
 	public static void main(String[] args) {
 		ServerSocket server = null;
 		try {
+			
 			// server is listening on port 1234
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
 			Bank bank = new Bank();
+			
+			try {
+				bank.loadData(bank.getCustomers(), bank.getAccounts(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			// running infinite loop for getting
 			// client request
 			while (true) {
@@ -72,32 +81,26 @@ public class Server {
 
 		public ClientHandler(Bank bank, Socket socket) {
 			atm = new ATM();
-			this.loggedIn = false;
-			this.bank = bank;
+			//			this.loggedIn = false;
+			//this.bank = bank;
+			ClientHandler.loggedIn = false;
+			ClientHandler.bank = bank;
 			this.clientSocket = socket;
 		}
 
 		public void run() {
-
 			/*
 			 * creating accounts for debugging purposes
 			 */
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-			Customer customer = new Customer();
-			bank.addCustomer(customer);
-
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 
-			Account testAccount2 = firstTeller.createAccount("321");
-			bank.addAccount(testAccount2);
-
 			for (Account account : bank.getAccounts()) {
-				System.out.println("account #" + account.getId());
+				System.out.println("account #" + account.getId() + " account pin: " + account.getPin());
 			}
-
 			for (Teller teller : bank.getTellers()) {
 				System.out.println("teller #" + teller.getId());
 			}
@@ -130,12 +133,13 @@ public class Server {
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
+			
 		}
 
 		/*
 		 * Switch statement for processing incoming requests
 		 */
-		private static void processRequest(List<Request> req) {
+		private static void processRequest(List<Request> req) throws IOException {
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
@@ -175,6 +179,11 @@ public class Server {
 					break;
 				}
 
+			}
+			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
+			if (!bank.getCustomers().isEmpty()) {
+				System.out.println("CUSTOMERS NOT EMPTY");
+				bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
 			}
 		}
 
