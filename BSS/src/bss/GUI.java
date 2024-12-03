@@ -95,6 +95,7 @@ public class GUI implements Runnable {
 
 		JButton enterAccountButton = new JButton("Enter Account");
 		JButton freezeAccountButton = new JButton("Freeze Account");
+		JButton unfreezeAccountButton = new JButton("Unfreeze Account");
 		JButton readLogsButton = new JButton("Read Logs");
 		JButton CreateCustomerButton = new JButton("Create Customer");
 		JButton CreateAccountButton = new JButton("Create Account");
@@ -102,6 +103,7 @@ public class GUI implements Runnable {
 
 		enterAccountButton.addActionListener(e -> handleEnterAccount());
 		freezeAccountButton.addActionListener(e -> handleFreezeAccount());
+		unfreezeAccountButton.addActionListener(e -> handleUnfreezeAccount());
 		readLogsButton.addActionListener(e -> handleReadLogs());
 		CreateCustomerButton.addActionListener(e -> handleCreateCustomer());
 		CreateAccountButton.addActionListener(e -> handleCreateAccount());
@@ -109,6 +111,7 @@ public class GUI implements Runnable {
 
 		frame.add(enterAccountButton);
 		frame.add(freezeAccountButton);
+		frame.add(unfreezeAccountButton);
 		frame.add(readLogsButton);
 		frame.add(CreateCustomerButton);
 		frame.add(CreateAccountButton);
@@ -174,6 +177,15 @@ public class GUI implements Runnable {
 		if (accountId != null) {
 			client.createFreezeRequest(Integer.parseInt(accountId));
 			loadingDots("Freezing Account");
+			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+		}
+	}
+	
+	private synchronized void handleUnfreezeAccount() {
+		String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Unfreeze:");
+		if (accountId != null) {
+			client.createUnfreezeRequest(Integer.parseInt(accountId));
+			loadingDots("Unfreezing Account");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
 		}
 	}
