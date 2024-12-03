@@ -294,10 +294,21 @@ public class GUI implements Runnable {
 	 */
 
 	private synchronized void handleLogout() {
-		client.createLogoutRequest();
-		loadingDots("Logging Out");
-		JOptionPane.showMessageDialog(frame, "Logged out successfully.");
-		frame.dispose();
+		if(client.getAccountAccessed()) {
+			client.createLeaveRequest();
+			loadingDots("Leaving Account");
+			if (!client.getAccountAccessed()) {
+				System.out.println();
+				showTellerView();
+			}
+		}
+		else {
+			client.createLogoutRequest();
+			loadingDots("Logging Out");
+			JOptionPane.showMessageDialog(frame, "Logged out successfully.");
+			frame.dispose();
+		}
+		
 	}
 
 	private void loadingDots(String message) {
