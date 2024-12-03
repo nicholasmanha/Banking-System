@@ -38,14 +38,16 @@ public class Server {
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
 			Bank bank = new Bank();
-			
+			Teller firstTeller = new Teller("password");
+			bank.addTeller(firstTeller);
+
 			try {
-				bank.loadData(bank.getCustomers(), bank.getAccounts(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				bank.loadData(bank.getCustomers(), bank.getAccounts(), "output.txt");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+			
 			// running infinite loop for getting
 			// client request
 			while (true) {
@@ -91,7 +93,8 @@ public class Server {
 			atm = new ATM();
 			//			this.loggedIn = false;
 			//this.bank = bank;
-			this.loggedIn = false;
+			loggedIn = false;
+
 			this.bank = bank;
 			this.clientSocket = socket;
 		}
@@ -100,17 +103,19 @@ public class Server {
 			/*
 			 * creating accounts for debugging purposes
 			 */
-			Teller firstTeller = new Teller("password");
-			bank.addTeller(firstTeller);
+			
 
-			Account testAccount = firstTeller.createAccount("123");
-			bank.addAccount(testAccount);
+//			Account testAccount = firstTeller.createAccount("123");
+//			bank.addAccount(testAccount);
 
 			for (Account account : bank.getAccounts()) {
 				System.out.println("account #" + account.getId() + " account pin: " + account.getPin());
 			}
 			for (Teller teller : bank.getTellers()) {
 				System.out.println("teller #" + teller.getId());
+			}
+			for (Customer customerinst : bank.getCustomers()) {
+				System.out.println("customer #" + customerinst.getId());
 			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
@@ -148,7 +153,9 @@ public class Server {
 		 * Switch statement for processing incoming requests
 		 */
 
-		private synchronized void processRequest(List<Request> req) throws IOException {
+
+		private synchronized void processRequest(List<Request> req) {
+			
 
 			// for every request in the list of requests that was received
 			for (Request request : req) {
@@ -178,6 +185,9 @@ public class Server {
 				case ENTER:
 					doEnter(request);
 					break;
+				case CREATECUSTOMER:
+					doCreateCustomer(request);
+					break;
 				case CREATEACCOUNT:
 					doCreateAccount(request);
 					break;
@@ -191,11 +201,38 @@ public class Server {
 			}
 			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
 			if (!bank.getCustomers().isEmpty()) {
-				System.out.println("CUSTOMERS NOT EMPTY");
-				bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				//System.out.println("CUSTOMERS NOT EMPTY");
+				try {
+					bank.saveData(bank.getCustomers(), "output.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+			
 		}
 
+		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(userType, requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
+		private synchronized void sendResponse(RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+
+		private synchronized void sendResponse(ArrayList<String> messages, RequestType requestType, Status status, double balance) {
+			List<Request> responses = new ArrayList<>();
+			Request response = new Request(messages, requestType, status, balance);
+			responses.add(response);
+			outputHandler.enqueueRequest(responses);
+		}
+		
 		private synchronized void sendResponse(UserType userType, RequestType requestType, Status status) {
 			List<Request> responses = new ArrayList<>();
 			Request response = new Request(userType, requestType, status);
@@ -231,7 +268,7 @@ public class Server {
 
 					// initialized global session variable
 					session = atm.logIn(acc);
-					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS, acc.getAmount());
 					System.out.println("Balance: $" + session.getAccount().getAmount());
 					
 				} else {
@@ -267,7 +304,7 @@ public class Server {
 					session.getAccount().deposit(request.getAmount());
 					session.getAccount().setFrozen(false);
 
-					sendResponse(RequestType.DEPOSIT, Status.SUCCESS);
+					sendResponse(RequestType.DEPOSIT, Status.SUCCESS, session.getAccount().getAmount());
 					DepositLog depositLog = new DepositLog(session.getAccount().getId(), "Deposit", session.getAccount().getId());
                     logTransaction(depositLog);
 					
@@ -286,6 +323,7 @@ public class Server {
 			if (loggedIn) {
 				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 
+
 					// if they have insufficient funds
 					if (session.getAccount().getAmount() < request.getAmount()) {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds"));
@@ -293,7 +331,7 @@ public class Server {
 					} else {
 						session.getAccount().withdraw(request.getAmount());
 						// Account has sufficient funds, withdraw and send success
-						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
+						sendResponse(RequestType.WITHDRAW, Status.SUCCESS, session.getAccount().getAmount());
 						WithdrawLog withdrawLog = new WithdrawLog(session.getAccount().getId(), "Withdraw", session.getAccount().getId());
                         logTransaction(withdrawLog);
 					}
@@ -309,8 +347,9 @@ public class Server {
 
 
 		private synchronized void doTransfer(Request request) {
-			if (loggedIn) {
-				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
+			if (loggedIn == true) {
+				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+
 
 					// Account has insufficient funds, send failure
 					if (session.getAccount().getAmount() < request.getAmount()) {
@@ -327,7 +366,7 @@ public class Server {
 						} else {
 							// Account has sufficient funds, transfer and send success
 							to_account.deposit(request.getAmount());
-							sendResponse(RequestType.TRANSFER, Status.SUCCESS);
+							sendResponse(RequestType.TRANSFER, Status.SUCCESS, session.getAccount().getAmount());
 							TransferLog transferLog = new TransferLog(session.getAccount().getId(), "Transfer", session.getAccount().getId(), to_account.getId());
                             logTransaction(transferLog);
 						}
@@ -402,19 +441,32 @@ public class Server {
 		
 
 		private synchronized void doCreateAccount(Request request) {
-			
 			if (loggedIn) {
-				System.out.println(userType);
 				if (userType == UserType.TELLER) {
-					
-					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
-					
+					Account account = teller.createAccount(request.getTexts().get(0));
+					int customerID = Integer.parseInt(request.getTexts().get(1));
+					account.addUser(customerID);
+					Customer customer = bank.findCustomer(customerID);
+					customer.addAccount(account);
+					bank.addAccount(account);
 					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
-					
 				}
 			}
-			
-			
+		}
+		
+
+		private void doCreateCustomer(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					Customer customer = new Customer();
+					bank.addCustomer(customer);
+					ArrayList<String> customerID = new ArrayList<String>(Arrays.asList(customer.getId() + ""));
+					for (Customer customerinst : bank.getCustomers()) {
+						System.out.println("customer #" + customerinst.getId());
+					}
+					sendResponse(customerID, RequestType.CREATECUSTOMER, Status.SUCCESS);
+				}
+			}
 		}
 
 		private synchronized void doLeave(Request request) {

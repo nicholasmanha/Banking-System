@@ -27,7 +27,7 @@ public class InputHandler implements Runnable {
 	            if (e instanceof java.io.EOFException) {
 	                System.out.println("Connection closed by server.");
 	            } else {
-	                e.printStackTrace();
+	                //e.printStackTrace();
 	            }
 	            running = false; // Stop the thread
 	        } catch (ClassNotFoundException e) {
@@ -38,7 +38,7 @@ public class InputHandler implements Runnable {
 	        try {
 	            Thread.sleep(200); // Avoid busy-waiting
 	        } catch (InterruptedException e) {
-	            e.printStackTrace();
+	            //e.printStackTrace();
 	        }
 	    }
 	}

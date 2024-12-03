@@ -17,6 +17,7 @@ public class Request implements Serializable{
     private final Status status;
     private final UserType userType;
     private final double amount;
+    private double balance;
 
     public Request(){
     	this.amount = -1;
@@ -25,6 +26,16 @@ public class Request implements Serializable{
     	this.status = Status.UNDEFINED;
     	this.texts = null;
     	this.id = ++count;
+    	this.balance = 0;
+    }
+    public Request(UserType userType, RequestType type, Status status, double balance) {
+    	this.amount = -1;
+    	this.userType = userType;
+    	this.texts = null;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
     }
     public Request(UserType userType, RequestType type, Status status) {
     	this.amount = -1;
@@ -34,6 +45,15 @@ public class Request implements Serializable{
         this.status = status;
         this.id = ++count;
     }
+    public Request(ArrayList<String> texts, RequestType type, Status status, double balance) {
+    	this.amount = -1;
+    	this.userType = UserType.UNDEFINED;
+    	this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
+    }
     public Request(ArrayList<String> texts, RequestType type, Status status) {
     	this.amount = -1;
     	this.userType = UserType.UNDEFINED;
@@ -41,6 +61,15 @@ public class Request implements Serializable{
         this.type = type;
         this.status = status;
         this.id = ++count;
+    }
+    public Request(ArrayList<String> texts, double amt, RequestType type, Status status, double balance) {
+    	this.amount = amt;
+    	this.userType = UserType.UNDEFINED;
+    	this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
     }
     public Request(ArrayList<String> texts, double amt, RequestType type, Status status) {
     	this.amount = amt;
@@ -50,6 +79,15 @@ public class Request implements Serializable{
         this.status = status;
         this.id = ++count;
     }
+    public Request(UserType userType, ArrayList<String> texts, RequestType type, Status status, double balance) {
+    	this.amount = -1;
+    	this.userType = userType;
+        this.texts = texts;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
+    }
     public Request(UserType userType, ArrayList<String> texts, RequestType type, Status status) {
     	this.amount = -1;
     	this.userType = userType;
@@ -58,6 +96,15 @@ public class Request implements Serializable{
         this.status = status;
         this.id = ++count;
     }
+    public Request(double amt, RequestType type, Status status, double balance) {
+    	this.amount = amt;
+    	this.userType = UserType.UNDEFINED;
+        this.texts = null;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
+    }
     public Request(double amt, RequestType type, Status status) {
     	this.amount = amt;
     	this.userType = UserType.UNDEFINED;
@@ -65,6 +112,15 @@ public class Request implements Serializable{
         this.type = type;
         this.status = status;
         this.id = ++count;
+    }
+    public Request(RequestType type, Status status, double balance) {
+    	this.amount = -1;
+    	this.userType = UserType.UNDEFINED;
+        this.texts = null;
+        this.type = type;
+        this.status = status;
+        this.id = ++count;
+        this.balance = balance;
     }
     public Request(RequestType type, Status status) {
     	this.amount = -1;
@@ -93,6 +149,9 @@ public class Request implements Serializable{
     }
     public double getAmount() {
     	return amount;
+    }
+    public double getBal() {
+    	return this.balance;
     }
 }
 

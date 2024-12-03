@@ -18,6 +18,7 @@ public class Client {
 	private String responseMessage;
 	private UserType userType;
 	private boolean accountAccessed;
+	private double balance;
 
 	public Client(InputHandler inputHandler, OutputHandler outputHandler) {
 		this.inputHandler = inputHandler;
@@ -57,8 +58,8 @@ public class Client {
 			Client client = new Client(inputHandler, outputHandler);
 
 			// Start GUI
-			//GUI UI = new GUI(client);
-			BSSConsoleUI UI = new BSSConsoleUI(client);
+			GUI UI = new GUI(client);
+			//BSSConsoleUI UI = new BSSConsoleUI(client);
 			Thread consoleThread = new Thread(UI);
 			consoleThread.start();
 
@@ -74,7 +75,7 @@ public class Client {
 			System.out.println("Closing socket...");
 
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} finally {
 			// Ensuring the socket is closed, even if an exception occurred
 			try {
@@ -82,7 +83,7 @@ public class Client {
 					socket.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace(); // Handle error closing the socket
+				//e.printStackTrace(); // Handle error closing the socket
 			}
 		}
 	}
@@ -99,9 +100,10 @@ public class Client {
 				if (request.getStatus() == Status.SUCCESS) {
 					loggedIn = true;
 					responseMessage = "Login Successful";
+					setBal(request.getBal());
 					userType = request.getUserType();
 				} else {
-					System.out.println("Login failed");
+					responseMessage = "Incorrect Credentials";
 				}
 				break;
 			case LOGOUT:
@@ -110,10 +112,11 @@ public class Client {
 					if (inputHandler != null) inputHandler.stop();
 					alive = false;
 				}
-				startConnection();
+				//startConnection();
 				break;
 			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
+					setBal(request.getBal());
 					responseMessage = "Deposit Successful";
 				}
 				if (request.getStatus() == Status.FAILURE) {
@@ -122,6 +125,7 @@ public class Client {
 				break;
 			case WITHDRAW:
 				if (request.getStatus() == Status.SUCCESS) {
+					setBal(request.getBal());
 					responseMessage = "Withdraw Successful";
 				} else if (request.getTexts() != null && !request.getTexts().isEmpty()) {
 					responseMessage = request.getTexts().get(0);
@@ -129,6 +133,7 @@ public class Client {
 				break;
 			case TRANSFER:
 				if (request.getStatus() == Status.SUCCESS) {
+					setBal(request.getBal());
 					responseMessage = "Transfer Successful";
 				} else if (request.getStatus() == Status.FAILURE) {
 					responseMessage = request.getTexts().get(0);
@@ -158,6 +163,11 @@ public class Client {
 			case CREATEACCOUNT:
 				if (request.getStatus() == Status.SUCCESS) {
 					responseMessage = "Account Creation Successful";
+				}
+				break;
+			case CREATECUSTOMER:
+				if(request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Customer #" + request.getTexts().get(0) + " Creation Successful";
 				}
 				break;
 			case LEAVE:
@@ -194,41 +204,48 @@ public class Client {
 	public synchronized boolean getAccountAccessed() {
 		return accountAccessed;
 	}
-
+	
+	public void setBal(double amt) {
+		this.balance = amt;
+	}
+	public double getBal()
+	{
+		return this.balance;
+	}
 	public synchronized void createLoginRequest(String username, String password) {
 		isProcessing = true;
 		ArrayList<String> userAndPass = new ArrayList<>();
 		userAndPass.add(username);
 		userAndPass.add(password);
-		sendRequest(userAndPass, RequestType.LOGIN, Status.REQUEST);
+		sendRequest(userAndPass, RequestType.LOGIN, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createDepositRequest(double amount) {
 		isProcessing = true;
-		sendRequest(amount, RequestType.DEPOSIT, Status.REQUEST);
+		sendRequest(amount, RequestType.DEPOSIT, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createWithdrawRequest(double amount) {
 		isProcessing = true;
-		sendRequest(amount, RequestType.WITHDRAW, Status.REQUEST);
+		sendRequest(amount, RequestType.WITHDRAW, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createTransferRequest(int toAccountID, double amount) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(toAccountID + ""));
-		sendRequest(ID, amount, RequestType.TRANSFER, Status.REQUEST);
+		sendRequest(ID, amount, RequestType.TRANSFER, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createFreezeRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
-		sendRequest(ID, RequestType.FREEZE, Status.REQUEST);
+		sendRequest(ID, RequestType.FREEZE, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createEnterAccountRequest(int acc_ID) {
 		isProcessing = true;
 		ArrayList<String> ID = new ArrayList<>(Arrays.asList(acc_ID + ""));
-		sendRequest(ID, RequestType.ENTER, Status.REQUEST);
+		sendRequest(ID, RequestType.ENTER, Status.REQUEST, this.balance);
 	}
 
 	public synchronized void createReadLogsRequest(String startDate, String endDate) {
@@ -236,79 +253,65 @@ public class Client {
 	    ArrayList<String> dateRange = new ArrayList<>();
 	    dateRange.add(startDate);
 	    dateRange.add(endDate);
-	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
+	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST, this.balance);
 	}
 	
-	public synchronized void createAccountCreationRequest(String password) {
+
+	public void createCustomerCreationRequest() {
+		isProcessing = true;
+		sendRequest(RequestType.CREATECUSTOMER, Status.REQUEST, this.balance);
+	}
+	
+	public synchronized void createAccountCreationRequest(String password, String customerID) {
 		
 		isProcessing = true;
-		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
-		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
+		ArrayList<String> passwordAndCustomerID = new ArrayList<>();
+		passwordAndCustomerID.add(password);
+		passwordAndCustomerID.add(customerID);
+		sendRequest(passwordAndCustomerID, RequestType.CREATEACCOUNT, Status.REQUEST, this.balance);
 		
 	}
 
 	public synchronized void createLeaveRequest() {
 		isProcessing = true;
-		sendRequest(RequestType.LEAVE, Status.REQUEST);
+		sendRequest(RequestType.LEAVE, Status.REQUEST, this.balance);
 	}
 
 
 
 
 	public synchronized void createLogoutRequest() {
-	    sendRequest(RequestType.LOGOUT, Status.REQUEST);
-	
-	    // Shutdown
-	    try {
-	        System.out.println("Stopping Handlers...");
-	        inputHandler.stop();
-	        outputHandler.stop();
-	
-	        // Wait for threads to finish
-	        Thread inputThread = new Thread(inputHandler);
-	        Thread outputThread = new Thread(outputHandler);
-	        inputThread.join();
-	        outputThread.join();
-	
-	        // Close the socket and streams
-	        if (inputHandler.getInputStream() != null) {
-	            inputHandler.getInputStream().close();
-	        }
-	        if (outputHandler.getOutputStream() != null) {
-	            outputHandler.getOutputStream().close();
-	        }
-	
-	        alive = false;
-	    } catch (IOException | InterruptedException e) {
-	        e.printStackTrace();
-	    }
+		sendRequest(RequestType.LOGOUT, Status.REQUEST, this.balance);
+		isProcessing = true;
+		// Shutdown
+		
 	}
 
-	private synchronized void sendRequest(RequestType requestType, Status status) {
+	private synchronized void sendRequest(RequestType requestType, Status status, double balance) {
 
 		List<Request> responses = new ArrayList<>();
-		Request response = new Request(requestType, status);
+		Request response = new Request(requestType, status, balance);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private synchronized void sendRequest(ArrayList<String> messages, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, RequestType requestType, Status status, double balance) {
 		List<Request> responses = new ArrayList<>();
-		Request response = new Request(messages, requestType, status);
+		Request response = new Request(messages, requestType, status, balance);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private synchronized void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status, double balance) {
 		List<Request> responses = new ArrayList<>();
-		Request response = new Request(messages, amt, requestType, status);
+		Request response = new Request(messages, amt, requestType, status, balance);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private synchronized void sendRequest(double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(double amt, RequestType requestType, Status status, double balance) {
 		List<Request> responses = new ArrayList<>();
-		Request response = new Request(amt, requestType, status);
+		Request response = new Request(amt, requestType, status, balance);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}

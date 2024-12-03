@@ -16,38 +16,57 @@ public class BSSConsoleUI implements Runnable {
 	}
 
 	public void run() {
-		// Logging in
-		System.out.println("Enter username");
-		String username = scan.nextLine();
+		boolean success = false;
+		while(!success) {
+			// Logging in
+			System.out.println("Enter username");
+			String username = scan.nextLine();
 
-		System.out.println("Enter password");
-		String password = scan.nextLine();
+			System.out.println("Enter password");
+			String password = scan.nextLine();
 
-		client.createLoginRequest(username, password);
+			client.createLoginRequest(username, password);
 
-		System.out.print("Logging in");
-		loadingDots();
-		
-		System.out.println(client.getResponseMessage());
+			System.out.print("Logging in");
+			loadingDots();
+			
+			System.out.println(client.getResponseMessage());
 
-		// determine which view to show based off who is logging in
-		if (client.getUserType() == UserType.CUSTOMER) {
-			AccountView(true);
+			// determine which view to show based off who is logging in
+			if (client.getUserType() == UserType.CUSTOMER) {
+				success=true;
+				AccountView(true);
+				break;
 
-		} else {
-			tellerView();
+			} else if(client.getUserType() == UserType.TELLER) {
+				success=true;
+				tellerView();
+				
+				break;
+			}
+			else {
+				success = false;
+			}
 		}
+		
 
 	}
 
 	/*
 	 * Teller methods
 	 */
+	private void doCreateCustomer() {
+		client.createCustomerCreationRequest();
+		loadingDots();
+	    System.out.println(client.getResponseMessage());
+	}
 
 	private void doCreateAccount() {
 		System.out.println("Enter Password");
 	    String password = scan.nextLine();
-	    client.createAccountCreationRequest(password);
+	    System.out.println("Enter Customer ID to be Added");
+	    String cust_id = scan.nextLine();
+	    client.createAccountCreationRequest(password, cust_id);
 	    loadingDots();
 	    System.out.println(client.getResponseMessage());
 		
@@ -144,7 +163,7 @@ public class BSSConsoleUI implements Runnable {
 	 */
 	
 	private void tellerView() {
-		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Create Account", "Logout" };
+		String[] commands = { "Enter Account", "Freeze", "Read Logs", "Create Customer", "Create Account", "Logout" };
 
 		int choice;
 
@@ -166,9 +185,12 @@ public class BSSConsoleUI implements Runnable {
 					doReadLogs();
 					break;
 				case 3:
-					doCreateAccount();
+					doCreateCustomer();
 					break;
 				case 4:
+					doCreateAccount();
+					break;
+				case 5:
 					doLogout();
 					break;
 				default:
@@ -182,7 +204,7 @@ public class BSSConsoleUI implements Runnable {
 		} while (choice != commands.length - 1);
 
 	}
-	
+
 	private void AccountView(boolean customer) {
 		String[] commands;
 		

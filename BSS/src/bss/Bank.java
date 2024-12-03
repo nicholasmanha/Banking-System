@@ -11,45 +11,46 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Bank {
-	private ArrayList<Account> accounts;
-	private ArrayList<Customer> customers;
-	private ArrayList<Teller> tellers;
+	private static ArrayList<Account> accounts;
+	private static ArrayList<Customer> customers;
+	private static ArrayList<Teller> tellers;
+	private static boolean debug = false;
 	
 	public Bank() {
 		//
-		this.accounts = new ArrayList<Account>();
-		this.customers = new ArrayList<Customer>();
-		this.tellers = new ArrayList<Teller>();
+		Bank.accounts = new ArrayList<Account>();
+		Bank.customers = new ArrayList<Customer>();
+		Bank.tellers = new ArrayList<Teller>();
 	}
 	
 	public ArrayList<Account> getAccounts() {
-		return this.accounts;
+		return Bank.accounts;
 	}
 	public ArrayList<Customer> getCustomers() {
-		return this.customers;
+		return Bank.customers;
 	}
 	public void setAccounts(ArrayList<Account> accountData) {
-		this.accounts = accountData;
+		Bank.accounts = accountData;
 	}
 	public void setCustomers(ArrayList<Customer> customerData) {
-		this.customers = customerData;
+		Bank.customers = customerData;
 	}
 	
 	public ArrayList<Teller> getTellers() {
-		return this.tellers;
+		return Bank.tellers;
 	}
 	
 	// add an account to the bank
 	public void addAccount(Account account) {
-		this.accounts.add(account);
+		Bank.accounts.add(account);
 	}
 	// add a customer to the bank
 	public void addCustomer(Customer customer) {
-		customers.add(customer);
+		Bank.customers.add(customer);
 	}
 	// add a teller to the bank
 	public void addTeller(Teller teller) {
-		tellers.add(teller);
+		Bank.tellers.add(teller);
 	}
 	// find an account by account ID
 	public Account findAccount(int account_id){
@@ -73,6 +74,16 @@ public class Bank {
 	    }
 	    return null;
 	}
+	public Customer findCustomer(int customer_id) {
+		for (Customer customer : customers) 
+		{
+	        if (customer.getId() == customer_id) 
+	        {
+	            return customer;
+	        }
+	    }
+	    return null;
+	}
 
 	// save bank data to a file //ArrayList<Customer> customers, 
 	public void saveData(ArrayList<Customer> customers, String filePath) throws IOException{
@@ -82,7 +93,10 @@ public class Bank {
         for (Customer customer : customers) {
             // Write Customer ID
             writer.write("Customer_ID: " + customer.getId() + "\n");
-            System.out.println("Writing Customer_ID: " + customer.getId());
+            if(debug) {
+            	System.out.println("Writing Customer_ID: " + customer.getId());
+            }
+            
             
             // Write each account belonging to this customer
             for (Account account : customer.getAccounts()) {
@@ -141,7 +155,10 @@ public class Bank {
                 currentCustomer = new Customer(temp);
                 //add into customer into HASHMAP
                 customerCount.put(temp, currentCustomer);
-                System.out.println("Customer_ID: " + temp + " -> " + currentCustomer);
+                if(debug) {
+                	System.out.println("Customer_ID: " + temp + " -> " + currentCustomer);
+                }
+                
             } 
         }
         reader.close();
@@ -166,7 +183,10 @@ public class Bank {
             	currentAccount= new Account(temp);
                 //add account object and its ID into HASHMAP
             	accountCount.put(temp, currentAccount);
-            	System.out.println("Account_ID: " + temp + " -> " + currentAccount);
+            	if(debug) {
+            		System.out.println("Account_ID: " + temp + " -> " + currentAccount);
+            	}
+            	
             } 
         }
         reader.close();
@@ -317,7 +337,10 @@ public class Bank {
         for (Customer customer : customers) {
             // Write Customer ID
             writer.write("Customer_ID: " + customer.getId() + "\n");
-            System.out.println("Writing Customer_ID: " + customer.getId());
+            if(debug) {
+            	System.out.println("Writing Customer_ID: " + customer.getId());
+            }
+            
             
             // Write each account belonging to this customer
             for (Account account : customer.getAccounts()) {
