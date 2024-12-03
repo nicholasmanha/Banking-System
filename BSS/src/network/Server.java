@@ -37,7 +37,7 @@ public class Server {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			// running infinite loop for getting
 			// client request
 			while (true) {
@@ -95,19 +95,6 @@ public class Server {
 			Teller firstTeller = new Teller("password");
 			bank.addTeller(firstTeller);
 
-			//Customer customer = new Customer();
-			//bank.addCustomer(customer);
-		/*	Account custAcc = new Account();
-			custAcc.setPin("777");
-			custAcc.setAmount(0.00);
-			custAcc.deposit(2000.00);
-			custAcc.setAccountTypeCheckings();
-			customer.addAccount(custAcc);
-			System.out.println("Customer ID: " + customer.getId());
-			System.out.println("CustomerAcc ID: " + customer.getAccounts().getFirst().getId());
-			System.out.println("CustomerAcc pin: " + customer.getAccounts().getFirst().getPin());
-			bank.addCustomer(customer);
-			*/	
 			Account testAccount = firstTeller.createAccount("123");
 			bank.addAccount(testAccount);
 

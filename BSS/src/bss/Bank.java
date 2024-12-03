@@ -118,7 +118,6 @@ public class Bank {
 				HashMap<Integer, Account> b = countAccounts(filePath);
 				//readFromFile will populate each Customer with the accounts that belong to it
 				customers = readFromFile(filePath, accounts, a, b); 
-				//
 				setCustomers(customers);
 	}
 	
@@ -310,4 +309,39 @@ public class Bank {
         }
         return accounts;
     }
-}	    
+    
+    public static void writeToFile(ArrayList<Customer> customers, String filePath) throws IOException {
+        FileWriter fileWriter = new FileWriter(filePath);
+        BufferedWriter writer = new BufferedWriter(fileWriter);
+
+        for (Customer customer : customers) {
+            // Write Customer ID
+            writer.write("Customer_ID: " + customer.getId() + "\n");
+            System.out.println("Writing Customer_ID: " + customer.getId());
+            
+            // Write each account belonging to this customer
+            for (Account account : customer.getAccounts()) {
+                writer.write("\tAccount_ID: " + account.getAccountID() + "\n");
+                writer.write("\t\tPin: \"" + account.getPin() + "\"\n");
+
+                // Write Users
+                writer.write("\t\tUsers: [");
+                for (int i = 0; i < account.getUsers().size(); i++) {
+                    writer.write("Customer_ID! " + account.getUsers().get(i));
+                    if (i < account.getUsers().size() - 1) {
+                        writer.write(", ");
+                    }
+                }
+                writer.write("]\n");  
+
+                // Write other account details
+                writer.write("\t\tFrozen: " + account.getFrozen() + "\n");
+                writer.write("\t\tAmount: " + account.getAmount() + "\n");
+                writer.write("\t\tAccountType: " + account.getAccountType() + "\n");
+            }
+        }
+        // Close the writer to flush data to the file
+        writer.close();
+    }
+}
+
