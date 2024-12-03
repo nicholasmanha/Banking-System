@@ -18,6 +18,7 @@ public class Client {
 	private String responseMessage;
 	private UserType userType;
 	private boolean accountAccessed;
+	private static double bal;
 
 	public Client(InputHandler inputHandler, OutputHandler outputHandler) {
 		this.inputHandler = inputHandler;
@@ -193,6 +194,14 @@ public class Client {
 
 	public boolean getAccountAccessed() {
 		return accountAccessed;
+	}
+	
+	public double getBal() {
+		return Client.bal;
+	}
+	
+	public static void setBal(double amt) {
+		Client.bal = amt;
 	}
 
 	public synchronized void createLoginRequest(String username, String password) {

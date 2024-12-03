@@ -209,12 +209,13 @@ public class Server {
 			if (userType == UserType.CUSTOMER) {
 				Account acc = bank.findAccount(username);
 				if (acc.checkCredentials(username, password)) {
-					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
-					
 					loggedIn = true;
 
 					// initialized global session variable
 					session = atm.logIn(acc);
+					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.SUCCESS);
+					
+					
 				} else {
 					// user credentials were incorrect, send failure response
 					sendResponse(UserType.CUSTOMER, RequestType.LOGIN, Status.FAILURE);
@@ -261,6 +262,7 @@ public class Server {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds"));
 						sendResponse(errorMessage, RequestType.WITHDRAW, Status.FAILURE);
 					} else {
+						session.getAccount().withdraw(request.getAmount());
 						// Account has sufficient funds, withdraw and send success
 						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
 					}
@@ -352,6 +354,7 @@ public class Server {
 		private synchronized static void doEnter(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
+					System.out.println("got here");
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
 					Account acc = bank.findAccount(acc_ID);
 					session = atm.logIn(acc);
