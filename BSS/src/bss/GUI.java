@@ -83,7 +83,7 @@ public class GUI implements Runnable {
 		if (userType == UserType.TELLER) {
 			showTellerView();
 		} else if (userType == UserType.CUSTOMER) {
-			showCustomerView();
+			showCustomerView(true);
 		}
 	}
 
@@ -139,7 +139,7 @@ public class GUI implements Runnable {
 	}
 
 	// display the customer view
-	private synchronized void showCustomerView() {
+	private synchronized void showCustomerView(boolean customer) {
 		frame.getContentPane().removeAll();
 		frame.setTitle("Customer View");
 		frame.setLayout(new GridLayout(4, 1));
@@ -147,7 +147,14 @@ public class GUI implements Runnable {
 		JButton depositButton = new JButton("Deposit");
 		JButton withdrawButton = new JButton("Withdraw");
 		JButton transferButton = new JButton("Transfer");
-		JButton logoutButton = new JButton("Logout");
+		JButton logoutButton;
+		if(customer) {
+			logoutButton = new JButton("Logout");
+		}
+		else {
+			logoutButton = new JButton("Leave");
+		}
+		
 
 		depositButton.addActionListener(e -> handleDeposit());
 		withdrawButton.addActionListener(e -> handleWithdraw());
@@ -169,6 +176,9 @@ public class GUI implements Runnable {
 			client.createEnterAccountRequest(Integer.parseInt(accountId));
 			loadingDots("Entering Account");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
 		}
 	}
 
@@ -226,7 +236,12 @@ public class GUI implements Runnable {
 			client.createDepositRequest(Double.parseDouble(amount));
 			loadingDots("Depositing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
@@ -236,7 +251,12 @@ public class GUI implements Runnable {
 			client.createWithdrawRequest(Double.parseDouble(amount));
 			loadingDots("Withdrawing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
@@ -247,7 +267,12 @@ public class GUI implements Runnable {
 			client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
 			loadingDots("Transferring");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
