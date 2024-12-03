@@ -52,7 +52,8 @@ public class GUI implements Runnable{
     {
     	
     	client.createLoginRequest(username, password);
-        JOptionPane.showMessageDialog(frame, "Logging in...");
+    	loadingDots("Logging In");
+//        JOptionPane.showMessageDialog(frame, "Logging in...");
         
         new SwingWorker<Void, Void>() 
         {
@@ -156,6 +157,7 @@ public class GUI implements Runnable{
         if (accountId != null) 
         {
             client.createEnterAccountRequest(Integer.parseInt(accountId));
+            loadingDots("Entering Account");
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
@@ -166,6 +168,7 @@ public class GUI implements Runnable{
         if (accountId != null) 
         {
             client.createFreezeRequest(Integer.parseInt(accountId));
+            loadingDots("Freezing Account");
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
@@ -177,6 +180,7 @@ public class GUI implements Runnable{
         if (startDate != null && endDate != null) 
         {
             client.createReadLogsRequest(startDate, endDate);
+            loadingDots("Reading Logs");
             JOptionPane.showMessageDialog(frame, "Fetching logs...");
 
             new SwingWorker<Void, Void>() {
@@ -213,7 +217,7 @@ public class GUI implements Runnable{
         if (amount != null) 
         {
             client.createDepositRequest(Double.parseDouble(amount));
-            
+            loadingDots("Depositing");
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
@@ -224,6 +228,7 @@ public class GUI implements Runnable{
         if (amount != null) 
         {
             client.createWithdrawRequest(Double.parseDouble(amount));
+            loadingDots("Withdrawing");
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
@@ -235,6 +240,7 @@ public class GUI implements Runnable{
         if (accountId != null && amount != null) 
         {
             client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
+            loadingDots("Transferring");
             JOptionPane.showMessageDialog(frame, client.getResponseMessage());
         }
     }
@@ -272,8 +278,26 @@ public class GUI implements Runnable{
     private synchronized void handleLogout() 
     {
         client.createLogoutRequest();
+        loadingDots("Logging Out");
         JOptionPane.showMessageDialog(frame, "Logged out successfully.");
         frame.dispose();
     }
+    
+    private void loadingDots(String message) {
+    	
+    	JLabel loading = new JLabel(message);
+    	JOptionPane pane = new JOptionPane(loading);
+    	JDialog dialog = pane.createDialog(message);
+
+		while (client.getIsProcessing()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.out.println("Thread was interrupted.");
+			}
+			loading.setText(message += ".");
+		}
+	}
 
 }

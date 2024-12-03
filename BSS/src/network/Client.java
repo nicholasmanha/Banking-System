@@ -57,8 +57,8 @@ public class Client {
 			Client client = new Client(inputHandler, outputHandler);
 
 			// Start GUI
-			//GUI UI = new GUI(client);
-			BSSConsoleUI UI = new BSSConsoleUI(client);
+			GUI UI = new GUI(client);
+			//BSSConsoleUI UI = new BSSConsoleUI(client);
 			Thread consoleThread = new Thread(UI);
 			consoleThread.start();
 
