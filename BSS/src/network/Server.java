@@ -91,8 +91,8 @@ public class Server {
 			atm = new ATM();
 			//			this.loggedIn = false;
 			//this.bank = bank;
-			ClientHandler.loggedIn = false;
-			ClientHandler.bank = bank;
+			loggedIn = false;
+			bank = bank;
 			this.clientSocket = socket;
 		}
 
@@ -255,10 +255,6 @@ public class Server {
 			
 		}
 
-
-		private static void doDeposit(Request request) {
-			if (loggedIn) {
-
 		private synchronized void doDeposit(Request request) {
 			if (loggedIn == true) {
 
@@ -285,9 +281,6 @@ public class Server {
 		}
 
 
-		private static void doWithdraw(Request request) {
-			if (loggedIn) {
-				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 
 		private synchronized void doWithdraw(Request request) {
 			if (loggedIn == true) {
@@ -313,11 +306,6 @@ public class Server {
 			}
 			System.out.println("Balance: $" + session.getAccount().getAmount());
 		}
-
-
-		private static void doTransfer(Request request) {
-			if (loggedIn) {
-				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 
 		private synchronized void doTransfer(Request request) {
 			if (loggedIn == true) {
