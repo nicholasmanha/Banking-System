@@ -361,7 +361,6 @@ public class Server {
 		private synchronized void doEnter(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
-					System.out.println("got here");
 					int acc_ID = Integer.parseInt(request.getTexts().get(0));
 					Account acc = bank.findAccount(acc_ID);
 					session = atm.logIn(acc);
