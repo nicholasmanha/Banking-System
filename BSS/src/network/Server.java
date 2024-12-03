@@ -84,8 +84,8 @@ public class Server {
 			atm = new ATM();
 			//			this.loggedIn = false;
 			//this.bank = bank;
-			ClientHandler.loggedIn = false;
-			ClientHandler.bank = bank;
+			loggedIn = false;
+			bank = bank;
 			this.clientSocket = socket;
 		}
 
@@ -185,7 +185,12 @@ public class Server {
 			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
 			if (!bank.getCustomers().isEmpty()) {
 				System.out.println("CUSTOMERS NOT EMPTY");
-				bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				try {
+					bank.saveData(bank.getCustomers(), "/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
