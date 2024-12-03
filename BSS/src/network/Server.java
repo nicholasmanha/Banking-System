@@ -188,6 +188,9 @@ public class Server {
 				case ENTER:
 					doEnter(request);
 					break;
+				case CREATECUSTOMER:
+					doCreateCustomer(request);
+					break;
 				case CREATEACCOUNT:
 					doCreateAccount(request);
 					break;
@@ -407,19 +410,24 @@ public class Server {
 		
 
 		private synchronized void doCreateAccount(Request request) {
-			
 			if (loggedIn) {
-				System.out.println(userType);
 				if (userType == UserType.TELLER) {
-					
 					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
-					
 					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
-					
 				}
 			}
-			
-			
+		}
+		
+
+		private void doCreateCustomer(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					Customer customer = new Customer();
+					bank.addCustomer(customer);
+					ArrayList<String> customerID = new ArrayList<String>(Arrays.asList(customer.getId() + ""));
+					sendResponse(customerID, RequestType.CREATECUSTOMER, Status.SUCCESS);
+				}
+			}
 		}
 
 		private synchronized void doLeave(Request request) {
