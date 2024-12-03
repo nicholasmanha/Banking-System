@@ -113,6 +113,9 @@ public class Server {
 			for (Teller teller : bank.getTellers()) {
 				System.out.println("teller #" + teller.getId());
 			}
+			for (Customer customerinst : bank.getCustomers()) {
+				System.out.println("customer #" + customerinst.getId());
+			}
 			/*
 			 * Establish input and output streams and inputHandler and outputHandler,
 			 * initialize threads for them and process requests in a regular interval
@@ -150,16 +153,7 @@ public class Server {
 		 */
 
 		private synchronized void processRequest(List<Request> req) {
-			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
-			if (!bank.getCustomers().isEmpty()) {
-				//System.out.println("CUSTOMERS NOT EMPTY");
-				try {
-					bank.saveData(bank.getCustomers(), "output.txt");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			
 			// for every request in the list of requests that was received
 			for (Request request : req) {
 				RequestType type = request.getType();
@@ -201,6 +195,16 @@ public class Server {
 					break;
 				}
 
+			}
+			//"/Users/edgarromero/eclipse-workspace/Banking-System/BSS/src/TestCustomers.txt
+			if (!bank.getCustomers().isEmpty()) {
+				//System.out.println("CUSTOMERS NOT EMPTY");
+				try {
+					bank.saveData(bank.getCustomers(), "output.txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 		}
@@ -412,7 +416,12 @@ public class Server {
 		private synchronized void doCreateAccount(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
-					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
+					Account account = teller.createAccount(request.getTexts().get(0));
+					int customerID = Integer.parseInt(request.getTexts().get(1));
+					account.addUser(customerID);
+					Customer customer = bank.findCustomer(customerID);
+					customer.addAccount(account);
+					bank.addAccount(account);
 					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
 				}
 			}
@@ -425,6 +434,9 @@ public class Server {
 					Customer customer = new Customer();
 					bank.addCustomer(customer);
 					ArrayList<String> customerID = new ArrayList<String>(Arrays.asList(customer.getId() + ""));
+					for (Customer customerinst : bank.getCustomers()) {
+						System.out.println("customer #" + customerinst.getId());
+					}
 					sendResponse(customerID, RequestType.CREATECUSTOMER, Status.SUCCESS);
 				}
 			}
