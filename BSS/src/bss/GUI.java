@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import enums.UserType;
 import network.Client;
 
-public class GUI {
+public class GUI implements Runnable{
 
     private JFrame frame;
     private Client client;
@@ -16,11 +16,10 @@ public class GUI {
     public GUI(Client client) {
 
     	this.client = client;
-        initializeLoginScreen();
     }
 
     // initialize the login screen
-    private void initializeLoginScreen() 
+    public void run() 
     {
     	
     	frame = new JFrame("Banking System - Login");
@@ -273,7 +272,6 @@ public class GUI {
         client.createLogoutRequest();
         JOptionPane.showMessageDialog(frame, "Logged out successfully.");
         frame.dispose();
-        initializeLoginScreen();
     }
 
 }
