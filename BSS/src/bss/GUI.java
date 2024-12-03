@@ -111,11 +111,15 @@ public class GUI implements Runnable{
         JButton enterAccountButton = new JButton("Enter Account");
         JButton freezeAccountButton = new JButton("Freeze Account");
         JButton readLogsButton = new JButton("Read Logs");
+        JButton CreateCustomerButton = new JButton("Create Customer");
+        JButton CreateAccountButton = new JButton("Create Account");
         JButton logoutButton = new JButton("Logout");
         
         enterAccountButton.addActionListener(e -> handleEnterAccount());
         freezeAccountButton.addActionListener(e -> handleFreezeAccount());
         readLogsButton.addActionListener(e -> handleReadLogs());
+        CreateCustomerButton.addActionListener(e -> handleCreateCustomer());
+        CreateAccountButton.addActionListener(e -> handleCreateAccount());
         logoutButton.addActionListener(e -> handleLogout());
 
         frame.add(enterAccountButton);
@@ -126,7 +130,17 @@ public class GUI implements Runnable{
         frame.repaint();
     }
     
-    // display the customer view
+    private Object handleCreateAccount() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Object handleCreateCustomer() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// display the customer view
     private synchronized void showCustomerView() 
     {
     	frame.getContentPane().removeAll();
