@@ -74,7 +74,7 @@ public class Client {
 			System.out.println("Closing socket...");
 
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} finally {
 			// Ensuring the socket is closed, even if an exception occurred
 			try {
@@ -82,7 +82,7 @@ public class Client {
 					socket.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace(); // Handle error closing the socket
+				//e.printStackTrace(); // Handle error closing the socket
 			}
 		}
 	}
@@ -110,7 +110,7 @@ public class Client {
 					if (inputHandler != null) inputHandler.stop();
 					alive = false;
 				}
-				startConnection();
+				//startConnection();
 				break;
 			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
@@ -158,6 +158,11 @@ public class Client {
 			case CREATEACCOUNT:
 				if (request.getStatus() == Status.SUCCESS) {
 					responseMessage = "Account Creation Successful";
+				}
+				break;
+			case CREATECUSTOMER:
+				if(request.getStatus() == Status.SUCCESS) {
+					responseMessage = "Customer Creation Successful";
 				}
 				break;
 			case LEAVE:
@@ -237,6 +242,12 @@ public class Client {
 	    dateRange.add(startDate);
 	    dateRange.add(endDate);
 	    sendRequest(dateRange, RequestType.TEXT, Status.REQUEST);
+	}
+	
+
+	public void createCustomerCreationRequest() {
+		isProcessing = true;
+		sendRequest(RequestType.CREATECUSTOMER, Status.REQUEST);
 	}
 	
 	public synchronized void createAccountCreationRequest(String password) {
