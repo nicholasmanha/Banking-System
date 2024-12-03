@@ -1,0 +1,2 @@
+2024-12-02T21:04:35.250461 : Deposit | Log ID: 2 | Account ID: 2 | Deposit
+2024-12-02T21:04:40.757524 : Withdraw | Log ID: 2 | Account ID: 2 | Withdraw

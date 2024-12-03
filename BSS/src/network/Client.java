@@ -229,33 +229,38 @@ public class Client {
 		sendRequest(RequestType.LEAVE, Status.REQUEST);
 	}
 
+
+
 	public void createLogoutRequest() {
-		sendRequest(RequestType.LOGOUT, Status.REQUEST);
-
-		// Shutdown
-		try {
-			System.out.println("Stopping Handlers...");
-			inputHandler.stop();
-			outputHandler.stop();
-			alive = false;
-
-			// Wait for threads to finish
-			Thread inputThread = new Thread(inputHandler);
-			Thread outputThread = new Thread(outputHandler);
-			inputThread.join();
-			outputThread.join();
-
-			// Close the socket and streams
-			if (inputHandler.getInputStream() != null) {
-				inputHandler.getInputStream().close();
-			}
-			if (outputHandler.getOutputStream() != null) {
-				outputHandler.getOutputStream().close();
-			}
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
+	    sendRequest(RequestType.LOGOUT, Status.REQUEST);
+	
+	    // Shutdown
+	    try {
+	        System.out.println("Stopping Handlers...");
+	        inputHandler.stop();
+	        outputHandler.stop();
+	
+	        // Wait for threads to finish
+	        Thread inputThread = new Thread(inputHandler);
+	        Thread outputThread = new Thread(outputHandler);
+	        inputThread.join();
+	        outputThread.join();
+	
+	        // Close the socket and streams
+	        if (inputHandler.getInputStream() != null) {
+	            inputHandler.getInputStream().close();
+	        }
+	        if (outputHandler.getOutputStream() != null) {
+	            outputHandler.getOutputStream().close();
+	        }
+	
+	        alive = false;
+	    } catch (IOException | InterruptedException e) {
+	        e.printStackTrace();
+	    }
 	}
+
+
 
 	private void sendRequest(RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();

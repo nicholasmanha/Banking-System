@@ -16,13 +16,16 @@ import bss.Customer;
 import bss.Session;
 import bss.Teller;
 import enums.*;
+import log.DepositLog;
 import log.Log;
+import log.TransferLog;
+import log.WithdrawLog;
 
 import java.io.File;
 import java.util.Scanner;
 
 public class Server {
-    private static final String LOG_FILE_PATH = "BSS/src/log/ServerActions.txt";
+    private static final String LOG_FILE_PATH = "BSS/src/log/transactions.txt";
 
 	
 	public static void main(String[] args) {
@@ -233,16 +236,19 @@ public class Server {
 		}
 
 		private static void doDeposit(Request request) {
-			if (loggedIn == true) {
+			if (loggedIn) {
 				// getOccupied is for checking if the account is currently processing something
 				// so two people can't interact with an account at once
-				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 					// set the frozen flag to true on account whilst interacting with it
 					session.getAccount().setFrozen(true);
 					session.getAccount().deposit(request.getAmount());
 					session.getAccount().setFrozen(false);
 
 					sendResponse(RequestType.DEPOSIT, Status.SUCCESS);
+					DepositLog depositLog = new DepositLog(session.getAccount().getId(), "Deposit", session.getAccount().getId());
+                    logTransaction(depositLog);
+					
 				} else {
 					// send deposit failure response if the account is occupied
 					ArrayList<String> errorMessage = new ArrayList<String>(
@@ -253,8 +259,8 @@ public class Server {
 		}
 
 		private static void doWithdraw(Request request) {
-			if (loggedIn == true) {
-				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+			if (loggedIn) {
+				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 					// if they have insufficient funds
 					if (session.getAccount().getAmount() < request.getAmount()) {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds"));
@@ -262,6 +268,8 @@ public class Server {
 					} else {
 						// Account has sufficient funds, withdraw and send success
 						sendResponse(RequestType.WITHDRAW, Status.SUCCESS);
+						WithdrawLog withdrawLog = new WithdrawLog(session.getAccount().getId(), "Withdraw", session.getAccount().getId());
+                        logTransaction(withdrawLog);
 					}
 				} else {
 					// send deposit failure response if the account is occupied
@@ -273,8 +281,8 @@ public class Server {
 		}
 
 		private static void doTransfer(Request request) {
-			if (loggedIn == true) {
-				if (session.getAccount().getOccupied() == false && session.getAccount().getFrozen() == false) {
+			if (loggedIn) {
+				if (!session.getAccount().getOccupied() && !session.getAccount().getFrozen()) {
 					// Account has insufficient funds, send failure
 					if (session.getAccount().getAmount() < request.getAmount()) {
 						ArrayList<String> errorMessage = new ArrayList<String>(Arrays.asList("Insufficient Funds\n"));
@@ -291,6 +299,8 @@ public class Server {
 							// Account has sufficient funds, transfer and send success
 							to_account.deposit(request.getAmount());
 							sendResponse(RequestType.TRANSFER, Status.SUCCESS);
+							TransferLog transferLog = new TransferLog(session.getAccount().getId(), "Transfer", session.getAccount().getId(), to_account.getId());
+                            logTransaction(transferLog);
 						}
 					}
 				} else {
