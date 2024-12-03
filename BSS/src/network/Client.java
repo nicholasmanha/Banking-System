@@ -25,6 +25,11 @@ public class Client {
 	}
 
 	public static void main(String[] args) {
+		
+		startConnection();
+	}
+	
+	private static void startConnection() {
 		final String HOST = "localhost";
 		final int PORT = 1234;
 
@@ -54,8 +59,8 @@ public class Client {
 			// Start GUI
 			GUI gui = new GUI(client);
 			//BSSConsoleUI UI = new BSSConsoleUI(client);
-			//Thread consoleThread = new Thread(UI);
-			//consoleThread.start();
+			Thread consoleThread = new Thread(gui);
+			consoleThread.start();
 
 			// Process server responses
 			while (client.alive) {
@@ -101,9 +106,11 @@ public class Client {
 				break;
 			case LOGOUT:
 				if (request.getStatus() == Status.SUCCESS) {
-					System.out.println("Logging out...");
-					createLogoutRequest(); // Graceful shutdown
+					if (outputHandler != null) outputHandler.stop();
+					if (inputHandler != null) inputHandler.stop();
+					alive = false;
 				}
+				startConnection();
 				break;
 			case DEPOSIT:
 				if (request.getStatus() == Status.SUCCESS) {
@@ -245,30 +252,9 @@ public class Client {
 
 	public void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
-
+		isProcessing = true;
 		// Shutdown
-		try {
-			System.out.println("Stopping Handlers...");
-			inputHandler.stop();
-			outputHandler.stop();
-			alive = false;
-
-			// Wait for threads to finish
-			Thread inputThread = new Thread(inputHandler);
-			Thread outputThread = new Thread(outputHandler);
-			inputThread.join();
-			outputThread.join();
-
-			// Close the socket and streams
-			if (inputHandler.getInputStream() != null) {
-				inputHandler.getInputStream().close();
-			}
-			if (outputHandler.getOutputStream() != null) {
-				outputHandler.getOutputStream().close();
-			}
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	private void sendRequest(RequestType requestType, Status status) {
