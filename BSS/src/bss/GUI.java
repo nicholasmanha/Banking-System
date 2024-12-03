@@ -83,7 +83,7 @@ public class GUI implements Runnable {
 		if (userType == UserType.TELLER) {
 			showTellerView();
 		} else if (userType == UserType.CUSTOMER) {
-			showCustomerView();
+			showCustomerView(true);
 		}
 	}
 
@@ -95,6 +95,7 @@ public class GUI implements Runnable {
 
 		JButton enterAccountButton = new JButton("Enter Account");
 		JButton freezeAccountButton = new JButton("Freeze Account");
+		JButton unfreezeAccountButton = new JButton("Unfreeze Account");
 		JButton readLogsButton = new JButton("Read Logs");
 		JButton CreateCustomerButton = new JButton("Create Customer");
 		JButton CreateAccountButton = new JButton("Create Account");
@@ -102,6 +103,7 @@ public class GUI implements Runnable {
 
 		enterAccountButton.addActionListener(e -> handleEnterAccount());
 		freezeAccountButton.addActionListener(e -> handleFreezeAccount());
+		unfreezeAccountButton.addActionListener(e -> handleUnfreezeAccount());
 		readLogsButton.addActionListener(e -> handleReadLogs());
 		CreateCustomerButton.addActionListener(e -> handleCreateCustomer());
 		CreateAccountButton.addActionListener(e -> handleCreateAccount());
@@ -109,6 +111,7 @@ public class GUI implements Runnable {
 
 		frame.add(enterAccountButton);
 		frame.add(freezeAccountButton);
+		frame.add(unfreezeAccountButton);
 		frame.add(readLogsButton);
 		frame.add(CreateCustomerButton);
 		frame.add(CreateAccountButton);
@@ -136,7 +139,7 @@ public class GUI implements Runnable {
 	}
 
 	// display the customer view
-	private synchronized void showCustomerView() {
+	private synchronized void showCustomerView(boolean customer) {
 		frame.getContentPane().removeAll();
 		frame.setTitle("Customer View");
 		frame.setLayout(new GridLayout(4, 1));
@@ -144,7 +147,14 @@ public class GUI implements Runnable {
 		JButton depositButton = new JButton("Deposit");
 		JButton withdrawButton = new JButton("Withdraw");
 		JButton transferButton = new JButton("Transfer");
-		JButton logoutButton = new JButton("Logout");
+		JButton logoutButton;
+		if(customer) {
+			logoutButton = new JButton("Logout");
+		}
+		else {
+			logoutButton = new JButton("Leave");
+		}
+		
 
 		depositButton.addActionListener(e -> handleDeposit());
 		withdrawButton.addActionListener(e -> handleWithdraw());
@@ -166,6 +176,9 @@ public class GUI implements Runnable {
 			client.createEnterAccountRequest(Integer.parseInt(accountId));
 			loadingDots("Entering Account");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
 		}
 	}
 
@@ -174,6 +187,15 @@ public class GUI implements Runnable {
 		if (accountId != null) {
 			client.createFreezeRequest(Integer.parseInt(accountId));
 			loadingDots("Freezing Account");
+			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
+		}
+	}
+	
+	private synchronized void handleUnfreezeAccount() {
+		String accountId = JOptionPane.showInputDialog(frame, "Enter Account ID to Unfreeze:");
+		if (accountId != null) {
+			client.createUnfreezeRequest(Integer.parseInt(accountId));
+			loadingDots("Unfreezing Account");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
 		}
 	}
@@ -214,7 +236,12 @@ public class GUI implements Runnable {
 			client.createDepositRequest(Double.parseDouble(amount));
 			loadingDots("Depositing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
@@ -224,7 +251,12 @@ public class GUI implements Runnable {
 			client.createWithdrawRequest(Double.parseDouble(amount));
 			loadingDots("Withdrawing");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
@@ -235,7 +267,12 @@ public class GUI implements Runnable {
 			client.createTransferRequest(Integer.parseInt(accountId), Double.parseDouble(amount));
 			loadingDots("Transferring");
 			JOptionPane.showMessageDialog(frame, client.getResponseMessage());
-			showCustomerView();
+			if (client.getAccountAccessed()) {
+				showCustomerView(false);
+			}
+			else {
+				showCustomerView(true);
+			}
 		}
 	}
 
@@ -257,10 +294,21 @@ public class GUI implements Runnable {
 	 */
 
 	private synchronized void handleLogout() {
-		client.createLogoutRequest();
-		loadingDots("Logging Out");
-		JOptionPane.showMessageDialog(frame, "Logged out successfully.");
-		frame.dispose();
+		if(client.getAccountAccessed()) {
+			client.createLeaveRequest();
+			loadingDots("Leaving Account");
+			if (!client.getAccountAccessed()) {
+				System.out.println();
+				showTellerView();
+			}
+		}
+		else {
+			client.createLogoutRequest();
+			loadingDots("Logging Out");
+			JOptionPane.showMessageDialog(frame, "Logged out successfully.");
+			frame.dispose();
+		}
+		
 	}
 
 	private void loadingDots(String message) {

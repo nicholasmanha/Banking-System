@@ -179,6 +179,9 @@ public class Server {
 				case FREEZE:
 					doFreeze(request);
 					break;
+				case UNFREEZE:
+					doUnfreeze(request);
+					break;
 				case TEXT:
 					doReadLogs(request);
 					break;
@@ -391,6 +394,18 @@ public class Server {
 				}
 			}
 		}
+		
+		private synchronized void doUnfreeze(Request request) {
+			if (loggedIn) {
+				if (userType == UserType.TELLER) {
+					int acc_ID = Integer.parseInt(request.getTexts().get(0));
+					Account account = bank.findAccount(acc_ID);
+					account.setFrozen(false);
+					sendResponse(RequestType.UNFREEZE, Status.SUCCESS);
+				}
+			}
+			
+		}
 
 		private synchronized void doReadLogs(Request request) {
 			if (loggedIn && userType == UserType.TELLER) {
@@ -398,7 +413,7 @@ public class Server {
 		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
 		            LocalDateTime end = LocalDateTime.parse(request.getTexts().get(1));
 
-		            File logFile = new File("Logs.txt");
+		            File logFile = new File("transactions.txt");
 		            if (!logFile.exists()) {
 		                sendResponse(new ArrayList<>(Arrays.asList("Log file not found")), RequestType.TEXT, Status.FAILURE);
 		                return;

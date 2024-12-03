@@ -3,5 +3,5 @@ Customer_ID: 1
 		Pin: "password"
 		Users: [Customer_ID! 1]
 		Frozen: false
-		Amount: 0.0
+		Amount: 150.0
 		AccountType: Undefined
