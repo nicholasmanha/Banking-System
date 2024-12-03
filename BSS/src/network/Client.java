@@ -29,8 +29,8 @@ public class Client {
 		startConnection();
 	}
 	
-	private static void startConnection() {
-		final String HOST = "134.154.71.141";
+	private synchronized static void startConnection() {
+		final String HOST = "localhost";
 		final int PORT = 1234;
 
 		Socket socket = null;
@@ -175,23 +175,23 @@ public class Client {
 	/*
 	 * METHODS FOR GUI
 	 */
-	public UserType getUserType() {
+	public synchronized UserType getUserType() {
 		return userType;
 	}
 
-	public boolean getIsProcessing() {
+	public synchronized boolean getIsProcessing() {
 		return isProcessing;
 	}
 
-	public String getResponseMessage() {
+	public synchronized String getResponseMessage() {
 		return responseMessage;
 	}
 
-	public boolean getLoggedIn() {
+	public synchronized boolean getLoggedIn() {
 		return loggedIn;
 	}
 
-	public boolean getAccountAccessed() {
+	public synchronized boolean getAccountAccessed() {
 		return accountAccessed;
 	}
 
@@ -240,45 +240,47 @@ public class Client {
 	}
 	
 	public synchronized void createAccountCreationRequest(String password) {
+		
 		isProcessing = true;
 		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
 		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
+		
 	}
 
-	public void createLeaveRequest() {
+	public synchronized void createLeaveRequest() {
 		isProcessing = true;
 		sendRequest(RequestType.LEAVE, Status.REQUEST);
 	}
 
-	public void createLogoutRequest() {
+	public synchronized void createLogoutRequest() {
 		sendRequest(RequestType.LOGOUT, Status.REQUEST);
 		isProcessing = true;
 		// Shutdown
 		
 	}
 
-	private void sendRequest(RequestType requestType, Status status) {
+	private synchronized void sendRequest(RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(ArrayList<String> messages, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(messages, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(ArrayList<String> messages, double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(messages, amt, requestType, status);
 		responses.add(response);
 		outputHandler.enqueueRequest(responses);
 	}
 
-	private void sendRequest(double amt, RequestType requestType, Status status) {
+	private synchronized void sendRequest(double amt, RequestType requestType, Status status) {
 		List<Request> responses = new ArrayList<>();
 		Request response = new Request(amt, requestType, status);
 		responses.add(response);
