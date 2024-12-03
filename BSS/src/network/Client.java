@@ -250,11 +250,13 @@ public class Client {
 		sendRequest(RequestType.CREATECUSTOMER, Status.REQUEST);
 	}
 	
-	public synchronized void createAccountCreationRequest(String password) {
+	public synchronized void createAccountCreationRequest(String password, String customerID) {
 		
 		isProcessing = true;
-		ArrayList<String> passwordMessage = new ArrayList<>(Arrays.asList(password));
-		sendRequest(passwordMessage, RequestType.CREATEACCOUNT, Status.REQUEST);
+		ArrayList<String> passwordAndCustomerID = new ArrayList<>();
+		passwordAndCustomerID.add(password);
+		passwordAndCustomerID.add(customerID);
+		sendRequest(passwordAndCustomerID, RequestType.CREATEACCOUNT, Status.REQUEST);
 		
 	}
 

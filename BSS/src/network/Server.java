@@ -412,7 +412,10 @@ public class Server {
 		private synchronized void doCreateAccount(Request request) {
 			if (loggedIn) {
 				if (userType == UserType.TELLER) {
-					bank.addAccount(teller.createAccount(request.getTexts().get(0)));
+					Account account = teller.createAccount(request.getTexts().get(0));
+					int customerID = Integer.parseInt(request.getTexts().get(1));
+					account.addUser(customerID);
+					bank.addAccount(account);
 					sendResponse(RequestType.CREATEACCOUNT, Status.SUCCESS);
 				}
 			}
