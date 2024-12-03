@@ -121,7 +121,7 @@ public class GUI implements Runnable {
 	}
 
 	private synchronized void handleCreateAccount() {
-		String password = JOptionPane.showInputDialog(frame, "Enter Password:");
+		String password = JOptionPane.showInputDialog(frame, "Enter Password for the Account:");
 		String cust_id = JOptionPane.showInputDialog(frame, "Enter Customer ID to be Added:");
 		if (password != null && cust_id != null) {
 			client.createAccountCreationRequest(password, cust_id);
