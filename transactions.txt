@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+<<<<<<<< HEAD:transactions.txt
 2024-12-02T21:04:35.250461 : Deposit | Log ID: 2 | Account ID: 2 | Deposit
 2024-12-02T21:04:40.757524 : Withdraw | Log ID: 2 | Account ID: 2 | Withdraw
 2024-12-03T09:13:46.557694100 : Deposit | Log ID: 0 | Account ID: 0 | Deposit
@@ -12,4 +14,3 @@
 2024-12-03T11:25:37.587023100 : Deposit | Log ID: 2 | Account ID: 2 | Deposit
 2024-12-03T11:29:02.903129500 : Deposit | Log ID: 3 | Account ID: 3 | Deposit
 2024-12-03T11:29:19.543634900 : Transfer | Log ID: 3 | From Account ID: 3 | To Account ID: 2 | Transfer
-

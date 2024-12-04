@@ -2,6 +2,7 @@ package network;
 
 import bss.BSSConsoleUI;
 import bss.GUI;
+import bss.Teller;
 import enums.*;
 import java.io.*;
 import java.net.Socket;
@@ -160,10 +161,15 @@ public class Client {
 				break;
 			case TEXT:
 				if (request.getStatus() == Status.SUCCESS) {
-			        System.out.println("Logs:");
-			        for (String log : request.getTexts()) {
-			            System.out.println(log);
-			        }
+					responseMessage = "";
+					for (String log : request.getTexts()) {
+						responseMessage += log + "\n";
+					}
+					
+//			        System.out.println("Logs:");
+//			        for (String log : request.getTexts()) {
+//			            System.out.println(log);
+//			        }
 			    } else {
 			        System.out.println("Failed to retrieve logs: " + request.getTexts().get(0));
 			    }

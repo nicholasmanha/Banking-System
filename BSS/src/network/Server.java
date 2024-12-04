@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Server {
-    private static final String LOG_FILE_PATH = "BSS/src/log/transactions.txt";
+    private static final String LOG_FILE_PATH = "transactions.txt";
 
 	
 	public static void main(String[] args) {
