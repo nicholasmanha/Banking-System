@@ -118,7 +118,7 @@ public class Bank {
                 writer.write("\t\tAmount: " + account.getAmount() + "\n");
                 writer.write("\t\tAccountType: " + account.getAccountType() + "\n");
             }
-            //writer.write("\t\t " + "\n");
+            
         }
         // Close the writer to flush data to the file
         writer.close();
