@@ -39,7 +39,7 @@ public class TestOutputHandler {
         Thread.sleep(500); 
 
         byte[] outputBytes = byteArrayOutputStream.toByteArray();
-        assertNotNull(outputBytes.length);
+        assertNotNull(outputBytes);
 
         outputHandler.stop();
         outputHandlerThread.join(); 
