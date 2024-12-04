@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Server {
-    private static final String LOG_FILE_PATH = "BSS/src/log/transactions.txt";
+    private static final String LOG_FILE_PATH = "transactions.txt";
 
 	
 	public static void main(String[] args) {
@@ -407,7 +407,7 @@ public class Server {
 		            LocalDateTime start = LocalDateTime.parse(request.getTexts().get(0));
 		            LocalDateTime end = LocalDateTime.parse(request.getTexts().get(1));
 
-		            File logFile = new File("Logs.txt");
+		            File logFile = new File("transactions.txt");
 		            if (!logFile.exists()) {
 		                sendResponse(new ArrayList<>(Arrays.asList("Log file not found")), RequestType.TEXT, Status.FAILURE);
 		                return;
