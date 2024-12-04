@@ -202,7 +202,7 @@ public class Bank {
     	HashMap<Integer, Customer> customerCount, HashMap<Integer, Account> accountCount) 
     	throws IOException {
     	//get the total number of accounts
-    	int numCustomers = customerCount.size();
+    	//int numCustomers = customerCount.size();
     	//ArrayList to store accounts for Customer
     	ArrayList<Account> custAccounts = new ArrayList<Account>();
     	//arrayList to store customers for Bank
